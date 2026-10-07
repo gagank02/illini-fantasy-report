@@ -178,6 +178,19 @@ th.left { width: 100%; }
 .rl-headline { display: block; font-family: var(--serif); font-size: 1.3rem; margin: 0.15rem 0 0.3rem; }
 .rl-lede { display: block; font-family: var(--serif); color: var(--ink-muted); }
 
+/* History */
+section + section { margin-top: 2rem; }
+.champs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.champs li { position: relative; background: var(--surface); border: 1px solid var(--rule); border-top: 4px solid var(--orange); border-radius: 8px; padding: 1rem; }
+.champ-year { position: absolute; top: 0.6rem; right: 0.9rem; font: 700 1.6rem var(--serif); color: var(--muted); }
+.champ-name { display: block; font: 700 1.35rem var(--serif); }
+.champs dl { margin: 0.75rem 0 0; display: grid; gap: 0.2rem; font-size: 0.9rem; }
+.champs dl div { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--rule); padding-top: 0.2rem; }
+.champs dt { color: var(--muted); }
+.champs dd { margin: 0; font-weight: 600; }
+.wi-self-blank { color: var(--muted); }
+.wi-none { color: var(--muted); }
+
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }

@@ -1,0 +1,142 @@
+---
+import Base from '../../layouts/Base.astro';
+import { buildHistory, loadHistory } from '../../lib/history';
+import type { Record3 } from '../../lib/stats';
+
+const h = buildHistory(await loadHistory());
+const done = h.seasons.filter(s => !s.inProgress);
+const rec = (r: Record3) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+const count = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const pct = (n: number) => n.toFixed(3).replace(/^0/, '');
+const first = h.seasons.at(-1)!.season;
+const r = h.records;
+const records = [
+  { title: 'Highest score', text: `${r.highScore.name} put up ${r.highScore.value.toFixed(2)} in ${r.highScore.season} week ${r.highScore.week}.` },
+  { title: 'Lowest score', text: `${r.lowScore.name} managed ${r.lowScore.value.toFixed(2)} in ${r.lowScore.season} week ${r.lowScore.week}.` },
+  { title: 'Biggest blowout', text: `${r.blowout.winner.name} beat ${r.blowout.loser.name} by ${r.blowout.margin.toFixed(2)} in ${r.blowout.season} week ${r.blowout.week}.` },
+  { title: 'Best season', text: `${r.bestSeason.name} went ${rec(r.bestSeason)} in ${r.bestSeason.season}.` },
+  { title: 'Worst season', text: `${r.worstSeason.name} went ${rec(r.worstSeason)} in ${r.worstSeason.season}.` },
+  { title: 'Longest win streak', text: `${r.longestWinStreak.name} won ${r.longestWinStreak.n} straight in ${r.longestWinStreak.season}.` },
+  { title: 'Longest losing streak', text: `${r.longestLosingStreak.name} lost ${r.longestLosingStreak.n} straight in ${r.longestLosingStreak.season}.` },
+];
+const vs = (a: string, b: string): Record3 => h.h2h[a]?.[b] ?? { w: 0, l: 0, t: 0 };
+const tone = (x: Record3) => (x.w + x.l + x.t === 0 ? 'none' : x.w > x.l ? 'up' : x.w < x.l ? 'down' : 'same');
+---
+
+<Base title="History">
+  <h1>League History</h1>
+  <p class="muted">
+    Every season since {first}. Records count regular season games only. The champion wins the playoff final, and the punishment
+    goes to last place in the regular season.
+  </p>
+
+  <section aria-labelledby="champs-h">
+    <h2 id="champs-h">Champions</h2>
+    <ul class="champs">
+      {done.map(s => (
+        <li>
+          <span class="champ-year">{s.season}</span>
+          <span class="fact-title">Champion</span>
+          <strong class="champ-name">{s.champion?.name}</strong>
+          <span class="sub">{s.champion?.team}</span>
+          <dl>
+            <div><dt>Runner up</dt><dd>{s.runnerUp?.name}</dd></div>
+            <div><dt>Punishment</dt><dd>{s.punishment?.name}</dd></div>
+            <div><dt>Teams</dt><dd>{s.teams}</dd></div>
+          </dl>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section aria-labelledby="alltime-h">
+    <h2 id="alltime-h">All time</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col" class="left">Manager</th>
+            <th scope="col">W-L-T</th>
+            <th scope="col" class="wide">Win %</th>
+            <th scope="col" class="wide">PF</th>
+            <th scope="col" class="wide">Seasons</th>
+            <th scope="col" class="wide">Playoffs</th>
+            <th scope="col">Titles</th>
+            <th scope="col" class="wide">Punish.</th>
+          </tr>
+        </thead>
+        <tbody>
+          {h.managers.map((m, i) => (
+            <tr>
+              <td>{i + 1}</td>
+              <th scope="row" class="left">
+                {m.name}
+                <span class="sub">{m.team}</span>
+                <span class="sub narrow">{count(m.seasons, 'season')}, {count(m.playoffs, 'playoff')}, {count(m.punishments, 'punishment')}</span>
+              </th>
+              <td>{rec(m)}<span class="sub narrow">{pct(m.pct)}</span></td>
+              <td class="wide">{pct(m.pct)}</td>
+              <td class="wide">{m.pf.toFixed(2)}</td>
+              <td class="wide">{m.seasons}</td>
+              <td class="wide">{m.playoffs}</td>
+              <td>{m.titles}</td>
+              <td class="wide">{m.punishments}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="facts" aria-labelledby="records-h">
+    <h2 id="records-h">Records book</h2>
+    <ul>
+      {records.map(x => (
+        <li><span class="fact-title">{x.title}</span>{x.text}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section aria-labelledby="h2h-h">
+    <h2 id="h2h-h">Head to head</h2>
+    <p class="muted">All time regular season record of each row's manager against each column's.</p>
+
+    <div class="grid-only table-scroll">
+      <table class="whatif">
+        <thead>
+          <tr>
+            <th scope="col" class="left">Manager ↓ / vs →</th>
+            {h.managers.map(b => <th scope="col" class="vert"><span>{b.name}</span></th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {h.managers.map(a => (
+            <tr>
+              <th scope="row" class="left">{a.name}</th>
+              {h.managers.map(b => {
+                if (a.userId === b.userId) return <td class="wi-self-blank" aria-label="same manager">·</td>;
+                const x = vs(a.userId, b.userId);
+                return <td class={`wi-${tone(x)}`} title={`${a.name} vs ${b.name}: ${rec(x)}`}>{x.w + x.l + x.t ? rec(x) : '·'}</td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="list-only whatif-list">
+      {h.managers.map(a => (
+        <details>
+          <summary>{a.name}<span class="sub">All time {rec(a)}</span></summary>
+          <ul>
+            {h.managers.filter(b => b.userId !== a.userId && vs(a.userId, b.userId).w + vs(a.userId, b.userId).l + vs(a.userId, b.userId).t > 0).map(b => {
+              const x = vs(a.userId, b.userId);
+              return <li class={`wi-${tone(x)}`}><span>vs {b.name}</span><strong>{rec(x)}</strong></li>;
+            })}
+          </ul>
+        </details>
+      ))}
+    </div>
+  </section>
+</Base>

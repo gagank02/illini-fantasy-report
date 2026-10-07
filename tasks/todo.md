@@ -382,12 +382,12 @@ The all time stats are:
 - the head to head grid, which uses the same scroll container as the what if grid
 
 **Acceptance criteria:**
-- [ ] All four sections render with real data
-- [ ] Managers who joined in 2025 show the right count of seasons played
-- [ ] No horizontal page scroll at 360px
+- [x] All four sections render with real data
+- [x] Managers who joined in 2025 show the right count of seasons played
+- [x] No horizontal page scroll at 360px
 
 **Verification:**
-- [ ] Manual: check the page against what you know about the league's history
+- [x] Manual: check the page against what you know about the league's history
 
 **Dependencies:** T14
 
