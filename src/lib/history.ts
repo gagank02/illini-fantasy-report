@@ -154,10 +154,14 @@ export function draftBoard(picks: DraftPick[], team: (rosterId: number) => strin
   const rounds = Array.from({ length: roundCount }, (_, r) =>
     Array.from({ length: slotCount }, (_, s) => {
       const p = picks.find(x => x.round === r + 1 && x.draft_slot === s + 1);
-      return { pickNo: p?.pick_no ?? 0, name: p ? pickName(p) : '', pos: p?.metadata.position ?? '', nflTeam: p?.metadata.team ?? '' };
+      // label: round.pick within the round, like 3.11.
+      const inRound = p ? ((p.pick_no - 1) % slotCount) + 1 : 0;
+      return { pickNo: p?.pick_no ?? 0, label: p ? `${p.round}.${String(inRound).padStart(2, '0')}` : '', name: p ? pickName(p) : '', pos: p?.metadata.position ?? '', nflTeam: p?.metadata.team ?? '' };
     }),
   );
-  return { slots, rounds };
+  // Direction from the data, not assumed: a snake reverses each round, other formats may not.
+  const directions = rounds.map(row => ((row[0]?.pickNo ?? 0) <= (row.at(-1)?.pickNo ?? 0) ? 'ltr' : 'rtl') as 'ltr' | 'rtl');
+  return { slots, rounds, directions };
 }
 
 /**

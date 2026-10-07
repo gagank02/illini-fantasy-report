@@ -145,6 +145,19 @@ describe('season pages', () => {
     expect(b25.slots[first.draft_slot - 1]).toBe(team(seasons[1]!)(first.roster_id));
   });
 
+  test('draft board labels each pick as round.pick and knows each round\'s direction', () => {
+    const b = draftBoard(picks25, team(seasons[1]!));
+    const first = picks25.find(p => p.pick_no === 1)!;
+    expect(b.rounds[0]![first.draft_slot - 1]!.label).toBe('1.01');
+    const p35 = picks25.find(p => p.pick_no === 35)!; // 12 team snake: round 3, 11th pick of the round
+    expect(b.rounds[2]![p35.draft_slot - 1]!.label).toBe('3.11');
+    expect(b.directions.slice(0, 4)).toEqual(['ltr', 'rtl', 'ltr', 'rtl']);
+    for (const [i, row] of b.rounds.entries()) {
+      const order = row.map(c => Number(c.label.split('.')[1]));
+      expect(order).toEqual(b.directions[i] === 'ltr' ? [...order].sort((x, y) => x - y) : [...order].sort((x, y) => y - x));
+    }
+  });
+
   test('draft value is judged within each position, so late QBs do not dominate', () => {
     const v = draftValue(picks25, seasons[1]!.weeks);
     const pts = (id: string) => seasons[1]!.weeks.flat().reduce((sum, m) => sum + (m.players_points?.[id] ?? 0), 0);
