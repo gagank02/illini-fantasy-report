@@ -115,7 +115,7 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
               {board.rounds.map((row, i) => (
                 <tr>
                   <th scope="row">{i + 1}<span class="dp-dir" aria-label={board.directions[i] === 'ltr' ? 'picks go left to right' : 'picks go right to left'}>{board.directions[i] === 'ltr' ? '→' : '←'}</span></th>
-                  {row.map(c => <td class={`pos-${c.pos}`} title={`Pick ${c.pickNo}`}><span class="dp-name">{c.name}</span><span class="dp-pos">{c.pos} {c.nflTeam}<span class="dp-pick">{c.label}</span></span></td>)}
+                  {row.map(c => <td class={`pos-${c.pos}`} title={`Pick ${c.pickNo}`}><span class="dp-name">{c.name}</span><span class="dp-pos">{c.pos} {c.nflTeam}</span><span class="dp-pick">{c.label}</span></td>)}
                 </tr>
               ))}
             </tbody>

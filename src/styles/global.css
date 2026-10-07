@@ -210,7 +210,8 @@ table.draft thead th { text-transform: none; letter-spacing: 0; }
 .dp-name { display: block; font-weight: 600; }
 .dp-pos { display: block; color: var(--muted); font-size: 0.7rem; }
 /* Pick labels and snake arrows stay quiet: muted and small. */
-.dp-pick { float: right; font-variant-numeric: tabular-nums; }
+table.draft td { position: relative; padding-bottom: 1.15rem; }
+.dp-pick { position: absolute; right: 0.3rem; bottom: 0.2rem; color: var(--muted); font-size: 0.65rem; font-variant-numeric: tabular-nums; }
 .dp-pick-m { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 0.85em; }
 .dp-dir { display: block; color: var(--muted); font-weight: 400; font-size: 0.85rem; opacity: 0.7; }
 .pos-QB { background: color-mix(in srgb, #e5484d 18%, var(--surface)); }
