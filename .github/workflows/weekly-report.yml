@@ -1,0 +1,90 @@
+name: Weekly report
+
+# Every Tuesday 15:00 UTC (10am Central in fall), after Monday night games are final.
+# Writes the report with Claude on the commissioner's subscription and opens a PR to review.
+on:
+  schedule:
+    - cron: '0 15 * * 2'
+  workflow_dispatch:
+    inputs:
+      week:
+        description: 'Week number (leave blank for the latest finished week)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency: weekly-report
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SLEEPER_LEAGUE_ID: '1386106937921253376'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code@2.1.292
+
+      # The only /players/nfl call of the week (Sleeper asks for at most one a day).
+      - name: Refresh player list
+        run: npm run players
+
+      - name: Write the report
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          WEEK: ${{ inputs.week }}
+        run: |
+          if [ -z "$CLAUDE_CODE_OAUTH_TOKEN" ]; then echo "CLAUDE_CODE_OAUTH_TOKEN secret is not set (run claude setup-token)"; exit 1; fi
+          if [ -n "$WEEK" ] && ! [[ "$WEEK" =~ ^[0-9]+$ ]]; then echo "Week must be a number"; exit 1; fi
+          npm run report -- ${WEEK:+--week "$WEEK"}
+
+      # ci.yml does not run on PRs opened with GITHUB_TOKEN, so the same checks run here before the PR exists.
+      - run: npm test
+      - run: npm run check
+      - run: npm run build
+      - name: Fail if secrets leaked into the build
+        run: |
+          if grep -rIl -e 'sk-ant-' -e 'pages/webhooks/deploy_hooks' dist/; then
+            echo "Secret pattern found in dist/ (files listed above)"
+            exit 1
+          fi
+      - name: Lint every report against writing-style.md
+        run: find src/content/reports -name '*.md' -print0 | xargs -0 -r npm run lint:report --
+
+      - name: Open or update the PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          file=$(git status --porcelain --untracked-files=all src/content/reports | awk '{print $2}' | head -n 1)
+          if [ -z "$file" ]; then echo "No report changed"; exit 1; fi
+          season=$(echo "$file" | cut -d/ -f4)
+          week=$(basename "$file" .md | sed 's/week-//')
+          branch="report/${season}-week-${week}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add "$file" src/data/players.json
+          git commit -m "Week ${week} report"
+          git push --force origin "$branch"
+
+          if gh pr view "$branch" >/dev/null 2>&1; then
+            echo "Updated the existing PR for week ${week}."
+          else
+            gh pr create --base main --head "$branch" --title "Week ${week} report" --body "$(cat <<EOF
+          The week ${week} report, written by Claude from the Sleeper facts bundle and ESPN headlines.
+
+          Before this PR opened, the workflow ran the tests, type check, build, secret scan, and style linter (\`ci.yml\` does not run on bot PRs).
+
+          **Before merging:** read it, check anything that looks off against Sleeper, and edit the markdown here if you want. Cloudflare will comment a preview link.
+          EOF
+          )"
+          fi

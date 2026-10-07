@@ -320,6 +320,8 @@ Notes:
 - Cron times are in UTC. `0 15 * * 2` is Tuesday 10am Central Daylight Time and 9am Central Standard Time. Monday night games finish well before then.
 - GitHub turns off scheduled workflows after 60 days with no repo activity. Merging the weekly PRs counts as activity, so this only matters in the offseason. The first run of each season may need a manual re enable.
 
+**Done so far:** workflow written and passes actionlint 1.7.12 and a YAML parse. The week input is checked as a number (an injection attempt is rejected), and the branch name parsing was dry run. The rest needs the human's first dispatch.
+
 **Acceptance criteria:**
 - [ ] A manual dispatch opens a PR with the report file and the refreshed `src/data/players.json`
 - [ ] A failing test, check, build, secret guard, or lint fails the job and opens no PR
