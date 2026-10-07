@@ -152,11 +152,11 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Description:** `facts()` returns 3 to 5 facts: the highest single week score, the most points against, the biggest blowout, the longest current win streak, and the closest game. Show them in a block on `/standings`.
 
 **Acceptance criteria:**
-- [ ] Each fact names the team, the week, and the number
-- [ ] The block skips facts that aren't defined yet, for example a streak in week 1
+- [x] Each fact names the team, the week, and the number
+- [x] The block skips facts that aren't defined yet, for example a streak in week 1
 
 **Verification:**
-- [ ] `npm test`: each fact against fixtures
+- [x] `npm test`: each fact against fixtures
 
 **Dependencies:** T3
 

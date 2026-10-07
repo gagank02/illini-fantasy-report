@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
 import players from '../src/data/players.json';
-import { allPlay, games, ordinal, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
+import { allPlay, facts, games, ordinal, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -270,5 +270,47 @@ describe('positional rankings', () => {
         expect(r.rank).toBeLessThanOrEqual(i + 1);
       });
     }
+  });
+});
+
+describe('facts', () => {
+  const all = games(weeks);
+  const rows = standings(rosters, users, all);
+  const f = facts(rows, all);
+  const get = (kind: string) => f.find(x => x.kind === kind);
+
+  test('returns 3 to 5 facts', () => {
+    expect(f.length).toBeGreaterThanOrEqual(3);
+    expect(f.length).toBeLessThanOrEqual(5);
+  });
+
+  test('highest single week score matches the max in the data', () => {
+    const top = all.reduce((a, b) => (b.points > a.points ? b : a));
+    expect(get('high')).toMatchObject({ rosterId: top.rosterId, week: top.week, value: top.points });
+  });
+
+  test('biggest blowout and closest game use the winning side', () => {
+    const margins = all.filter(g => g.points > g.opponentPoints).map(g => g.points - g.opponentPoints);
+    expect(get('blowout')!.value).toBeCloseTo(Math.max(...margins), 2);
+    expect(get('close')!.value).toBeCloseTo(Math.min(...margins), 2);
+  });
+
+  test('most points against names the team with the highest PA', () => {
+    const worst = rows.reduce((a, b) => (b.pa > a.pa ? b : a));
+    expect(get('unlucky')).toMatchObject({ rosterId: worst.rosterId, value: worst.pa });
+  });
+
+  test('every fact names a team and a number', () => {
+    for (const x of f) {
+      expect(x.text).toContain(rows.find(r => r.rosterId === x.rosterId)!.team);
+      expect(x.text).toMatch(/\d/);
+    }
+  });
+
+  test('skips the win streak fact when no one has won 2 straight', () => {
+    const wk1 = games(weeks.slice(0, 1));
+    const out = facts(standings(rosters, users, wk1), wk1);
+    expect(out.find(x => x.kind === 'streak')).toBeUndefined();
+    expect(out.length).toBeGreaterThanOrEqual(3);
   });
 });

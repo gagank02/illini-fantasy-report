@@ -144,6 +144,11 @@ th.left { width: 100%; }
 .tabs:has(input:nth-of-type(6):checked) .tab-panel:nth-of-type(6),
 .tabs:has(input:nth-of-type(7):checked) .tab-panel:nth-of-type(7) { display: block; }
 
+.facts { margin-top: 2rem; }
+.facts ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+.facts li { background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--orange); border-radius: 6px; padding: 0.8rem 0.9rem; }
+.fact-title { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-text); margin-bottom: 0.25rem; }
+
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }

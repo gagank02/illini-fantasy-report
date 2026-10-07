@@ -248,3 +248,48 @@ export function positionRankings(
     return { ...r, move: prev ? prev.rank - r.rank : null };
   });
 }
+
+export interface Fact {
+  kind: 'high' | 'unlucky' | 'blowout' | 'close' | 'streak';
+  title: string;
+  /** Plain sentence naming the team, the week, and the number. */
+  text: string;
+  rosterId: number;
+  value: number;
+  week?: number;
+}
+
+/** 3 to 5 standings facts. Facts that don't make sense yet (like a streak in week 1) are skipped. */
+export function facts(rows: StandingsRow[], all: Game[]): Fact[] {
+  const name = (id: number) => rows.find(r => r.rosterId === id)?.team ?? 'Unknown';
+  const pts = (n: number) => n.toFixed(2);
+  const out: Fact[] = [];
+  if (!all.length) return out;
+
+  const high = all.reduce((a, b) => (b.points > a.points ? b : a));
+  out.push({ kind: 'high', title: 'Highest score', rosterId: high.rosterId, value: high.points, week: high.week,
+    text: `${name(high.rosterId)} put up ${pts(high.points)} in week ${high.week}.` });
+
+  const unlucky = rows.reduce((a, b) => (b.pa > a.pa ? b : a));
+  out.push({ kind: 'unlucky', title: 'Toughest luck', rosterId: unlucky.rosterId, value: unlucky.pa,
+    text: `${unlucky.team} has faced ${pts(unlucky.pa)} points, the most in the league.` });
+
+  const wins = all.filter(g => g.points > g.opponentPoints);
+  if (wins.length) {
+    const margin = (g: Game) => round2(g.points - g.opponentPoints);
+    const blowout = wins.reduce((a, b) => (margin(b) > margin(a) ? b : a));
+    out.push({ kind: 'blowout', title: 'Biggest blowout', rosterId: blowout.rosterId, value: margin(blowout), week: blowout.week,
+      text: `${name(blowout.rosterId)} beat ${name(blowout.opponentId)} by ${pts(margin(blowout))} in week ${blowout.week}.` });
+    const close = wins.reduce((a, b) => (margin(b) < margin(a) ? b : a));
+    out.push({ kind: 'close', title: 'Closest game', rosterId: close.rosterId, value: margin(close), week: close.week,
+      text: `${name(close.rosterId)} edged ${name(close.opponentId)} by ${pts(margin(close))} in week ${close.week}.` });
+  }
+
+  const streaks = rows.filter(r => r.streak.endsWith('W')).map(r => ({ r, n: parseInt(r.streak, 10) }));
+  const best = streaks.sort((a, b) => b.n - a.n || b.r.pf - a.r.pf)[0];
+  if (best && best.n >= 2) {
+    out.push({ kind: 'streak', title: 'Hottest team', rosterId: best.r.rosterId, value: best.n,
+      text: `${best.r.team} has won ${best.n} straight.` });
+  }
+  return out;
+}
