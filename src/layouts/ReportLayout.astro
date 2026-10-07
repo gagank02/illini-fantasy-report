@@ -24,11 +24,18 @@ const name = (rosterId: number) => {
 const games = Object.values(
   Object.groupBy(matchups.filter(m => m.matchup_id != null), m => String(m.matchup_id)),
 ).map(pair => [...pair!].sort((a, b) => b.points - a.points));
+// Drop cap as a real element (not ::first-letter) so image export keeps it. Spread handles emoji.
+const [first = '', ...rest] = [...lede];
 const longDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
 
 <Base title={`Week ${week}: ${headline}`}>
-  <article class="paper">
+  <div class="report-actions">
+    <button type="button" id="save-pdf">Save PDF</button>
+    <button type="button" id="save-img" data-filename={`illini-report-${season}-week-${week}.png`}>Save image</button>
+    <span id="save-status" class="muted" role="status"></span>
+  </div>
+  <article class="paper" id="report">
     <header class="masthead">
       <div class="mast-title" aria-hidden="true">The Illini Fantasy Report</div>
       <div class="dateline">
@@ -39,7 +46,7 @@ const longDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'nume
     </header>
 
     <h1 class="headline">{headline}</h1>
-    <p class="lede">{lede}</p>
+    <p class="lede"><span class="dropcap" aria-hidden="true">{first}</span><span class="visually-hidden">{first}</span>{rest.join('')}</p>
 
     <div class="paper-body">
       <div class="columns">
@@ -61,3 +68,38 @@ const longDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'nume
     </div>
   </article>
 </Base>
+
+<script>
+  document.getElementById('save-pdf')!.addEventListener('click', () => window.print());
+
+  const imgButton = document.getElementById('save-img') as HTMLButtonElement;
+  const status = document.getElementById('save-status')!;
+  imgButton.addEventListener('click', async () => {
+    imgButton.disabled = true;
+    status.textContent = 'Making image…';
+    // Render a copy off screen at a fixed 1080px newspaper layout so every device makes the same image.
+    const holder = document.createElement('div');
+    holder.className = 'capture-holder';
+    const copy = document.getElementById('report')!.cloneNode(true) as HTMLElement;
+    copy.removeAttribute('id');
+    copy.classList.add('capture');
+    holder.append(copy);
+    document.body.append(holder);
+    try {
+      const { toPng } = await import('html-to-image');
+      await document.fonts.ready;
+      const url = await toPng(copy, { width: 1080, pixelRatio: 1, cacheBust: true });
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = imgButton.dataset.filename!;
+      a.click();
+      status.textContent = '';
+    } catch (err) {
+      console.error(err);
+      status.textContent = 'Could not make the image. Try Save PDF instead.';
+    } finally {
+      holder.remove();
+      imgButton.disabled = false;
+    }
+  });
+</script>

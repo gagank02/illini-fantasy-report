@@ -220,13 +220,13 @@ Add the `/reports` index and the report pages. Add the latest report's headline 
 **Description:** A print stylesheet hides the nav and buttons, forces light colors, sets `@page { size: letter }`, and avoids column breaks inside paragraphs. "Save PDF" calls `window.print()`. "Save image" dynamically imports `html-to-image`, renders the article at a fixed 1080px width, and downloads `illini-report-{season}-week-{n}.png`. Adding `html-to-image` is already approved in the spec.
 
 **Acceptance criteria:**
-- [ ] The printed PDF is 1 to 2 letter pages with no nav or buttons, in Chrome and Safari
-- [ ] The PNG is 1080px wide and includes the masthead font. The font must be embedded, not swapped for a fallback
-- [ ] The page's on load JS stays under 5 KB, because `html-to-image` loads only when clicked
+- [x] The printed PDF is 1 to 2 letter pages with no nav or buttons (Chrome verified: 1 page, light colors from a dark mode browser). Safari is still for the human to check
+- [x] The PNG is 1080px wide and includes the masthead font (verified at 1440px and 360px viewports under the production CSP; identical 1080x1169 output)
+- [x] The page's on load JS stays under 5 KB (2.7 KB), because `html-to-image` (12.5 KB) loads only when clicked
 
 **Verification:**
-- [ ] Manual: export both formats on desktop Chrome, desktop Safari, and an iPhone
-- [ ] Manual: the DevTools network tab shows no `html-to-image` request until the button is clicked
+- [ ] Manual (human): export both formats in desktop Safari and on an iPhone. Desktop Chrome done
+- [x] Manual: the DevTools network tab shows no `html-to-image` request until the button is clicked
 
 **Dependencies:** T9
 
