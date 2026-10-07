@@ -35,7 +35,8 @@ Details for each task are in `tasks/todo.md`.
 - [x] T5: What if matrix
 - [x] T6: Overall power rankings
 - [x] T7: Positional power rankings
-- [x] T8: Interesting facts on standings
+- [x] T8: Interesting facts (moved to the home page)
+- [x] T8b: Home page previews for each tab
 
 ### Checkpoint B: Stats complete
 - [ ] All stats pages match the Sleeper app for the current week
