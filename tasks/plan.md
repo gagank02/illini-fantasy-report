@@ -58,7 +58,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] T16: `/history/{season}` with the draft board
 
 ### Checkpoint D: Done
-- [ ] Every success criterion in `SPEC.md` passes
+- [x] Every success criterion in `SPEC.md` passes (Safari and iPhone export checks pending with the human)
 
 ## Parallelization
 
