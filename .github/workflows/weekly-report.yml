@@ -73,14 +73,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$branch"
           git add "$file" src/data/players.json
-          git commit -m "Week ${week} report"
+          title="${season} Week ${week} report"
+          git commit -m "$title"
           git push --force origin "$branch"
 
           if gh pr view "$branch" >/dev/null 2>&1; then
-            echo "Updated the existing PR for week ${week}."
+            gh pr edit "$branch" --title "$title"
+            echo "Updated the existing PR: $title"
           else
-            gh pr create --base main --head "$branch" --title "Week ${week} report" --body "$(cat <<EOF
-          The week ${week} report, written by Claude from the Sleeper facts bundle and ESPN headlines.
+            gh pr create --base main --head "$branch" --title "$title" --body "$(cat <<EOF
+          The ${season} week ${week} report, written by Claude from the Sleeper facts bundle and ESPN headlines.
 
           Before this PR opened, the workflow ran the tests, type check, build, secret scan, and style linter (\`ci.yml\` does not run on bot PRs).
 
