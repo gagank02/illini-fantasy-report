@@ -1,9 +1,10 @@
 name: Daily refresh
 
 # Rebuilds the site on Cloudflare so Sleeper data stays current.
+# Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 on:
   schedule:
-    - cron: '0 10 * * *'
+    - cron: '17 10 * * *'
   workflow_dispatch:
 
 permissions: {}

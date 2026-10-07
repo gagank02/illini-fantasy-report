@@ -63,7 +63,7 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 ## Task 4: Deploy to Cloudflare Pages with security headers and daily refresh
 
-**Description:** Add `public/_headers` with a strict CSP that allows the inline theme script by its hash, plus `nosniff`, `Referrer-Policy`, and `frame-ancestors 'none'`. Add `refresh.yml`, which runs daily at 10:00 UTC and POSTs to `CF_DEPLOY_HOOK_URL`. **You** do the Cloudflare and GitHub setup listed in `plan.md`.
+**Description:** Add `public/_headers` with a strict CSP that allows the inline theme script by its hash, plus `nosniff`, `Referrer-Policy`, and `frame-ancestors 'none'`. Add `refresh.yml`, which runs daily at 10:17 UTC and POSTs to `CF_DEPLOY_HOOK_URL`. **You** do the Cloudflare and GitHub setup listed in `plan.md`.
 
 **Done locally (verified with `wrangler pages dev` and headless Chrome):** `_headers` is served on every path. The hashed inline script and the external scripts run with no CSP violations. `/standings` is served with no redirect (`build.format: 'file'`). `tests/headers.test.ts` fails if the theme script changes without its hash.
 
@@ -312,12 +312,12 @@ The script writes the markdown with frontmatter and runs the linter. If the lint
 
 ## Task 13: Weekly report GitHub Action
 
-**Description:** `weekly-report.yml` runs on cron `0 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It installs Claude Code and runs it with the `CLAUDE_CODE_OAUTH_TOKEN` secret. On the Tuesday schedule only, it runs `npm run players` (the only weekly `/players/nfl` call; manual reruns use the committed list), then runs the writer for the last completed week, lints the result, and opens the PR `{season} Week N report` (for example `2026 Week 4 report`) on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
+**Description:** `weekly-report.yml` runs on cron `23 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It installs Claude Code and runs it with the `CLAUDE_CODE_OAUTH_TOKEN` secret. On the Tuesday schedule only, it runs `npm run players` (the only weekly `/players/nfl` call; manual reruns use the committed list), then runs the writer for the last completed week, lints the result, and opens the PR `{season} Week N report` (for example `2026 Week 4 report`) on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
 
 GitHub doesn't run `ci.yml` on PRs opened with the built in `GITHUB_TOKEN`. That's on purpose, to prevent workflow loops. So this job runs the same checks itself **before** it opens the PR: `npm test`, `npm run check`, `npm run build`, the `dist/` secret guard, and `lint:report`. The PR body says the checks ran in the weekly job. Cloudflare still builds its own preview of the PR, because that comes from Cloudflare's GitHub app, not from Actions.
 
 Notes:
-- Cron times are in UTC. `0 15 * * 2` is Tuesday 10am Central Daylight Time and 9am Central Standard Time. Monday night games finish well before then.
+- Cron times are in UTC. `23 15 * * 2` is Tuesday 10:23am Central Daylight Time and 9:23am Central Standard Time. The odd minute is on purpose: GitHub drops scheduled runs at the top of the hour under load (the first daily refresh at 10:00 UTC was dropped). Monday night games finish well before then.
 - GitHub turns off scheduled workflows after 60 days with no repo activity. Merging the weekly PRs counts as activity, so this only matters in the offseason. The first run of each season may need a manual re enable.
 
 **Done so far:** workflow written and passes actionlint 1.7.12 and a YAML parse. The week input is checked as a number (an injection attempt is rejected), and the branch name parsing was dry run. The rest needs the human's first dispatch.

@@ -165,7 +165,7 @@ tests/
   lint-report.test.ts
 .github/workflows/
   ci.yml                  → test + check + build + audit on PRs
-  weekly-report.yml       → Tue 15:00 UTC: draft report, lint, open PR
+  weekly-report.yml       → Tue 15:23 UTC: draft report, lint, open PR
   refresh.yml             → daily: hit Cloudflare deploy hook
 public/_headers           → security headers
 writing-style.md          → report system prompt (source of truth for voice)

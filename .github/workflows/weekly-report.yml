@@ -1,10 +1,11 @@
 name: Weekly report
 
-# Every Tuesday 15:00 UTC (10am Central in fall), after Monday night games are final.
+# Every Tuesday 15:23 UTC (10:23am Central in fall), after Monday night games are final.
+# Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 # Writes the report with Claude on the commissioner's subscription and opens a PR to review.
 on:
   schedule:
-    - cron: '0 15 * * 2'
+    - cron: '23 15 * * 2'
   workflow_dispatch:
     inputs:
       week:
