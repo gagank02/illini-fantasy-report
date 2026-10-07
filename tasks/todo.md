@@ -192,7 +192,9 @@ Add the `/reports` index and the report pages. The home page shows the latest he
 
 **Dependencies:** T3 (scores for the box score)
 
-**Files likely touched:** `src/content.config.ts`, `src/layouts/ReportLayout.astro`, `src/pages/reports/[...slug].astro`, `src/pages/reports/index.astro`, `src/pages/index.astro`, `public/fonts/*.woff2`, `src/content/reports/2026/week-4.md`
+**Licensing:** Get UnifrakturMaguntia from its official source (Google Fonts or the upstream repo). Check that its license is OFL 1.1, and commit `public/fonts/OFL.txt` with the font. Use no other images except our own SVG.
+
+**Files likely touched:** `public/fonts/OFL.txt`, `src/content.config.ts`, `src/layouts/ReportLayout.astro`, `src/pages/reports/[...slug].astro`, `src/pages/reports/index.astro`, `src/pages/index.astro`, `public/fonts/*.woff2`, `src/content/reports/2026/week-4.md`
 
 **Estimated scope:** M (7 files, but most are small)
 
@@ -253,7 +255,7 @@ Add the `/reports` index and the report pages. The home page shows the latest he
 - trending adds and drops
 - the top 10 ESPN RSS headlines, parsed with a simple regex on `<item><title>`
 
-The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt, plus rules: use only the facts given, name managers, and use newspaper structure. It writes the markdown with frontmatter, then runs the linter. If the lint fails, it retries once and sends the model the list of violations. Load the `claude-api` skill before writing this.
+The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt, plus rules: use only the facts given, name managers, use newspaper structure, and never copy headline or article wording from ESPN (restate the news in your own words). It writes the markdown with frontmatter, then runs the linter. If the lint fails, it retries once and sends the model the list of violations. Load the `claude-api` skill before writing this.
 
 **Acceptance criteria:**
 - [ ] It writes `src/content/reports/{season}/week-{N}.md`, and the file passes `lint:report`

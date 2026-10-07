@@ -89,7 +89,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 
 - **Astro 7** (static output) + TypeScript (strict). Ships almost no client JS. The theme toggle and position tabs are the only scripts.
 - **Report export:** `html-to-image` (about 10 KB, lazy loaded) for PNG. PDF uses the browser's print to PDF with a print stylesheet.
-- **Fonts:** One self hosted blackletter woff2 for the masthead (e.g. UnifrakturMaguntia, OFL licensed). Body text uses system serif fonts. Fonts live under `public/fonts/` because the CSP blocks third party font hosts.
+- **Fonts:** One self hosted blackletter woff2 for the masthead (UnifrakturMaguntia, SIL Open Font License 1.1). The license text ships as `public/fonts/OFL.txt` next to the font. Don't rename the font, because OFL reserves the font name for unmodified copies. Body text uses system serif fonts. Fonts live under `public/fonts/` because the CSP blocks third party font hosts.
 - **Data:** Sleeper public API (`https://api.sleeper.app/v1`). It's free with no key. Fetching happens **at build time only**, so the browser never calls Sleeper.
 - **Sleeper rate limits:** Sleeper may IP block anyone above 1000 calls a minute, and asks that `/players/nfl` be called at most once a day.
   - **Per URL:** Each URL is fetched at most once per process. `get()` caches it.
@@ -196,9 +196,9 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 
 ## Boundaries
 
-- **Always:** Keep Sleeper fetches at build time. Run `npm test && npm run check` before committing. Pass reports through `lint:report`. Use `writing-style.md` verbatim as the system prompt.
+- **Always:** Make icons and graphics ourselves (inline SVG or Unicode). Ship a font's license file next to the font. Keep the footer line saying the site isn't affiliated with the University of Illinois, Sleeper, or the NFL. Keep Sleeper fetches at build time. Run `npm test && npm run check` before committing. Pass reports through `lint:report`. Use `writing-style.md` verbatim as the system prompt.
 - **Ask first:** Adding any npm dependency. Changing the power ranking formula. Switching the Claude model. Adding client side JS beyond the theme toggle, tabs, and report export buttons. Changing hosting.
-- **Never:** Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call the Anthropic API from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
+- **Never:** Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy ESPN article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call the Anthropic API from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
 
 ## Success Criteria
 
