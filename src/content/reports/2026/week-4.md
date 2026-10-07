@@ -1,6 +1,6 @@
 ---
-headline: "fr0styishere Scores 167.68, Buries samtheearth by 72 Points"
-lede: "from puka, 2000 years ago put up 167.68, the top score of week 4, and crushed Riceman szn 🥶🧊👌🏽 by 72.38. Meanwhile three losing managers had a win sitting on their bench and never used it."
+headline: "fr0styishere hangs 167.68 on samtheearth in a 72 point rout"
+lede: "from puka, 2000 years ago posted the top score of week 4 and beat Riceman szn 🥶🧊👌🏽 by 72.38. Three losing managers also had enough points on their benches to flip their results."
 season: 2026
 week: 4
 date: 2026-10-07
@@ -8,118 +8,90 @@ date: 2026-10-07
 
 ## Game by game
 
-**Gibbs me a Woody 110.62, hurts to watch 101.22.** KingJeevs won by 9.4 thanks to Nico Collins and his 30.8. That's the good news. The bad news is Kenyon Sadiq posted a zero in the lineup. coledawg got 24.9 from T.J. Hockenson, but Emeka Egbuka gave back just 3.3. Both managers left points on the table, and we'll get to that.
+**Gibbs me a Woody 110.62, hurts to watch 101.22.** KingJeevs won by 9.4 and still had a messy day. Nico Collins carried the load with 30.8, while Kenyon Sadiq put up a clean 0 at tight end. T.J. Hockenson gave coledawg 24.9, but Emeka Egbuka managed just 3.3. The real story for coledawg sits on the bench. More on that below.
 
-**I have a scheme 132.18, Andthony Borrdain 116.18.** johnwarzecha rode Bijan Robinson's 27.7 to a 16 point win. That makes three straight wins for I have a scheme. DJ Moore did nothing with 2.7. m4n4s got 19.3 from RJ Harvey. Then there's Jauan Jennings. m4n4s picked him up this week and started him. He scored 1.8. Rough.
+**I have a scheme 132.18, Andthony Borrdain 116.18.** johnwarzecha keeps rolling. That's three straight wins now. Bijan Robinson led the way with 27.7, enough to cover a 2.7 dud from DJ Moore. m4n4s got 19.3 from RJ Harvey. Then there's Jauan Jennings. m4n4s grabbed Jennings off free agency this week and got 1.8 points back. Ouch.
 
-**And Your Raven Can Sing 165.18, Williams’ Wiener Circle 161.06.** The game of the week. Fujetus won by 4.12 because Tetairoa McMillan exploded for 45.2. D00zer scored 161.06, the third highest total of the week, and still lost. Kyren Williams put up 36.7. David Montgomery put up 4.3. Dalton Kincaid nearly cost Fujetus the game with 1.7.
+**And Your Raven Can Sing 165.18, Williams’ Wiener Circle 161.06.** Game of the week. Tetairoa McMillan exploded for 45.2, and Fujetus needed every one of those points. Dalton Kincaid chipped in 1.7. D00zer got 36.7 from Kyren Williams, but David Montgomery posted 4.3. You score the third best total of the week and still lose by 4.12? Cruel. Losing that way with Rome Odunze on the bench is worse.
 
-**Deshaun’s Happy Ending 140.14, UC Barkley 113.42.** parinkashyap1 won by 26.72 behind CeeDee Lamb's 41.3. TreVeyon Henderson managed 4.2. ritvik got 25.8 from Zay Flowers but started Ladd McConkey, who scored zero and now sits on the injury report as Out.
+**Deshaun’s Happy Ending 140.14, UC Barkley 113.42.** CeeDee Lamb went off for 41.3, and parinkashyap1 cruised by 26.72. TreVeyon Henderson posted 4.2, but nobody remembers that after a CeeDee game like this. ritvik got 25.8 from Zay Flowers and 0 from Ladd McConkey. UC Barkley falls to 1 and 3.
 
-**HarriZyn & JaxZyn Darts 142.00, Golden Showers 132.82.** rafaelcbb won by 9.18 with Kyle Monangai leading the way at 28. Parker Washington chipped in a sad 2. DumberBell got 22.7 from Jonathan Taylor and 6.1 from Bucky Irving. The real story here lives on the Golden Showers bench.
+**HarriZyn & JaxZyn Darts 142.00, Golden Showers 132.82.** rafaelcbb got 28 from Kyle Monangai and climbed two spots into first place at 3 and 1. Parker Washington added 2. DumberBell got 22.7 from Jonathan Taylor and 6.1 from Bucky Irving. A 9.18 margin looks close. It looks a lot worse once you check the Golden Showers bench.
 
-**from puka, 2000 years ago 167.68, Riceman szn 🥶🧊👌🏽 95.30.** Total demolition. fr0styishere won by 72.38, the biggest margin of the week. Kenneth Walker led with 30.9. samtheearth scored the lowest total in the league at 95.3. Sam LaPorta did his part with 22.4, but Rashee Rice scored zero for a team literally named after him.
+**from puka, 2000 years ago 167.68, Riceman szn 🥶🧊👌🏽 95.30.** This one was over early. fr0styishere posted the top score of the week, and the 72.38 margin was the biggest of the week too. Kenneth Walker led with 30.9, and kicker Evan McPherson brought up the rear with 5. samtheearth got 22.4 from Sam LaPorta. Rashee Rice scored 0. On a team called Riceman szn. Kirk Cousins scored 22.6 on the bench, just to twist the knife.
 
 ## Player of the week
 
-Tetairoa McMillan, 45.2 points for And Your Raven Can Sing. Nobody in the league topped it. Fujetus won by 4.12, so McMillan basically won that game alone.
+Tetairoa McMillan, 45.2 points for And Your Raven Can Sing. No top scorer topped that this week, and CeeDee Lamb's 41.3 was the only other 40 point game. Fujetus won by 4.12, so McMillan basically won this matchup alone.
 
 ## Bust of the week
 
-Rashee Rice, 0 points for Riceman szn 🥶🧊👌🏽. samtheearth named the team after him, started him, and got nothing back in a 72.38 point loss. Kenyon Sadiq and Ladd McConkey also posted zeros, but only one of them has a team named in their honor.
+Rashee Rice, 0 points for Riceman szn 🥶🧊👌🏽. samtheearth named the whole team after Rice and got nothing back. Rice now shows up as Questionable too. Ladd McConkey and Kenyon Sadiq also posted zeros, so Rice has company.
 
 ## Bench blunders
 
-Three managers lost games their benches would have won.
+Three losses this week came with a winning lineup sitting on the bench.
 
-DumberBell hurts the most. Golden Showers left 29.4 points on the bench, including Emanuel Wilson with 27. The optimal lineup scored 162.22. HarriZyn & JaxZyn Darts scored 142. You lost by 9.18, DumberBell. Wilson alone covers that.
+DumberBell, you're first. Golden Showers left 29.4 points on the bench and lost by 9.18. Emanuel Wilson scored 27 sitting down. Swap Wilson in for Bucky Irving's 6.1 and Golden Showers wins.
 
-coledawg left 25.6 on the bench with DK Metcalf sitting there with 16.5. The best lineup for hurts to watch was 126.82, well above the 110.62 KingJeevs scored.
+coledawg, you're next. hurts to watch left 25.6 points behind and lost by 9.4. DK Metcalf sat with 16.5 while Egbuka started and scored 3.3. That swap alone flips the game.
 
-D00zer left 19.6 on the bench, with Rome Odunze at 15.4. The optimal lineup hit 180.66. You lost by 4.12. Ouch.
+D00zer lost by 4.12 and left 19.6 on the bench. Rome Odunze put up 15.4 as a spectator. That one stings.
 
-Worst coach goes to KingJeevs. Gibbs me a Woody left 31.9 points on the bench, the most in the league, with Carnell Tate scoring 21.5 as a backup. KingJeevs won anyway, so consider this a warning.
+samtheearth benched Kirk Cousins and his 22.6 and left 24.7 total on the bench. It wouldn't have mattered against 167.68, but it's still a bad look.
 
-samtheearth benched Kirk Cousins and his 22.6. Cousins was a fresh pickup, too. It wouldn't have saved a 72 point loss, but still.
+Worst coach goes to KingJeevs. Gibbs me a Woody left 31.9 points on the bench, the most in the league. Carnell Tate scored 21.5 on the pine. KingJeevs won anyway because coledawg made bigger mistakes. Take the win and say thanks.
 
-Coach of the week goes to fr0styishere. from puka, 2000 years ago left only 7.34 on the bench, the lowest in the league, while scoring the most points. That's how you do it.
+Coach of the week goes to fr0styishere. from puka, 2000 years ago left just 7.34 points behind, the fewest in the league, while putting up 167.68. That's how you set a lineup.
 
 ## Stock up and stock down
 
-Stock up.
+Stock up. Williams’ Wiener Circle jumped 3 spots to 7th in the power rankings despite the loss. D00zer has scored 357.72 over the last three weeks, and 161.06 this week shows the team is heating up. from puka, 2000 years ago rose 2 spots to 5th with 392.84 over the last three. Deshaun’s Happy Ending moved up 2 to 9th in the power rankings and climbed 4 spots in the standings to 8th, with 373.16 over the last three.
 
-Williams’ Wiener Circle jumped three spots to 7th in the power rankings despite the loss. D00zer has 357.72 points over the last three weeks.
-
-from puka, 2000 years ago climbed two spots to 5th, with 392.84 over the last three. A 167.68 week helps.
-
-Deshaun’s Happy Ending moved up two to 9th. parinkashyap1 has 373.16 over three weeks and jumped four spots in the standings to 8th.
-
-Stock down.
-
-Riceman szn 🥶🧊👌🏽 fell five spots to 11th, the biggest drop of the week. samtheearth sits at 1 and 3 and has faced 573.84 points, the most in the league.
-
-Andthony Borrdain slid two spots to 3rd. m4n4s still has 446.22 points over the last three weeks, so this team isn't dead. Just stumbling.
-
-Gibbs me a Woody won and still dropped two spots to 6th. KingJeevs has 401.7 over the last three. Maybe start the guy who scores 21.5 next time.
+Stock down. Riceman szn 🥶🧊👌🏽 fell 5 spots to 11th. samtheearth has also faced 573.84 points, the most in the league. Some of that is bad luck. Benching 22.6 from Cousins is not. Andthony Borrdain slid 2 spots to 3rd, but m4n4s has 446.22 over the last three weeks, second only to I have a scheme's 457.66. Gibbs me a Woody dropped 2 spots to 6th even with a win, because 110.62 doesn't impress anyone.
 
 ## Transactions
 
-fr0styishere spent the week spinning in circles. from puka, 2000 years ago added Tyreek Hill and Mack Hollins. They also dropped and re added Makai Lemon, Tre' Harris, and Will Reichard. Then they picked up kicker Evan McPherson, who scored 5. Busy week. It worked out fine, so we'll allow it.
+Nobody got burned by a dropped player this week. Here's what stood out.
 
-parinkashyap1 dropped De'Von Achane and added nobody in that move. Bold call. Deshaun’s Happy Ending also added Brycen Tremayne separately.
+parinkashyap1 cut De'Von Achane outright with no add, then swapped Courtland Sutton for C.J. Stroud. Bold week for Deshaun’s Happy Ending.
 
-D00zer made three moves. Williams’ Wiener Circle added Keaton Mitchell for Jahdae Walker, Pat Bryant for Tyler Allgeier, and Noah Fant for Oronde Gadsden.
+Fujetus also cut Jayden Reed with no add, dropped kicker Cameron Dicker for Brenton Strange, then picked up Matt Gay.
 
-DumberBell added Sam Darnold and dropped Brian Thomas.
+DumberBell dropped Brian Thomas for Sam Darnold.
 
-samtheearth swapped Baker Mayfield for Kirk Cousins, then benched Cousins in his 22.6 point week.
+fr0styishere added Tre' Harris on Thursday, cut him for Mack Hollins twenty minutes later, then claimed Harris back on waivers this week by dropping Hollins. Make up your mind. fr0styishere also added Evan McPherson, who scored 5.
 
-m4n4s added Jauan Jennings for Antonio Williams and got 1.8 points for the trouble. Andthony Borrdain also swapped the Saints defense for the Bears.
+D00zer added Noah Fant for Oronde Gadsden last Wednesday, then cut Fant on waivers this week to grab Dohnte Meyers. ritvik did something similar with Jaylen Wright, adding him over the weekend and then cutting him for Will Shipley on waivers.
 
-rafaelcbb dropped the Bills for the Packers on waivers, then grabbed the Bills right back by dropping the Giants.
+ritvik did land Keon Coleman, the most added player on Sleeper this week. Good grab.
 
-Fujetus dropped Jayden Reed and added Matt Gay in separate moves.
-
-Nobody got burned by a dropped player scoring for someone else this week.
+m4n4s swapped Jordan Love for Drake Maye and added Jauan Jennings, who scored 1.8. samtheearth dropped Baker Mayfield for Kirk Cousins and then benched Cousins in a 22.6 point week.
 
 ## Injury report
 
-UC Barkley takes the worst hit. Saquon Barkley and Ladd McConkey are both Out. Yes, the team named UC Barkley is down its Barkley, ritvik.
+UC Barkley takes the worst hit. ritvik has Saquon Barkley and Ladd McConkey both listed as Out. Williams’ Wiener Circle has Ja'Marr Chase Out, a big problem for D00zer.
 
-D00zer loses Ja'Marr Chase, who is Out for Williams’ Wiener Circle.
-
-rafaelcbb has Kyle Monangai and Tee Higgins listed as Questionable for HarriZyn & JaxZyn Darts.
-
-johnwarzecha has Jeremiyah Love and DJ Moore listed as Questionable for I have a scheme.
-
-fr0styishere has Mack Hollins and Alvin Kamara listed as Questionable for from puka, 2000 years ago.
-
-Lamar Jackson is Questionable for Fujetus and And Your Raven Can Sing.
-
-Chase McLaughlin is Questionable for KingJeevs and Gibbs me a Woody.
-
-Rashee Rice is Questionable for samtheearth and Riceman szn 🥶🧊👌🏽.
+The Questionable list is long. fr0styishere has Mack Hollins and Alvin Kamara. johnwarzecha has Jeremiyah Love and DJ Moore. rafaelcbb has Kyle Monangai and Tee Higgins. Fujetus has Lamar Jackson. KingJeevs has Chase McLaughlin. samtheearth has Rashee Rice.
 
 ## Fantasy news
 
-Emanuel Wilson ranks third in adds across Sleeper with 1,617,408. DumberBell already owns him and benched him for 27 points. Start him.
+This league beat the rest of Sleeper to the wire. Every player in the top 10 trending adds already sits on a roster here. Keon Coleman is on UC Barkley. Dohnte Meyers and Keaton Mitchell are on Williams’ Wiener Circle. Emanuel Wilson and Brian Robinson are on Golden Showers. Will Shipley is on UC Barkley. Roman Wilson and Kirk Cousins are on Riceman szn 🥶🧊👌🏽. Romeo Doubs is on HarriZyn & JaxZyn Darts, where he scored 23.8 on the bench. The Jacksonville Jaguars defense is on And Your Raven Can Sing. You won't find a hot pickup on waivers this week.
 
-Keaton Mitchell shows up at 761,283 adds. D00zer grabbed him this week. Kirk Cousins sits at 709,248 adds, and samtheearth already has him. Romeo Doubs has 650,040 adds and scored 23.8 on rafaelcbb's bench.
+Several trending drops live on our rosters. Darren Waller is on And Your Raven Can Sing. Jauan Jennings is on Andthony Borrdain. Kenyon Sadiq and Chase McLaughlin are both on Gibbs me a Woody. Sadiq scored 0 this week and McLaughlin is Questionable, so KingJeevs has some thinking to do.
 
-Keon Coleman leads all adds at 3,876,030. Dohnte Meyers, Will Shipley, Roman Wilson, Brian Robinson, and the Jaguars defense also made the list. Check your waiver wire. ritvik needs running backs with Barkley Out, so Shipley or Robinson should be the first look if they're free.
-
-On the drop side, three of our guys made the list. Jauan Jennings ranks third in drops with 436,695, and m4n4s just added him. Kenyon Sadiq shows up at 399,330 after his zero for KingJeevs. Chase McLaughlin, also on Gibbs me a Woody, sits at 332,264 drops. KingJeevs has some thinking to do.
+Isaiah Davis, Tank Bigsby, Konata Mumpfield, Kyler Murray, Quentin Johnston, and Harrison Butker are all unrostered here. The rest of Sleeper is cutting them, so there's no rush.
 
 ## Next week
 
-Andthony Borrdain vs Gibbs me a Woody. Pick m4n4s, ranked 3rd with 446.22 over the last three.
+Andthony Borrdain over Gibbs me a Woody. Both are 2 and 2, but m4n4s has 446.22 over three weeks and a power rank of 3.
 
-And Your Raven Can Sing vs hurts to watch. Pick Fujetus. coledawg ranks 12th with 326.6 over three weeks, the lowest in the league.
+And Your Raven Can Sing over hurts to watch. coledawg sits at power rank 12 with just 326.6 over the last three.
 
-I have a scheme vs Deshaun’s Happy Ending. Pick johnwarzecha, ranked 2nd with a league high 457.66 over the last three.
+I have a scheme over Deshaun’s Happy Ending. johnwarzecha is 3 and 1 with the best three week total at 457.66.
 
-Williams’ Wiener Circle vs HarriZyn & JaxZyn Darts. Pick rafaelcbb, the top power ranked team at 3 and 1.
+HarriZyn & JaxZyn Darts over Williams’ Wiener Circle. rafaelcbb holds power rank 1 and outscored D00zer 417.34 to 357.72 over three weeks.
 
-UC Barkley vs Riceman szn 🥶🧊👌🏽. Both teams sit at 1 and 3. Pick samtheearth, with 370.6 over three weeks against ritvik's 347.08.
+Riceman szn 🥶🧊👌🏽 over UC Barkley. Both are 1 and 3, and samtheearth has the better three week total at 370.6. Coin flip pick.
 
-from puka, 2000 years ago vs Golden Showers. Pick fr0styishere at 3 and 1 over DumberBell at 1 and 3.
+from puka, 2000 years ago over Golden Showers. fr0styishere is 3 and 1 and outscored DumberBell 392.84 to 373.54 over three weeks.
