@@ -110,6 +110,11 @@ export function winnersBracket(leagueId: string): Promise<{ r: number; m: number
   return get(`/league/${leagueId}/winners_bracket`);
 }
 
+/** Every pick in a draft, with the player's name, position, and NFL team at draft time. */
+export function draftPicks(draftId: string): Promise<import('./history.ts').DraftPick[]> {
+  return get(`/draft/${draftId}/picks`);
+}
+
 export function weekMatchups(week: number, leagueId = currentLeagueId()): Promise<Matchup[]> {
   return get<Matchup[]>(`/league/${leagueId}/matchups/${week}`);
 }

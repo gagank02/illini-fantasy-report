@@ -55,7 +55,7 @@ Details for each task are in `tasks/todo.md`.
 ### Phase 4: League history (can run in parallel with Phase 3)
 - [x] T14: History data layer (season chain, managers, champions)
 - [x] T15: `/history` overview page
-- [ ] T16: `/history/{season}` with the draft board
+- [x] T16: `/history/{season}` with the draft board
 
 ### Checkpoint D: Done
 - [ ] Every success criterion in `SPEC.md` passes

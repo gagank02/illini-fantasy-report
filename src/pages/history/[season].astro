@@ -1,0 +1,137 @@
+---
+import Base from '../../layouts/Base.astro';
+import { buildHistory, draftBoard, draftValue, loadHistory, playoffRounds, type SeasonData } from '../../lib/history';
+import { draftPicks } from '../../lib/sleeper';
+import { teamNames } from '../../lib/stats';
+
+export async function getStaticPaths() {
+  const seasons = await loadHistory();
+  return seasons.map(s => ({ params: { season: s.league.season }, props: { seasons, season: s } }));
+}
+
+const { seasons, season } = Astro.props as { seasons: SeasonData[]; season: SeasonData };
+const summary = buildHistory(seasons).seasons.find(x => x.season === Number(season.league.season))!;
+const team = (rosterId: number) => {
+  const r = season.rosters.find(x => x.roster_id === rosterId);
+  return r ? teamNames(season.users, r.owner_id).team : `Team ${rosterId}`;
+};
+const picks = await draftPicks(season.league.draft_id);
+const board = picks.length ? draftBoard(picks, team) : null;
+const value = picks.length ? draftValue(picks, season.weeks) : null;
+const rounds = season.bracket ? playoffRounds(season.bracket, team) : [];
+const roundName = (i: number) => (i === rounds.length - 1 ? 'Finals' : i === rounds.length - 2 ? 'Semifinals' : `Round ${i + 1}`);
+const placeName = (p: number | null) => (p === 1 ? 'Championship' : p ? `${p}${p === 3 ? 'rd' : 'th'} place game` : '');
+const rec = (r: { w: number; l: number; t: number }) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+const others = seasons.map(s => s.league.season).filter(y => y !== season.league.season);
+---
+
+<Base title={`${summary.season} Season`}>
+  <p class="muted"><a href="/history">League history</a> · {others.map((y, i) => <>{i ? ', ' : ''}<a href={`/history/${y}`}>{y}</a></>)}</p>
+  <h1>{summary.season} Season</h1>
+  {summary.inProgress ? (
+    <p class="muted">In progress. Standings through week {season.weeks.length}.</p>
+  ) : (
+    <ul class="champs">
+      <li>
+        <span class="fact-title">Champion</span>
+        <strong class="champ-name">{summary.champion?.name}</strong>
+        <span class="sub">{summary.champion?.team}</span>
+        <dl>
+          <div><dt>Runner up</dt><dd>{summary.runnerUp?.name}</dd></div>
+          <div><dt>Punishment</dt><dd>{summary.punishment?.name}</dd></div>
+          <div><dt>Teams</dt><dd>{summary.teams}</dd></div>
+        </dl>
+      </li>
+    </ul>
+  )}
+
+  <section aria-labelledby="st-h">
+    <h2 id="st-h">{summary.inProgress ? 'Standings' : 'Final regular season standings'}</h2>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th scope="col">#</th><th scope="col" class="left">Team</th><th scope="col">W-L-T</th><th scope="col">PF</th><th scope="col" class="wide">PA</th></tr></thead>
+        <tbody>
+          {summary.standings.map(r => (
+            <tr>
+              <td>{r.rank}</td>
+              <th scope="row" class="left">{r.team}<span class="sub">{r.name}</span></th>
+              <td>{rec(r)}</td>
+              <td>{r.pf.toFixed(2)}<span class="sub narrow">PA {r.pa.toFixed(2)}</span></td>
+              <td class="wide">{r.pa.toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {rounds.length > 0 && (
+    <section aria-labelledby="po-h">
+      <h2 id="po-h">Playoffs</h2>
+      <div class="bracket">
+        {rounds.map((r, i) => (
+          <div class="bracket-round">
+            <h3>{roundName(i)}</h3>
+            {r.matches.map(m => (
+              <div class="bracket-match">
+                {m.place && <span class="fact-title">{placeName(m.place)}</span>}
+                {m.teams.map(t => <div class:list={['bm-team', { win: t === m.winner }]}>{t}{t === m.winner && <span class="visually-hidden"> (won)</span>}</div>)}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {board && value && (
+    <>
+      <section aria-labelledby="dv-h" class="facts">
+        <h2 id="dv-h">Draft hits and busts{summary.inProgress ? ' so far' : ''}</h2>
+        <p class="muted">Each pick is compared within its position. QB20 means the 20th quarterback drafted. Points count only weeks on a roster in this league.</p>
+        <div class="dv-grid">
+          {[['Best picks', value.hits], ['Worst picks', value.busts]].map(([label, list]) => (
+            <div>
+              <h3>{label as string}</h3>
+              <ol class="dv-list">
+                {(list as typeof value.hits).map(x => (
+                  <li>
+                    <strong>{x.name}</strong> <span class="muted">{x.pos}, pick {x.pickNo} by {team(x.rosterId)}</span>
+                    <span class="sub">Drafted as {x.pos}{x.posPick}, finished {x.pos}{x.posFinish} with {x.points.toFixed(1)} pts</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="db-h">
+        <h2 id="db-h">Draft board</h2>
+        <div class="grid-only table-scroll">
+          <table class="draft">
+            <thead><tr><th scope="col">Rd</th>{board.slots.map(t => <th scope="col">{t}</th>)}</tr></thead>
+            <tbody>
+              {board.rounds.map((row, i) => (
+                <tr>
+                  <th scope="row">{i + 1}</th>
+                  {row.map(c => <td class={`pos-${c.pos}`} title={`Pick ${c.pickNo}`}><span class="dp-name">{c.name}</span><span class="dp-pos">{c.pos} {c.nflTeam}</span></td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="list-only whatif-list">
+          {board.slots.map((t, s) => (
+            <details>
+              <summary>{t}<span class="sub">Draft slot {s + 1}</span></summary>
+              <ul>
+                {board.rounds.map((row, i) => <li class={`pos-${row[s]!.pos}`}><span>Rd {i + 1}. {row[s]!.name}</span><strong>{row[s]!.pos}</strong></li>)}
+              </ul>
+            </details>
+          ))}
+        </div>
+      </section>
+    </>
+  )}
+</Base>

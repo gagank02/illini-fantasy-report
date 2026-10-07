@@ -191,6 +191,30 @@ section + section { margin-top: 2rem; }
 .wi-self-blank { color: var(--muted); }
 .wi-none { color: var(--muted); }
 
+/* Season pages: bracket, draft value, draft board. Position tints mix into the surface so text stays AA. */
+.bracket { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); align-items: start; }
+.bracket-round h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.bracket-match { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 0.5rem 0.7rem; margin-bottom: 0.6rem; }
+.bm-team { padding: 0.15rem 0; }
+.bm-team.win { font-weight: 700; }
+.bm-team.win::before { content: '▸ '; color: var(--accent-text); }
+.dv-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.dv-grid h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+.dv-list { margin: 0; padding-left: 1.3rem; }
+.dv-list li { margin-bottom: 0.45rem; }
+/* Fixed layout: every team column shares the width, so the board fits at desktop sizes. */
+table.draft { table-layout: fixed; }
+table.draft th, table.draft td { white-space: normal; text-align: left; font-size: 0.72rem; padding: 0.3rem; vertical-align: top; overflow-wrap: anywhere; }
+table.draft th:first-child { width: 2.2rem; }
+table.draft thead th { text-transform: none; letter-spacing: 0; }
+.dp-name { display: block; font-weight: 600; }
+.dp-pos { display: block; color: var(--muted); font-size: 0.7rem; }
+.pos-QB { background: color-mix(in srgb, #e5484d 18%, var(--surface)); }
+.pos-RB { background: color-mix(in srgb, #30a46c 18%, var(--surface)); }
+.pos-WR { background: color-mix(in srgb, #0091ff 18%, var(--surface)); }
+.pos-TE { background: color-mix(in srgb, #f76b15 18%, var(--surface)); }
+.pos-K, .pos-DEF { background: color-mix(in srgb, #8e8c99 18%, var(--surface)); }
+
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }

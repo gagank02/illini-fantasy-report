@@ -405,13 +405,13 @@ The all time stats are:
 The in progress 2026 season shows its draft but leaves out the bracket.
 
 **Acceptance criteria:**
-- [ ] The 2024 board has 10 columns and the 2025 board has 12. Every pick shows the player and position
-- [ ] The hits and busts lists come from `players_points` totals for the season
-- [ ] The 2026 page renders without a bracket
+- [x] The 2024 board has 10 columns and the 2025 board has 12. Every pick shows the player and position
+- [x] The hits and busts lists come from `players_points` totals for the season, compared **within each position** (drafted as WR49, finished WR9). Ranking across all positions made every hit a late QB
+- [x] The 2026 page renders without a bracket
 
 **Verification:**
-- [ ] `npm test`: the hit and bust ranking function
-- [ ] Manual: spot check three picks against the Sleeper draft recap
+- [x] `npm test`: the hit and bust ranking function
+- [x] Manual: checked pick 1 (Ja'Marr Chase), the slot to team mapping, and the bracket against Sleeper data. A human spot check against the Sleeper app is still welcome
 
 **Dependencies:** T14
 

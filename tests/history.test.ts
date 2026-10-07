@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { buildHistory, walkChain, type BracketMatch, type SeasonData } from '../src/lib/history';
+import { buildHistory, draftBoard, draftValue, playoffRounds, walkChain, type BracketMatch, type DraftPick, type SeasonData } from '../src/lib/history';
 import type { League, Matchup, Roster, User } from '../src/lib/sleeper';
 import { games, standings } from '../src/lib/stats';
 
@@ -121,5 +121,51 @@ describe('buildHistory', () => {
   test('best and worst completed seasons by win rate', () => {
     expect(h.records.bestSeason.w).toBeGreaterThanOrEqual(h.records.worstSeason.w);
     expect([2024, 2025]).toContain(h.records.bestSeason.season);
+  });
+});
+
+describe('season pages', () => {
+  const picks25 = load<DraftPick[]>('history/2025/draft_picks');
+  const picks24 = load<DraftPick[]>('history/2024/draft_picks');
+  const team = (s: SeasonData) => (rosterId: number) => {
+    const ownerId = s.rosters.find(r => r.roster_id === rosterId)!.owner_id;
+    const u = s.users.find(x => x.user_id === ownerId)!;
+    return u.metadata.team_name || u.display_name;
+  };
+
+  test('draft board: rounds by slots, 12 columns in 2025 and 10 in 2024, every pick named', () => {
+    const b25 = draftBoard(picks25, team(seasons[1]!));
+    const b24 = draftBoard(picks24, team(seasons[2]!));
+    expect(b25.slots).toHaveLength(12);
+    expect(b24.slots).toHaveLength(10);
+    expect(b25.rounds).toHaveLength(15);
+    for (const round of b25.rounds) for (const cell of round) expect(cell.name && cell.pos).toBeTruthy();
+    // Column header is the team that drafted from that slot.
+    const first = picks25.find(p => p.pick_no === 1)!;
+    expect(b25.slots[first.draft_slot - 1]).toBe(team(seasons[1]!)(first.roster_id));
+  });
+
+  test('draft value is judged within each position, so late QBs do not dominate', () => {
+    const v = draftValue(picks25, seasons[1]!.weeks);
+    const pts = (id: string) => seasons[1]!.weeks.flat().reduce((sum, m) => sum + (m.players_points?.[id] ?? 0), 0);
+    expect(v.all.find(x => x.pickNo === 1)!.points).toBeCloseTo(pts(picks25.find(p => p.pick_no === 1)!.player_id), 2);
+    for (const x of v.all) {
+      const samePos = v.all.filter(y => y.pos === x.pos);
+      expect(x.posPick).toBe(samePos.filter(y => y.pickNo < x.pickNo).length + 1);
+      expect(x.posFinish).toBe([...samePos].sort((a, b) => b.points - a.points || a.pickNo - b.pickNo).indexOf(x) + 1);
+      expect(x.diff).toBe(x.posPick - x.posFinish);
+    }
+    expect(v.hits).toHaveLength(5);
+    expect(v.busts).toHaveLength(5);
+    expect(v.hits[0]!.diff).toBe(Math.max(...v.all.map(x => x.diff)));
+    expect(v.busts[0]!.diff).toBe(Math.min(...v.all.map(x => x.diff)));
+    expect(new Set(v.hits.map(x => x.pos)).size).toBeGreaterThan(1);
+  });
+
+  test('playoff rounds in order, final marked with the champion', () => {
+    const rounds = playoffRounds(seasons[1]!.bracket!, team(seasons[1]!));
+    expect(rounds.map(r => r.round)).toEqual([1, 2, 3]);
+    const final = rounds.at(-1)!.matches.find(m => m.place === 1)!;
+    expect(final.winner).toBe(team(seasons[1]!)(6));
   });
 });

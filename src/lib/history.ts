@@ -131,3 +131,69 @@ export function buildHistory(seasons: SeasonData[]) {
     },
   };
 }
+
+export interface DraftPick {
+  round: number;
+  pick_no: number;
+  draft_slot: number;
+  roster_id: number;
+  player_id: string;
+  metadata: { first_name?: string | null; last_name?: string | null; position?: string | null; team?: string | null };
+}
+
+const pickName = (p: DraftPick) => `${p.metadata.first_name ?? ''} ${p.metadata.last_name ?? ''}`.trim() || p.player_id;
+
+/** Rounds (rows) by draft slots (columns). `team` names the roster that picks from each slot. */
+export function draftBoard(picks: DraftPick[], team: (rosterId: number) => string) {
+  const slotCount = Math.max(...picks.map(p => p.draft_slot));
+  const roundCount = Math.max(...picks.map(p => p.round));
+  const slots = Array.from({ length: slotCount }, (_, i) => {
+    const p = picks.find(x => x.round === 1 && x.draft_slot === i + 1);
+    return p ? team(p.roster_id) : `Slot ${i + 1}`;
+  });
+  const rounds = Array.from({ length: roundCount }, (_, r) =>
+    Array.from({ length: slotCount }, (_, s) => {
+      const p = picks.find(x => x.round === r + 1 && x.draft_slot === s + 1);
+      return { pickNo: p?.pick_no ?? 0, name: p ? pickName(p) : '', pos: p?.metadata.position ?? '', nflTeam: p?.metadata.team ?? '' };
+    }),
+  );
+  return { slots, rounds };
+}
+
+/**
+ * Draft value, judged within each position: posPick is the order a player was taken among his position
+ * (QB 20 = 20th QB drafted), posFinish is where he finished in points among drafted players at that position.
+ * diff = posPick - posFinish, so positive means he outplayed the pick. Points come from players_points,
+ * so only weeks on a roster in this league count.
+ */
+export function draftValue(picks: DraftPick[], weeks: { players_points?: Record<string, number> }[][]) {
+  const points = new Map<string, number>();
+  for (const m of weeks.flat()) for (const [id, pts] of Object.entries(m.players_points ?? {})) points.set(id, (points.get(id) ?? 0) + pts);
+  const base = picks.map(p => ({ pickNo: p.pick_no, round: p.round, rosterId: p.roster_id, name: pickName(p), pos: p.metadata.position ?? '', points: round2(points.get(p.player_id) ?? 0) }));
+  const all = base.map(x => {
+    const samePos = base.filter(y => y.pos === x.pos);
+    const posPick = samePos.filter(y => y.pickNo < x.pickNo).length + 1;
+    const posFinish = [...samePos].sort((a, b) => b.points - a.points || a.pickNo - b.pickNo).indexOf(x) + 1;
+    return { ...x, posPick, posFinish, diff: posPick - posFinish };
+  });
+  return {
+    all,
+    hits: [...all].sort((a, b) => b.diff - a.diff || b.points - a.points).slice(0, 5),
+    busts: [...all].sort((a, b) => a.diff - b.diff || a.points - b.points).slice(0, 5),
+  };
+}
+
+/** Winners bracket grouped by round, with team names. place: 1 = final, 3 = third place game, and so on. */
+export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) => string) {
+  const name = (id: number | null | undefined) => (typeof id === 'number' ? team(id) : 'TBD');
+  const rounds = [...new Set(bracket.map(m => m.r))].sort((a, b) => a - b);
+  return rounds.map(round => ({
+    round,
+    matches: bracket.filter(m => m.r === round).sort((a, b) => (a.p ?? 99) - (b.p ?? 99) || a.m - b.m).map(m => ({
+      place: m.p ?? null,
+      teams: [name(m.t1), name(m.t2)],
+      winner: m.w ? team(m.w) : null,
+      loser: m.l ? team(m.l) : null,
+    })),
+  }));
+}

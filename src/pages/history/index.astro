@@ -26,7 +26,8 @@ const tone = (x: Record3) => (x.w + x.l + x.t === 0 ? 'none' : x.w > x.l ? 'up' 
 <Base title="History">
   <h1>League History</h1>
   <p class="muted">
-    Every season since {first}. Records count regular season games only. The champion wins the playoff final, and the punishment
+    Every season since {first}. Season pages: {h.seasons.map((s, i) => <>{i ? ', ' : ''}<a href={`/history/${s.season}`}>{s.season}</a></>)}.
+    Records count regular season games only. The champion wins the playoff final, and the punishment
     goes to last place in the regular season.
   </p>
 
@@ -35,7 +36,7 @@ const tone = (x: Record3) => (x.w + x.l + x.t === 0 ? 'none' : x.w > x.l ? 'up' 
     <ul class="champs">
       {done.map(s => (
         <li>
-          <span class="champ-year">{s.season}</span>
+          <a class="champ-year" href={`/history/${s.season}`}>{s.season}</a>
           <span class="fact-title">Champion</span>
           <strong class="champ-name">{s.champion?.name}</strong>
           <span class="sub">{s.champion?.team}</span>
