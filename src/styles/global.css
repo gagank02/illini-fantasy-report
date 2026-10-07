@@ -107,8 +107,11 @@ th.left { width: 100%; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* What if: grid on wide screens, expandable list on phones. */
-.whatif th, .whatif td { padding: 0.4rem 0.35rem; }
-.whatif td { text-align: center; }
+.whatif th, .whatif td { padding: 0.55rem 0.4rem; }
+/* Unlike other tables, the matrix cells (not the team column) take the spare width. */
+.whatif th.left { width: auto; min-width: 9rem; max-width: 13rem; }
+.whatif td { text-align: center; font-size: 1.05rem; }
+@media (min-width: 60rem) { .whatif td { min-width: 3.2rem; } }
 .whatif .vert { vertical-align: bottom; }
 .whatif .vert span { writing-mode: vertical-rl; transform: rotate(180deg); display: inline-block; max-height: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; }
 .wi-up { background: color-mix(in srgb, var(--win) 22%, var(--surface)); }
