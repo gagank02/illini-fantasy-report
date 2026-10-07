@@ -53,7 +53,7 @@ The site is small, so all four modules live in this one spec and don't get separ
   8. **NFL news:** ESPN headlines that matter for fantasy, restated in the report's own words.
   9. **Next week:** each matchup with both teams' form and season scoring, plus a pick. Sleeper's public API has no projections, so picks use only our own stats.
 - **Tone:** friendly trash talk, by name. Jabs target decisions and results (bad starts, bench blunders, blowouts, waiver misses), never anything personal.
-- Written by Claude (`claude-opus-5-5`) with `writing-style.md` as the system prompt. The prompt also gets a facts bundle with scores, top players, standings changes, the "Around the league" facts, bench blunders, power ranking movers, league transactions, Sleeper injury statuses, trending adds/drops, next week's matchups, and the latest headlines from an NFL RSS feed.
+- Written by Claude (`claude-opus-5-5`) through **Claude Code in headless mode** (`claude -p`) on the commissioner's Claude Pro or Max **subscription**, not a paid API key. It runs with `writing-style.md` plus the report rules as the system prompt, all tools disabled, and no user settings or plugins. The prompt also gets a facts bundle with scores, top players, standings changes, the "Around the league" facts, bench blunders, power ranking movers, league transactions, Sleeper injury statuses, trending adds/drops, next week's matchups, and the latest headlines from an NFL RSS feed.
 - The model gets facts only and never invents stats. Every number in the report comes from the facts bundle.
 - A style check script fails the PR when the report contains em/en dashes, semicolons, emojis, `*`, hashtags, raw HTML, or phrases from a banned list (seeded from `writing-style.md`).
 - The home page (`/`) is the weekly front door. It has these parts.
@@ -92,7 +92,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 
 **7. Security**
 - Fully static output. No server, no database, no user input.
-- The Anthropic API key exists only as a GitHub Actions secret and never reaches the client bundle.
+- The Claude Code OAuth token exists only as a GitHub Actions secret and never reaches the client bundle.
 - Strict CSP via Cloudflare `_headers`: `default-src 'self'`, no inline scripts except the theme snippet (hashed), plus `X-Content-Type-Options`, `Referrer-Policy`, and `frame-ancestors 'none'`.
 - Report markdown renders with raw HTML disabled. `src/lib/markdown.ts` is a Sätteri plugin (Astro 7's markdown engine) that turns raw HTML into visible text and images into alt text. Tests prove Sätteri passes `<script>` through without it.
 - `npm audit --omit=dev` runs clean in CI.
@@ -111,7 +111,7 @@ The site is small, so all four modules live in this one spec and don't get separ
   - **Rate limiter:** In `sleeper.ts`, it caps each process at 600 calls a minute. A normal build uses about 100. The cap only matters if a bug causes a call loop.
   - **Players list:** `/players/nfl` is never called by builds or the dev server. `scripts/update-players.ts` writes a trimmed `src/data/players.json` (id, name, position, NFL team, injury status). The weekly report Action runs it, so the endpoint gets called once a week, and the file lands in the report PR.
   - **History walk:** Following `previous_league_id` stops on a repeated ID or after 30 seasons.
-- **Report writer:** `@anthropic-ai/sdk`, plus a small RSS fetch with no parser dependency, run by Node 24 in GitHub Actions.
+- **Report writer:** the `claude` CLI (Claude Code) in headless mode, plus a small RSS fetch with no parser dependency, run by Node 24. There's no SDK dependency. Locally it uses your logged in subscription. In GitHub Actions it uses `CLAUDE_CODE_OAUTH_TOKEN` (made with `claude setup-token`).
 - **Tests:** Vitest 5.
 - **Toolchain:** Node 22 or newer with **npm 11**. npm 10 crashes while resolving Vitest 5's peer dependencies (`Cannot read properties of null (reading 'edgesOut')`). CI uses Node 24, which ships with npm 11.
 - **Hosting:** Cloudflare Pages (free), building from `main`. A scheduled GitHub Action calls a Pages deploy hook daily so data stays fresh.
@@ -132,17 +132,17 @@ Style check:  npm run lint:report -- src/content/reports/2026/week-5.md
 
 Required env:
 - `SLEEPER_LEAGUE_ID` (build + report)
-- `ANTHROPIC_API_KEY` (report only, CI secret)
+- `CLAUDE_CODE_OAUTH_TOKEN` (report only, CI secret, made with `claude setup-token`; uses your Claude subscription)
 - `CF_DEPLOY_HOOK_URL` (daily refresh, CI secret)
 
 ### Secrets handling
 - `.gitignore` already ignores `.env` and `.env.*`. Only `.env.example`, holding placeholder values, gets committed.
-- Real keys live in exactly two places: your local `.env` and GitHub → Settings → Secrets and variables → Actions. Cloudflare Pages needs only `SLEEPER_LEAGUE_ID`, which isn't secret.
+- Secrets live in exactly two places: your local `.env` (only `SLEEPER_LEAGUE_ID` is needed locally, since Claude Code uses your login) and GitHub → Settings → Secrets and variables → Actions. Cloudflare Pages needs only `SLEEPER_LEAGUE_ID`, which isn't secret.
 - No code reads the secrets except Node scripts under `scripts/`. Astro only exposes env vars prefixed `PUBLIC_` to the browser, and we never use that prefix for secrets.
 - **GitHub push protection:** Turn it on under Settings → Code security → Secret scanning. Then GitHub rejects any push containing an Anthropic key. It's free on public repos.
 - **CI guard:** After every build, CI greps `dist/` for `sk-ant-` and the deploy hook host. It fails if either shows up.
 - Workflows never `echo` secrets, and GitHub masks them in logs anyway.
-- Set a monthly spend limit (e.g. $5) in the Anthropic console. If the key ever leaks, the damage stays capped.
+- The OAuth token grants use of your Claude subscription. If it leaks, revoke it by running `claude setup-token` again or from your Claude account settings, and replace the GitHub secret.
 
 ## Project Structure
 
@@ -213,7 +213,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 
 - **Always:** Make icons and graphics ourselves (inline SVG or Unicode). Ship a font's license file next to the font. Keep the footer line saying the site isn't affiliated with the University of Illinois, Sleeper, or the NFL. Keep Sleeper fetches at build time. Run `npm test && npm run check` before committing. Pass reports through `lint:report`. Use `writing-style.md` verbatim as the system prompt.
 - **Ask first:** Adding any npm dependency. Changing the power ranking formula. Switching the Claude model. Adding client side JS beyond the theme toggle, tabs, and report export buttons. Changing hosting.
-- **Never:** Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy ESPN article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call the Anthropic API from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
+- **Never:** Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy ESPN article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call Claude from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
 
 ## Success Criteria
 

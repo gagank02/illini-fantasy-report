@@ -46,7 +46,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] T10: Save PDF and Save image export
 - [x] T11: Report style linter
 - [x] T12a: Report facts bundle (bench blunders, transactions, injuries, movers, next week)
-- [ ] T12b: Report writer script (RSS, Claude, lint retry)
+- [x] T12b: Report writer script (RSS, Claude, lint retry)
 - [ ] T13: Weekly report GitHub Action that opens a PR
 
 ### Checkpoint C: Report pipeline
@@ -71,6 +71,7 @@ T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and
 | Season sizes differ (10 teams in 2024, 12 since) | Med | Fixtures cover both sizes, and the all time sums are tested |
 | ESPN RSS changes or goes down | Low | The writer catches fetch errors and continues with Sleeper data only |
 | Claude ignores the style rules | Med | T11's linter blocks the PR. The prompt includes the banned list, and you review before merge |
+| The weekly run hits your subscription's usage limit | Low | One report a week is small. If it fails, rerun the workflow later |
 | The model invents a stat | High | The prompt passes only the facts bundle and tells the model to use only those numbers. Human review is the final check |
 | Theme flash breaks the strict CSP | Low | The inline theme script is allowed by its hash in `_headers`, and T4 verifies it with the browser console |
 | A bug causes a call loop and Sleeper IP blocks us | Med | A rate limiter in `get()` (600 a minute), per URL memoization, and a guard on repeated IDs in the history walk |
@@ -83,7 +84,7 @@ T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and
 
 - **T4:** Create a Cloudflare account, connect the repo in Pages, set `SLEEPER_LEAGUE_ID`, and create a deploy hook. Then add `CF_DEPLOY_HOOK_URL` as a GitHub secret.
 - **T4:** Turn on GitHub secret scanning push protection.
-- **T12/T13:** Create an Anthropic API key, set a monthly spend limit, and add `ANTHROPIC_API_KEY` as a GitHub secret.
+- **T13:** Run `claude setup-token` locally and add the result as the GitHub secret `CLAUDE_CODE_OAUTH_TOKEN`. Reports use your Claude subscription, not a paid API key.
 - **T13:** Under GitHub → Settings → Actions → General, turn on "Allow GitHub Actions to create and approve pull requests". If you add branch protection to `main`, don't make `ci.yml` a required check, because it won't run on the report PRs.
 
 ## Open Questions

@@ -289,20 +289,20 @@ Add the `/reports` index and the report pages. Add the latest report's headline 
 
 ## Task 12b: Report writer script
 
-**Description:** `npm run report -- --week N` calls `buildFacts()`, adds the top 10 ESPN RSS headlines (parsed with a simple regex on `<item><title>`), and calls `claude-opus-5-5`. The system prompt is `writing-style.md`, plus rules for the nine sections in `SPEC.md`:
+**Description:** `npm run report -- --week N` calls `buildFacts()`, adds the top 10 ESPN RSS headlines (parsed with a simple regex on `<item><title>`), and calls `claude-opus-5-5` through Claude Code headless (`claude -p`) on your subscription, with tools disabled and no user settings or plugins. The system prompt is `writing-style.md`, plus rules for the nine sections in `SPEC.md`:
 - Use only the facts given, and never invent stats or news.
 - Friendly trash talk by name, aimed at decisions and results, never personal.
 - Never copy ESPN wording.
 
-The script writes the markdown with frontmatter and runs the linter. If the lint fails, it retries once with the list of violations. Load the `claude-api` skill before writing this.
+The script writes the markdown with frontmatter and runs the linter. If the lint fails, it retries once with the list of violations. Pure helpers (RSS parsing, prompt, draft parsing, section check, frontmatter) live in `src/lib/report-writer.ts` with tests.
 
 **Acceptance criteria:**
-- [ ] It writes `src/content/reports/{season}/week-{N}.md` with all nine sections, and the file passes `lint:report`
-- [ ] If the RSS fetch fails, the run still finishes, skips the NFL news section, and logs a warning
-- [ ] Without `ANTHROPIC_API_KEY`, the script stops with a clear message before calling the API
+- [x] It writes `src/content/reports/{season}/week-{N}.md` with all nine sections, and the file passes `lint:report`
+- [x] If the RSS fetch fails, the run still finishes, skips the NFL news section, and logs a warning
+- [x] If the `claude` command is missing or not logged in, the script stops with a clear message
 
 **Verification:**
-- [ ] Manual: run it locally for week 4 with your key, read the output, and check every number against the bundle
+- [x] Manual: ran it for week 4 and checked every claim against the bundle and ESPN. The first draft invented a Tyreek Hill story (the real headline was about a trial), made a false "leads the league" claim, and gendered managers. Rules added for all three, guarded by tests. The second draft checked out
 
 **Dependencies:** T12a, T9, T11
 
@@ -312,7 +312,7 @@ The script writes the markdown with frontmatter and runs the linter. If the lint
 
 ## Task 13: Weekly report GitHub Action
 
-**Description:** `weekly-report.yml` runs on cron `0 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It runs `npm run players` (the only weekly `/players/nfl` call), then runs the writer for the last completed week, lints the result, and opens the PR `Week N report` on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
+**Description:** `weekly-report.yml` runs on cron `0 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It installs Claude Code and runs it with the `CLAUDE_CODE_OAUTH_TOKEN` secret. It runs `npm run players` (the only weekly `/players/nfl` call), then runs the writer for the last completed week, lints the result, and opens the PR `Week N report` on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
 
 GitHub doesn't run `ci.yml` on PRs opened with the built in `GITHUB_TOKEN`. That's on purpose, to prevent workflow loops. So this job runs the same checks itself **before** it opens the PR: `npm test`, `npm run check`, `npm run build`, the `dist/` secret guard, and `lint:report`. The PR body says the checks ran in the weekly job. Cloudflare still builds its own preview of the PR, because that comes from Cloudflare's GitHub app, not from Actions.
 
