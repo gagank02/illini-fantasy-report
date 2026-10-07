@@ -97,7 +97,7 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
                 {(list as typeof value.hits).map(x => (
                   <li>
                     <strong>{x.name}</strong> <span class="muted">{x.pos}, pick {x.pickNo} by {team(x.rosterId)}</span>
-                    <span class="sub">Drafted as {x.pos}{x.posPick}, finished {x.pos}{x.posFinish} with {x.points.toFixed(1)} pts</span>
+                    <span class="sub">Drafted as {x.pos}{x.posPick}, {summary.inProgress ? 'currently' : 'finished'} {x.pos}{x.posFinish} with {x.points.toFixed(1)} pts{summary.inProgress ? ' so far' : ''}</span>
                   </li>
                 ))}
               </ol>
