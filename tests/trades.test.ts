@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { valueMap, type FcValue } from '../src/lib/fantasycalc';
+import { buildValues } from '../src/lib/fantasycalc';
 import type { League, Roster } from '../src/lib/sleeper';
 import { lineupSlots, teamScore, topTrades, tradeBoard, tradesBetween, valuedRosters, type Trade, type ValuedPlayer } from '../src/lib/trades';
 
@@ -48,7 +48,7 @@ test('topTrades drops a trade that is a better one plus a throw in', () => {
 
 test('board on the week 4 league with sample values', () => {
   const league = load<League>('league');
-  const values = valueMap(load<FcValue[]>('fantasycalc-values.sample'), false);
+  const values = new Map(Object.entries(buildValues({ FANTASYCALC: 'sample' })!.saved.values));
   const teams = valuedRosters(load<Roster[]>('rosters'), values);
   const board = tradeBoard(teams, league.roster_positions);
   expect(board.pairs.size).toBe(66);

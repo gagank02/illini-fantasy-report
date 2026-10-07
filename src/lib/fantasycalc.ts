@@ -1,15 +1,15 @@
 // FantasyCalc trade values. Their terms: https://fantasycalc.com/api-docs
 // - Only documented endpoints. We call GET /values/current and nothing else.
-// - Cache it and refresh at most once an hour. We fetch once per build, and builds run about daily.
+// - Cache it, ideally fetching once a day. Only scripts/update-values.ts calls the API, at most once per
+//   UTC day, from the daily refresh job. Builds, tests, CI, and previews read the saved file.
 // - Show "FantasyCalc.com" with a link on every page that shows the data.
-// - Non-commercial use only, and don't republish their full value list.
-//
-// Tests, CI, and preview builds must never call the API. Fetching is off unless
-// FANTASYCALC=live is set, which only the Cloudflare Pages production environment has.
-import { readFileSync } from 'node:fs';
+// - Non-commercial use only, and don't republish their full value list. The saved file keeps only
+//   players on our league's rosters.
+import { existsSync, readFileSync } from 'node:fs';
 import type { League } from './sleeper.ts';
 
 const BASE = 'https://api.fantasycalc.com';
+export const SAVED_PATH = 'src/data/trade-values.json';
 export const SAMPLE_PATH = 'tests/fixtures/fantasycalc-values.sample.json';
 
 export interface FcValue {
@@ -25,23 +25,12 @@ export interface ValuesQuery {
   ppr: 0 | 0.5 | 1;
 }
 
-/** off: no values, the trades page says so. sample: made up values for local work. live: the real API. */
-export type ValuesMode = 'off' | 'sample' | 'live';
-
-type Env = Record<string, string | undefined>;
-
-export function valuesMode(env: Env = process.env): ValuesMode {
-  const want = env.FANTASYCALC;
-  // Cloudflare sets CF_PAGES on every build and CF_PAGES_BRANCH to the branch being built.
-  const onCloudflare = env.CF_PAGES === '1';
-  if (want === 'live') {
-    if (env.GITHUB_ACTIONS === 'true' || env.VITEST) return 'off';
-    if (onCloudflare && env.CF_PAGES_BRANCH !== 'main') return 'off';
-    return 'live';
-  }
-  // Sample values are fake, so they never go out in a Cloudflare build.
-  if (want === 'sample' && !onCloudflare) return 'sample';
-  return 'off';
+/** What src/data/trade-values.json holds. values: Sleeper id → position and value. */
+export interface SavedValues {
+  /** UTC date of the fetch, e.g. "2026-10-08". */
+  fetched: string;
+  query: ValuesQuery;
+  values: Record<string, { pos: string; value: number }>;
 }
 
 const pick = <T extends number>(n: number, allowed: readonly T[]): T =>
@@ -63,33 +52,43 @@ export function valuesUrl(q: ValuesQuery): string {
   return `${BASE}/values/current?${params}`;
 }
 
-let cached: Promise<FcValue[] | null> | undefined;
-
-/** Values for this build, fetched at most once. null when values are off. */
-export function loadValues(league: League, env: Env = process.env): Promise<FcValue[] | null> {
-  cached ??= (async () => {
-    const mode = valuesMode(env);
-    if (mode === 'off') return null;
-    if (mode === 'sample') return JSON.parse(readFileSync(SAMPLE_PATH, 'utf8')) as FcValue[];
-    // If FantasyCalc is down, the trades page says it's off instead of failing the whole deploy.
-    try {
-      const res = await fetch(valuesUrl(queryFor(league)));
-      if (!res.ok) throw new Error(`returned ${res.status}`);
-      return (await res.json()) as FcValue[];
-    } catch (e) {
-      console.warn(`FantasyCalc /values/current failed, trades page is off this build: ${e}`);
-      return null;
-    }
-  })();
-  return cached;
+/** Values for `rostered` players only, keyed by Sleeper id. Redraft leagues use redraftValue. */
+export function keepRostered(values: FcValue[], rostered: Set<string>, isDynasty: boolean): SavedValues['values'] {
+  const out: SavedValues['values'] = {};
+  for (const v of values) {
+    const id = v.player.sleeperId;
+    const value = isDynasty ? v.value : (v.redraftValue ?? v.value);
+    if (id && rostered.has(id) && value > 0) out[id] = { pos: v.player.position, value };
+  }
+  return Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));
 }
 
-/** Sleeper id → position and value. Redraft leagues use redraftValue. Kickers and defenses have no value. */
-export function valueMap(values: FcValue[], isDynasty: boolean): Map<string, { pos: string; value: number }> {
-  const out = new Map<string, { pos: string; value: number }>();
-  for (const v of values) {
-    const value = isDynasty ? v.value : (v.redraftValue ?? v.value);
-    if (v.player.sleeperId && value > 0) out.set(v.player.sleeperId, { pos: v.player.position, value });
+type Env = Record<string, string | undefined>;
+
+/**
+ * Whether the update script may call FantasyCalc now: only when the daily job asks (FANTASYCALC=live),
+ * never in tests, and not if today's values are already saved, so reruns add no calls.
+ */
+export function mayFetch(env: Env, saved: SavedValues | null, today: string): boolean {
+  if (env.FANTASYCALC !== 'live' || env.VITEST) return false;
+  return saved?.fetched !== today;
+}
+
+export function readSaved(path = SAVED_PATH): SavedValues | null {
+  return existsSync(path) ? (JSON.parse(readFileSync(path, 'utf8')) as SavedValues) : null;
+}
+
+/**
+ * Values for this build, read from disk. Never fetches. null until the daily job has saved values.
+ * FANTASYCALC=sample swaps in made up values for local work; Cloudflare builds ignore it.
+ */
+export function buildValues(env: Env = process.env): { sample: boolean; saved: SavedValues } | null {
+  if (env.FANTASYCALC === 'sample' && env.CF_PAGES !== '1') {
+    const all = JSON.parse(readFileSync(SAMPLE_PATH, 'utf8')) as FcValue[];
+    const ids = new Set(all.flatMap(v => (v.player.sleeperId ? [v.player.sleeperId] : [])));
+    const query: ValuesQuery = { isDynasty: false, numQbs: '1', numTeams: 12, ppr: 1 };
+    return { sample: true, saved: { fetched: 'sample', query, values: keepRostered(all, ids, false) } };
   }
-  return out;
+  const saved = readSaved();
+  return saved ? { sample: false, saved } : null;
 }

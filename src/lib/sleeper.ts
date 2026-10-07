@@ -139,6 +139,10 @@ export function leagueUsers(leagueId = currentLeagueId()): Promise<User[]> {
   return get<User[]>(`/league/${leagueId}/users`);
 }
 
+export function leagueRosters(leagueId = currentLeagueId()): Promise<Roster[]> {
+  return get<Roster[]>(`/league/${leagueId}/rosters`);
+}
+
 export async function loadSeason(leagueId = currentLeagueId()): Promise<Season> {
   const [league, users, rosters] = await Promise.all([
     get<League>(`/league/${leagueId}`),

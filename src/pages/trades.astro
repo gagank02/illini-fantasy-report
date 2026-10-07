@@ -1,18 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
-import { loadValues, queryFor, valueMap, valuesMode } from '../lib/fantasycalc';
+import { buildValues } from '../lib/fantasycalc';
 import { loadSeason } from '../lib/sleeper';
 import { games, standings, type Players } from '../lib/stats';
 import { tradeBoard, valuedRosters, type Trade } from '../lib/trades';
 
 const { league, users, rosters, weeks } = await loadSeason();
-const mode = valuesMode();
-const values = await loadValues(league);
+const loaded = buildValues();
 const rows = standings(rosters, users, games(weeks));
 const teams = [...rows].sort((a, b) => a.team.localeCompare(b.team));
 const team = (id: number) => rows.find(r => r.rosterId === id)!;
-const board = values ? tradeBoard(valuedRosters(rosters, valueMap(values, queryFor(league).isDynasty)), league.roster_positions) : null;
+const board = loaded ? tradeBoard(valuedRosters(rosters, new Map(Object.entries(loaded.saved.values))), league.roster_positions) : null;
 
 const info = (id: string) => (players as Players)[id];
 const pct = (g: number) => `+${(g * 100).toFixed(1)}%`;
@@ -42,9 +41,9 @@ const first = teams[0]?.rosterId;
         Bench players count for a little because depth covers byes and injuries. Kickers and defenses aren't included.
       </p>
       <p class="trade-credit">
-        {mode === 'sample'
+        {loaded!.sample
           ? 'Sample values for local testing. These are made up.'
-          : <>Player values from <a href="https://fantasycalc.com">FantasyCalc.com</a>, refreshed daily. Rosters from Sleeper.</>}
+          : <>Player values from <a href="https://fantasycalc.com">FantasyCalc.com</a>, updated {loaded!.saved.fetched}. Rosters from Sleeper.</>}
       </p>
 
       <form class="trade-pick" id="trade-pick">

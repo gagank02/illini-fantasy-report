@@ -13,6 +13,7 @@
     "check": "astro check",
     "test": "vitest run --passWithNoTests",
     "players": "node scripts/update-players.ts",
+    "values": "node --env-file-if-exists=.env scripts/update-values.ts",
     "lint:report": "node --env-file-if-exists=.env scripts/lint-report.ts",
     "report": "node --env-file-if-exists=.env scripts/write-report.ts"
   },

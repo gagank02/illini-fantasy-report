@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { valuesMode } from '../lib/fantasycalc';
+import { buildValues } from '../lib/fantasycalc';
 
 interface Props {
   title?: string;
@@ -17,8 +17,8 @@ const links = [
   { href: '/power-rankings', label: 'Power Rankings' },
   { href: '/what-if', label: 'What If' },
   { href: '/history', label: 'History' },
-  // Hidden until FantasyCalc values are turned on for this build.
-  ...(valuesMode() === 'off' ? [] : [{ href: '/trades', label: 'Trades' }]),
+  // Hidden until the daily job has saved FantasyCalc values.
+  ...(buildValues() ? [{ href: '/trades', label: 'Trades' }] : []),
 ];
 const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
 ---
