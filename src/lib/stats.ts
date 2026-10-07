@@ -100,3 +100,43 @@ export function standings(rosters: Roster[], users: User[], all: Game[]): Standi
       paRank: rankBy(rows.map(r => r.pa))[i]!,
     }));
 }
+
+export interface Record3 {
+  w: number;
+  l: number;
+  t: number;
+}
+
+/**
+ * Team `a`'s record if it had played team `b`'s schedule. Each week `a` faces whoever `b` faced.
+ * If `b` faced `a`, `a` faces `b`'s score instead. With a === b this is the actual record.
+ */
+export function recordWithSchedule(all: Game[], a: number, b: number): Record3 {
+  const rec = { w: 0, l: 0, t: 0 };
+  for (const theirs of all.filter(g => g.rosterId === b)) {
+    const mine = all.find(g => g.rosterId === a && g.week === theirs.week);
+    if (!mine) continue;
+    const opp = theirs.opponentId === a ? theirs.points : theirs.opponentPoints;
+    const r = result({ points: mine.points, opponentPoints: opp });
+    rec[r === 'W' ? 'w' : r === 'L' ? 'l' : 't']++;
+  }
+  return rec;
+}
+
+export interface WhatIfRow {
+  rosterId: number;
+  /** One cell per schedule, in standings order. */
+  cells: (Record3 & { rosterId: number })[];
+  best: Record3 & { rosterId: number };
+  worst: Record3 & { rosterId: number };
+}
+
+const winPct = (r: Record3) => r.w + r.t / 2;
+
+export function whatIfMatrix(rows: StandingsRow[], all: Game[]): WhatIfRow[] {
+  return rows.map(a => {
+    const cells = rows.map(b => ({ rosterId: b.rosterId, ...recordWithSchedule(all, a.rosterId, b.rosterId) }));
+    const sorted = [...cells].sort((x, y) => winPct(y) - winPct(x));
+    return { rosterId: a.rosterId, cells, best: sorted[0]!, worst: sorted.at(-1)! };
+  });
+}

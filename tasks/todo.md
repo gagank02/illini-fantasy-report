@@ -91,16 +91,16 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 ## Task 5: What if matrix
 
-**Description:** Add `recordWithSchedule(weeks, a, b)` and `whatIfMatrix()`. Render a 12×12 grid with the diagonal highlighted. The grid scrolls sideways inside its own container. The first column (team names) stays fixed in place.
+**Description:** Add `recordWithSchedule(weeks, a, b)` and `whatIfMatrix()`. Render a 12×12 grid with the diagonal highlighted (48rem and up). Phones get an expandable `<details>` list per team instead, so nothing scrolls sideways.
 
 **Acceptance criteria:**
-- [ ] The diagonal equals each team's actual record
-- [ ] When B's opponent was A, the cell compares A's score to B's score
-- [ ] At 360px the grid scrolls inside its container, and the page doesn't scroll sideways
+- [x] The diagonal equals each team's actual record
+- [x] When B's opponent was A, the cell compares A's score to B's score
+- [x] At 320px and 360px the list view shows, and nothing scrolls sideways. At 768px and up the grid fits
 
 **Verification:**
-- [ ] `npm test`: diagonal, the swap rule, and ties
-- [ ] Manual: check the page at 360px
+- [x] `npm test`: diagonal, the swap rule, and ties
+- [x] Manual: check the page at 360px
 
 **Dependencies:** T3
 

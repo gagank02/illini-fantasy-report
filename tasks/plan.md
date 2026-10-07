@@ -32,7 +32,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] A deployed URL shows the real standings, the theme toggle works, and CI is green
 
 ### Phase 2: League stats pages
-- [ ] T5: What if matrix
+- [x] T5: What if matrix
 - [ ] T6: Overall power rankings
 - [ ] T7: Positional power rankings
 - [ ] T8: Interesting facts on standings

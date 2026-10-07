@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadSeason } from '../lib/sleeper';
+import { games, standings, whatIfMatrix, type Record3 } from '../lib/stats';
+
+const { league, users, rosters, weeks } = await loadSeason();
+const all = games(weeks);
+const rows = standings(rosters, users, all);
+const matrix = whatIfMatrix(rows, all);
+const team = (id: number) => rows.find(r => r.rosterId === id)!;
+
+const rec = (r: Record3) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+const score = (r: Record3) => r.w + r.t / 2;
+/** Compare a what if record with the actual one: up, down, or same. */
+const trend = (r: Record3, actual: Record3) => (score(r) > score(actual) ? 'up' : score(r) < score(actual) ? 'down' : 'same');
+const arrow = { up: '▲', down: '▼', same: '' };
+---
+
+<Base title="What If">
+  <h1>What If</h1>
+  <p class="muted">
+    Your record if you had played someone else's schedule, {league.season} through week {weeks.length}.
+    Each week you face whoever they faced. If they faced you, you face their score.
+  </p>
+
+  <div class="grid-only table-scroll">
+    <table class="whatif">
+      <caption class="visually-hidden">Rows are teams. Columns are the schedule they play.</caption>
+      <thead>
+        <tr>
+          <th scope="col" class="left">Team ↓ / Schedule →</th>
+          {rows.map(b => <th scope="col" class="vert"><span>{b.manager}</span></th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {matrix.map((row, i) => {
+          const a = team(row.rosterId);
+          return (
+            <tr>
+              <th scope="row" class="left">{a.team}<span class="sub">{a.manager}</span></th>
+              {row.cells.map((c, j) => {
+                const t = i === j ? 'self' : trend(c, a);
+                return <td class={`wi wi-${t}`} title={`${a.team} with ${team(c.rosterId).team}'s schedule: ${rec(c)}`}>{rec(c)}</td>;
+              })}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="list-only whatif-list">
+    {matrix.map(row => {
+      const a = team(row.rosterId);
+      return (
+        <details>
+          <summary>
+            <span class="wl-team">{a.team}<span class="sub">Actual {rec(a)}. Range {rec(row.worst)} to {rec(row.best)}</span></span>
+          </summary>
+          <ul>
+            {row.cells.filter(c => c.rosterId !== a.rosterId).map(c => {
+              const t = trend(c, a);
+              return (
+                <li class={`wi-${t}`}>
+                  <span>With {team(c.rosterId).team}</span>
+                  <strong>{rec(c)} {arrow[t]}</strong>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      );
+    })}
+  </div>
+
+  <p class="muted legend">
+    <span class="wi-up">▲ better</span> or <span class="wi-down">▼ worse</span> than the actual record.
+    <span class="grid-only">The outlined cell is the real schedule.</span>
+  </p>
+</Base>

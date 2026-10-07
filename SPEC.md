@@ -33,7 +33,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 - A 12×12 grid. The cell at row A, column B shows team A's record if A had played B's schedule.
 - Rule: in each week, A's score is compared to the score of the opponent B faced that week. If B's opponent was A, compare A's score to B's score.
 - The diagonal is the team's actual record and is highlighted.
-- On mobile the grid scrolls sideways inside its own container. The page itself never scrolls sideways.
+- Phones (under 48rem) get an expandable list instead of the grid. Each team shows its actual record and its range, and tapping it lists the team's record with every other schedule. Nothing scrolls sideways. Cells and list rows are shaded green (▲) or red (▼) when the schedule beats or hurts the actual record.
 
 **3. Power rankings** (`/power-rankings`)
 - Overall score = 50% all play win % + 30% points for (normalized) + 20% last 3 weeks' points (normalized).

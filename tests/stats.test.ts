@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
-import { games, ordinal, rankBy, standings, streak } from '../src/lib/stats';
+import { games, ordinal, rankBy, recordWithSchedule, standings, streak, whatIfMatrix } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -120,5 +120,48 @@ describe('PF and PA ranks in standings', () => {
 describe('ordinal', () => {
   test.each([[1, '1st'], [2, '2nd'], [3, '3rd'], [4, '4th'], [11, '11th'], [12, '12th'], [13, '13th'], [21, '21st'], [22, '22nd']])('%i → %s', (n, want) => {
     expect(ordinal(n)).toBe(want);
+  });
+});
+
+describe('what if', () => {
+  const all = games(weeks);
+  const rows = standings(rosters, users, all);
+  const m = (id: number, pts: number, opp: number) => ({ roster_id: id, matchup_id: opp, points: pts, starters: [], starters_points: [] });
+
+  test('diagonal equals each team\'s actual record', () => {
+    for (const r of rows) {
+      const rec = recordWithSchedule(all, r.rosterId, r.rosterId);
+      expect([rec.w, rec.l, rec.t]).toEqual([r.w, r.l, r.t]);
+    }
+  });
+
+  test('uses the opponent B faced, and B\'s own score when B played A', () => {
+    // Week 1: A(1) 100 vs B(2) 90, C(3) 120 vs D(4) 80.
+    // Week 2: A(1) 70 vs C(3) 60, B(2) 110 vs D(4) 75.
+    const g = games([
+      [m(1, 100, 1), m(2, 90, 1), m(3, 120, 2), m(4, 80, 2)],
+      [m(1, 70, 1), m(3, 60, 1), m(2, 110, 2), m(4, 75, 2)],
+    ]);
+    // A with B's schedule: week 1 B played A, so A faces B's score 90 (W). Week 2 B played D (75), A scored 70 (L).
+    expect(recordWithSchedule(g, 1, 2)).toEqual({ w: 1, l: 1, t: 0 });
+    // C with A's schedule: week 1 A played B (90), C 120 (W). Week 2 A played C, so C faces A's score 70, C 60 (L).
+    expect(recordWithSchedule(g, 3, 1)).toEqual({ w: 1, l: 1, t: 0 });
+  });
+
+  test('equal scores count as a tie', () => {
+    const g = games([[m(1, 100, 1), m(2, 90, 1), m(3, 100, 2), m(4, 80, 2)]]);
+    // B faced A (100). Team 3 scored 100 → tie.
+    expect(recordWithSchedule(g, 3, 2)).toEqual({ w: 0, l: 0, t: 1 });
+  });
+
+  test('matrix is square, in standings order, with the diagonal marked', () => {
+    const matrix = whatIfMatrix(rows, all);
+    expect(matrix.map(r => r.rosterId)).toEqual(rows.map(r => r.rosterId));
+    for (const [i, row] of matrix.entries()) {
+      expect(row.cells.map(c => c.rosterId)).toEqual(rows.map(r => r.rosterId));
+      expect(row.cells[i]!.w).toBe(rows[i]!.w);
+      expect(row.best.w).toBeGreaterThanOrEqual(row.cells[i]!.w);
+      expect(row.worst.w).toBeLessThanOrEqual(row.cells[i]!.w);
+    }
   });
 });
