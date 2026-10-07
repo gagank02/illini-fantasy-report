@@ -88,6 +88,10 @@ export function regularSeasonWeeks(league: League): number {
   return Math.min(league.settings.last_scored_leg ?? 0, league.settings.playoff_week_start - 1);
 }
 
+export function leagueUsers(leagueId = currentLeagueId()): Promise<User[]> {
+  return get<User[]>(`/league/${leagueId}/users`);
+}
+
 export async function loadSeason(leagueId = currentLeagueId()): Promise<Season> {
   const [league, users, rosters] = await Promise.all([
     get<League>(`/league/${leagueId}`),

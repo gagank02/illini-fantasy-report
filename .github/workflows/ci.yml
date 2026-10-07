@@ -24,6 +24,8 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: npm audit --omit=dev
+      - name: Lint every report against writing-style.md
+        run: find src/content/reports -name '*.md' -print0 | xargs -0 -r npm run lint:report --
       - name: Fail if secrets leaked into the build
         run: |
           if grep -rIl -e 'sk-ant-' -e 'pages/webhooks/deploy_hooks' dist/; then

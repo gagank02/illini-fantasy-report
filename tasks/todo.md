@@ -247,13 +247,13 @@ Add the `/reports` index and the report pages. Add the latest report's headline 
 - the banned phrases from `writing-style.md`
 
 **Acceptance criteria:**
-- [ ] Each banned pattern has a failing test case
-- [ ] "Amon-Ra St. Brown" passes, and "game-changer" fails
-- [ ] Frontmatter is skipped
+- [x] Each banned pattern has a failing test case
+- [x] "Amon-Ra St. Brown" passes, and "game-changer" fails
+- [x] Frontmatter is skipped
 
 **Verification:**
-- [ ] `npm test`: `tests/lint-report.test.ts`
-- [ ] `npm run lint:report -- src/content/reports/2026/week-4.md` passes on the sample
+- [x] `npm test`: `tests/lint-report.test.ts`
+- [x] `npm run lint:report -- src/content/reports/2026/week-4.md` passes on the sample
 
 **Dependencies:** T7 (players list)
 
