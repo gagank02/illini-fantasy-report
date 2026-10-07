@@ -35,6 +35,19 @@ export interface Matchup {
   points: number;
   starters: string[];
   starters_points: number[];
+  /** Every rostered player, bench included. */
+  players?: string[];
+  players_points?: Record<string, number>;
+}
+
+export interface Transaction {
+  type: 'waiver' | 'free_agent' | 'trade' | string;
+  status: 'complete' | 'failed' | string;
+  /** player id → roster id that received / gave up the player */
+  adds: Record<string, number> | null;
+  drops: Record<string, number> | null;
+  roster_ids: number[];
+  leg: number;
 }
 
 export interface Season {
@@ -86,6 +99,19 @@ export function currentLeagueId(): string {
 /** Weeks that count toward the regular season: final weeks before the playoffs. */
 export function regularSeasonWeeks(league: League): number {
   return Math.min(league.settings.last_scored_leg ?? 0, league.settings.playoff_week_start - 1);
+}
+
+export function weekMatchups(week: number, leagueId = currentLeagueId()): Promise<Matchup[]> {
+  return get<Matchup[]>(`/league/${leagueId}/matchups/${week}`);
+}
+
+export function weekTransactions(week: number, leagueId = currentLeagueId()): Promise<Transaction[]> {
+  return get<Transaction[]>(`/league/${leagueId}/transactions/${week}`);
+}
+
+/** Sleeper wide adds or drops over the last 24 hours. */
+export function trending(kind: 'add' | 'drop'): Promise<{ player_id: string; count: number }[]> {
+  return get(`/players/nfl/trending/${kind}?lookback_hours=24&limit=10`);
 }
 
 export function leagueUsers(leagueId = currentLeagueId()): Promise<User[]> {

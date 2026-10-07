@@ -45,7 +45,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] T9: Newspaper report page, home page, and a sample report
 - [x] T10: Save PDF and Save image export
 - [x] T11: Report style linter
-- [ ] T12a: Report facts bundle (bench blunders, transactions, injuries, movers, next week)
+- [x] T12a: Report facts bundle (bench blunders, transactions, injuries, movers, next week)
 - [ ] T12b: Report writer script (RSS, Claude, lint retry)
 - [ ] T13: Weekly report GitHub Action that opens a PR
 

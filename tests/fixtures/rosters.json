@@ -9,7 +9,9 @@
    "fpts": 533,
    "fpts_decimal": 64,
    "fpts_against": 508,
-   "fpts_against_decimal": 0
+   "fpts_against_decimal": 0,
+   "ppts": 567,
+   "ppts_decimal": 58
   },
   "metadata": {
    "record": "WLWW",
@@ -26,7 +28,9 @@
    "fpts": 478,
    "fpts_decimal": 74,
    "fpts_against": 522,
-   "fpts_against_decimal": 92
+   "fpts_against_decimal": 92,
+   "ppts": 541,
+   "ppts_decimal": 98
   },
   "metadata": {
    "record": "WLLL",
@@ -43,7 +47,9 @@
    "fpts": 585,
    "fpts_decimal": 16,
    "fpts_against": 521,
-   "fpts_against_decimal": 82
+   "fpts_against_decimal": 82,
+   "ppts": 623,
+   "ppts_decimal": 86
   },
   "metadata": {
    "record": "LWWW",
@@ -60,7 +66,9 @@
    "fpts": 489,
    "fpts_decimal": 18,
    "fpts_against": 497,
-   "fpts_against_decimal": 36
+   "fpts_against_decimal": 36,
+   "ppts": 592,
+   "ppts_decimal": 94
   },
   "metadata": {
    "record": "LWLW",
@@ -77,7 +85,9 @@
    "fpts": 510,
    "fpts_decimal": 68,
    "fpts_against": 492,
-   "fpts_against_decimal": 88
+   "fpts_against_decimal": 88,
+   "ppts": 577,
+   "ppts_decimal": 84
   },
   "metadata": {
    "record": "WLWL",
@@ -94,7 +104,9 @@
    "fpts": 589,
    "fpts_decimal": 24,
    "fpts_against": 530,
-   "fpts_against_decimal": 32
+   "fpts_against_decimal": 32,
+   "ppts": 662,
+   "ppts_decimal": 92
   },
   "metadata": {
    "record": "WLWW",
@@ -111,7 +123,9 @@
    "fpts": 568,
    "fpts_decimal": 36,
    "fpts_against": 547,
-   "fpts_against_decimal": 74
+   "fpts_against_decimal": 74,
+   "ppts": 617,
+   "ppts_decimal": 12
   },
   "metadata": {
    "record": "LWWL",
@@ -128,7 +142,9 @@
    "fpts": 552,
    "fpts_decimal": 38,
    "fpts_against": 533,
-   "fpts_against_decimal": 8
+   "fpts_against_decimal": 8,
+   "ppts": 605,
+   "ppts_decimal": 96
   },
   "metadata": {
    "record": "WLLW",
@@ -145,7 +161,9 @@
    "fpts": 532,
    "fpts_decimal": 26,
    "fpts_against": 533,
-   "fpts_against_decimal": 30
+   "fpts_against_decimal": 30,
+   "ppts": 620,
+   "ppts_decimal": 56
   },
   "metadata": {
    "record": "LWLW",
@@ -162,7 +180,9 @@
    "fpts": 443,
    "fpts_decimal": 2,
    "fpts_against": 454,
-   "fpts_against_decimal": 44
+   "fpts_against_decimal": 44,
+   "ppts": 496,
+   "ppts_decimal": 72
   },
   "metadata": {
    "record": "WWLL",
@@ -179,7 +199,9 @@
    "fpts": 482,
    "fpts_decimal": 40,
    "fpts_against": 573,
-   "fpts_against_decimal": 84
+   "fpts_against_decimal": 84,
+   "ppts": 531,
+   "ppts_decimal": 20
   },
   "metadata": {
    "record": "LWLL",
@@ -196,7 +218,9 @@
    "fpts": 493,
    "fpts_decimal": 40,
    "fpts_against": 542,
-   "fpts_against_decimal": 76
+   "fpts_against_decimal": 76,
+   "ppts": 564,
+   "ppts_decimal": 50
   },
   "metadata": {
    "record": "LLWL",

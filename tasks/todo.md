@@ -273,13 +273,13 @@ Add the `/reports` index and the report pages. Add the latest report's headline 
 - **Also:** standings changes, `facts()`, and Sleeper trending adds and drops.
 
 **Acceptance criteria:**
-- [ ] `optimalLineup()` is tested on a hand built roster, including a FLEX case and an empty slot
-- [ ] Every number in the bundle traces to Sleeper data, and a test checks the bundle against week 4 fixtures
-- [ ] Fetching adds at most about 5 Sleeper calls on top of `loadSeason()`
+- [x] `optimalLineup()` is tested on a hand built roster, including a FLEX case and an empty slot
+- [x] Every number in the bundle traces to Sleeper data, and a test checks the bundle against week 4 fixtures
+- [x] Fetching adds at most about 5 Sleeper calls on top of `loadSeason()`
 
 **Verification:**
-- [ ] `npm test`: `tests/report-facts.test.ts`
-- [ ] Manual: print the week 4 bundle and spot check bench points for two teams in the Sleeper app
+- [x] `npm test`: `tests/report-facts.test.ts`
+- [x] Manual: printed the live week 4 bundle. Stronger check than a spot check: our best lineups summed over weeks 1 to 4 equal Sleeper's own potential points (ppts) for all 12 teams, now a permanent test
 
 **Dependencies:** T6, T7, T8
 

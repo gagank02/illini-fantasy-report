@@ -1,0 +1,272 @@
+[
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": null,
+  "drops": {
+   "10222": 8
+  },
+  "roster_ids": [
+   8
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "3321": 1
+  },
+  "drops": {
+   "13294": 1
+  },
+  "roster_ids": [
+   1
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "11157": 4
+  },
+  "drops": null,
+  "roster_ids": [
+   4
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "11643": 2
+  },
+  "drops": {
+   "10213": 2
+  },
+  "roster_ids": [
+   2
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "7049": 7
+  },
+  "drops": {
+   "13301": 7
+  },
+  "roster_ids": [
+   7
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "4177": 1
+  },
+  "drops": {
+   "12509": 1
+  },
+  "roster_ids": [
+   1
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "12509": 1
+  },
+  "drops": null,
+  "roster_ids": [
+   1
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "CHI": 7
+  },
+  "drops": {
+   "NO": 7
+  },
+  "roster_ids": [
+   7
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "7839": 1
+  },
+  "drops": {
+   "11792": 1
+  },
+  "roster_ids": [
+   1
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "6083": 8
+  },
+  "drops": null,
+  "roster_ids": [
+   8
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "12492": 5
+  },
+  "drops": {
+   "8132": 5
+  },
+  "roster_ids": [
+   5
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "9511": 5
+  },
+  "drops": {
+   "13079": 5
+  },
+  "roster_ids": [
+   5
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "5857": 5
+  },
+  "drops": {
+   "12493": 5
+  },
+  "roster_ids": [
+   5
+  ],
+  "leg": 4
+ },
+ {
+  "type": "waiver",
+  "status": "complete",
+  "adds": {
+   "GB": 6
+  },
+  "drops": {
+   "BUF": 6
+  },
+  "roster_ids": [
+   6
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "BUF": 6
+  },
+  "drops": {
+   "NYG": 6
+  },
+  "roster_ids": [
+   6
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": null,
+  "drops": {
+   "9226": 4
+  },
+  "roster_ids": [
+   4
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "4943": 12
+  },
+  "drops": {
+   "11631": 12
+  },
+  "roster_ids": [
+   12
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "13294": 1
+  },
+  "drops": {
+   "12487": 1
+  },
+  "roster_ids": [
+   1
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "11792": 1
+  },
+  "drops": {
+   "13545": 1
+  },
+  "roster_ids": [
+   1
+  ],
+  "leg": 4
+ },
+ {
+  "type": "free_agent",
+  "status": "complete",
+  "adds": {
+   "1166": 11
+  },
+  "drops": {
+   "4892": 11
+  },
+  "roster_ids": [
+   11
+  ],
+  "leg": 4
+ }
+]
