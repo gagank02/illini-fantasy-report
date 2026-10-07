@@ -91,6 +91,8 @@ tbody th { font-weight: 600; white-space: normal; min-width: 8rem; }
 th.left { width: 100%; }
 .rk { font-size: 0.7rem; color: var(--muted); display: inline-block; min-width: 2.1em; text-align: left; }
 @media (max-width: 30rem) { th, td { padding: 0.5rem 0.4rem; } tbody th { min-width: 6rem; } .rk { min-width: 0; } td .sub { white-space: normal; } }
+/* Tiny phones (320px): season totals have 4 digits, so squeeze the padding a bit more. */
+@media (max-width: 21rem) { th, td { padding-inline: 0.28rem; } }
 
 .sub { display: block; font-weight: 400; font-size: 0.8rem; color: var(--muted); }
 
