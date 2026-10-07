@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { buildPrompt, missingSections, parseDraft, parseRss, REPORT_RULES, SECTIONS, toMarkdown } from '../src/lib/report-writer';
+import { buildPrompt, missingSections, parseDraft, parseEspnJson, parseRss, REPORT_RULES, SECTIONS, toMarkdown } from '../src/lib/report-writer';
 
 describe('parseRss', () => {
   const xml = `<rss><channel><title><![CDATA[www.espn.com - NFL]]></title>
@@ -18,6 +18,20 @@ describe('parseRss', () => {
     const many = '<rss>' + Array.from({ length: 30 }, (_, i) => `<item><title>T${i}</title></item>`).join('') + '</rss>';
     expect(parseRss(many, 10)).toHaveLength(10);
     expect(parseRss('not xml at all')).toEqual([]);
+  });
+});
+
+describe('parseEspnJson (fallback when the RSS feed fails)', () => {
+  test('reads headline and description from articles, skipping empty ones', () => {
+    const json = { articles: [{ headline: 'QB out', description: 'Ankle sprain' }, { headline: '' }, { headline: 'No desc' }] };
+    expect(parseEspnJson(json)).toEqual([
+      { title: 'QB out', description: 'Ankle sprain' },
+      { title: 'No desc', description: '' },
+    ]);
+  });
+  test('survives an unexpected shape', () => {
+    expect(parseEspnJson(null)).toEqual([]);
+    expect(parseEspnJson({ nope: 1 })).toEqual([]);
   });
 });
 
@@ -73,6 +87,7 @@ describe('REPORT_RULES guard rails (each came from a real bad draft)', () => {
     ['skip crime, legal, and health stories', /Skip stories about crimes, lawsuits, trials/],
     ['never copy ESPN wording', /Never copy ESPN wording/],
     ['facts only', /Never invent stats/],
+    ['no invented context like divisions or rivalries', /divisions, rivalries/],
   ])('%s', (_, re) => {
     expect(REPORT_RULES).toMatch(re);
   });

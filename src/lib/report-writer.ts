@@ -20,6 +20,7 @@ You write the weekly newspaper report for the Illini Fantasy league, a 12 team f
 Facts
 Use only the facts in the JSON you are given. Every number, score, record, name, injury, and transaction must come from it.
 Never invent stats, news, injury details, reasons, quotes, or projections. If a section has nothing to report, say so in one short sentence.
+Never invent league context the facts don't contain, like divisions, rivalries, past seasons, or history between managers.
 Copy team names, manager names, and player names exactly as given, even if they contain emoji or unusual characters.
 Write records as words, like 3 and 1. Never write 3-1.
 Only call a team or player first, best, most, worst, or the league leader when the facts show it across the whole list. Check the full list before you claim it.
@@ -67,6 +68,16 @@ export function parseRss(xml: string, limit = 10): Headline[] {
     title: decode(item!.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? ''),
     description: decode(item!.match(/<description>([\s\S]*?)<\/description>/)?.[1] ?? ''),
   })).filter(h => h.title);
+}
+
+/** Fallback source: ESPN's JSON news endpoint (a different host from the RSS feed). */
+export function parseEspnJson(json: unknown, limit = 10): Headline[] {
+  const articles = (json as { articles?: { headline?: string; description?: string }[] } | null)?.articles;
+  if (!Array.isArray(articles)) return [];
+  return articles
+    .filter(a => a?.headline)
+    .slice(0, limit)
+    .map(a => ({ title: a.headline!.trim(), description: (a.description ?? '').trim() }));
 }
 
 export function buildPrompt(facts: unknown, headlines: Headline[]): string {
