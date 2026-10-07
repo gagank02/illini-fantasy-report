@@ -37,7 +37,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 
 **3. Power rankings** (`/power-rankings`)
 - Overall score = 50% all play win % + 30% points for (normalized) + 20% last 3 weeks' points (normalized).
-- All play record = your record if you'd played every team every week.
+- "Vs. everyone" record (all play) = your record if you'd played every team every week. The page calls it "Vs. everyone" and explains it in the intro, because "all play" confused readers.
 - Shows each team's movement (▲/▼) versus last week.
 - Positional tab for QB, RB, WR, TE, K, DEF. Teams are ranked by season total starter points at that position.
 
