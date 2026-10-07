@@ -158,7 +158,10 @@ export function assembleFacts(input: FactsInput) {
         .map(p => ({ ...who(p.rosterId), rank: p.rank, move: p.move!, score: p.score, last3: p.last3 })),
     },
     aroundTheLeague: facts(rows, all).map(f => f.text),
-    transactions: completed.filter(t => t.leg === week).map(t => ({
+    // Oldest first with a readable time: Sleeper returns newest first, which made the writer tell add/drop loops backwards.
+    transactions: completed.filter(t => t.leg === week).sort((a, b) => (a.created ?? 0) - (b.created ?? 0)).map(t => ({
+      when: t.created ? new Date(t.created).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Chicago' }).replace(',', '') : '',
+      created: t.created ?? 0,
       type: t.type, team: who(t.roster_ids[0]!).team, teams: t.roster_ids.map(id => who(id).team),
       added: names(t.adds), dropped: names(t.drops),
     })),

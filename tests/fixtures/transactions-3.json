@@ -11,7 +11,8 @@
   "roster_ids": [
    9
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790735323421
  },
  {
   "type": "waiver",
@@ -23,7 +24,8 @@
   "roster_ids": [
    9
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790735239405
  },
  {
   "type": "waiver",
@@ -35,7 +37,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790724099469
  },
  {
   "type": "waiver",
@@ -49,7 +52,8 @@
   "roster_ids": [
    12
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790706814098
  },
  {
   "type": "waiver",
@@ -61,7 +65,8 @@
   "roster_ids": [
    6
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790695314506
  },
  {
   "type": "waiver",
@@ -73,7 +78,8 @@
   "roster_ids": [
    6
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790693689248
  },
  {
   "type": "waiver",
@@ -85,7 +91,8 @@
   "roster_ids": [
    6
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790691567118
  },
  {
   "type": "waiver",
@@ -97,7 +104,8 @@
   "roster_ids": [
    10
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790687714031
  },
  {
   "type": "waiver",
@@ -109,7 +117,8 @@
   "roster_ids": [
    10
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790687677691
  },
  {
   "type": "waiver",
@@ -121,7 +130,8 @@
   "roster_ids": [
    2
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790685585941
  },
  {
   "type": "waiver",
@@ -135,7 +145,8 @@
   "roster_ids": [
    2
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790685560151
  },
  {
   "type": "waiver",
@@ -147,7 +158,8 @@
   "roster_ids": [
    2
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790685547554
  },
  {
   "type": "waiver",
@@ -159,7 +171,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790649108495
  },
  {
   "type": "waiver",
@@ -171,7 +184,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790649094528
  },
  {
   "type": "waiver",
@@ -183,7 +197,8 @@
   "roster_ids": [
    12
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790628747096
  },
  {
   "type": "waiver",
@@ -197,7 +212,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790622535086
  },
  {
   "type": "waiver",
@@ -211,7 +227,8 @@
   "roster_ids": [
    5
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790618239373
  },
  {
   "type": "waiver",
@@ -223,7 +240,8 @@
   "roster_ids": [
    5
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790618145934
  },
  {
   "type": "waiver",
@@ -235,7 +253,8 @@
   "roster_ids": [
    5
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790617975290
  },
  {
   "type": "waiver",
@@ -247,7 +266,8 @@
   "roster_ids": [
    5
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790617957206
  },
  {
   "type": "waiver",
@@ -259,7 +279,8 @@
   "roster_ids": [
    5
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790617892943
  },
  {
   "type": "free_agent",
@@ -271,7 +292,8 @@
   "roster_ids": [
    5
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790617861473
  },
  {
   "type": "waiver",
@@ -283,7 +305,8 @@
   "roster_ids": [
    1
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790612483271
  },
  {
   "type": "waiver",
@@ -295,7 +318,8 @@
   "roster_ids": [
    1
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790612441985
  },
  {
   "type": "waiver",
@@ -309,7 +333,8 @@
   "roster_ids": [
    4
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790606998613
  },
  {
   "type": "waiver",
@@ -323,7 +348,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790569194177
  },
  {
   "type": "waiver",
@@ -335,7 +361,8 @@
   "roster_ids": [
    1
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790456003434
  },
  {
   "type": "free_agent",
@@ -349,7 +376,8 @@
   "roster_ids": [
    1
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790364617853
  },
  {
   "type": "free_agent",
@@ -363,7 +391,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790356219454
  },
  {
   "type": "free_agent",
@@ -377,7 +406,8 @@
   "roster_ids": [
    8
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790316807986
  },
  {
   "type": "free_agent",
@@ -389,7 +419,8 @@
   "roster_ids": [
    6
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790282702211
  },
  {
   "type": "free_agent",
@@ -403,7 +434,8 @@
   "roster_ids": [
    6
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790276449136
  },
  {
   "type": "waiver",
@@ -417,7 +449,8 @@
   "roster_ids": [
    9
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790203409597
  },
  {
   "type": "free_agent",
@@ -431,7 +464,8 @@
   "roster_ids": [
    10
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790195205954
  },
  {
   "type": "waiver",
@@ -445,7 +479,8 @@
   "roster_ids": [
    11
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790182188926
  },
  {
   "type": "waiver",
@@ -457,7 +492,8 @@
   "roster_ids": [
    7
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790174426726
  },
  {
   "type": "free_agent",
@@ -471,7 +507,8 @@
   "roster_ids": [
    2
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790172701658
  },
  {
   "type": "free_agent",
@@ -483,7 +520,8 @@
   "roster_ids": [
    2
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790172672323
  },
  {
   "type": "free_agent",
@@ -495,7 +533,8 @@
   "roster_ids": [
    9
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790172008807
  },
  {
   "type": "free_agent",
@@ -507,7 +546,8 @@
   "roster_ids": [
    9
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790171909549
  },
  {
   "type": "free_agent",
@@ -521,6 +561,7 @@
   "roster_ids": [
    1
   ],
-  "leg": 3
+  "leg": 3,
+  "created": 1790148807417
  }
 ]

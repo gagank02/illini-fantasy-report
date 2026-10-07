@@ -96,6 +96,12 @@ describe('assembleFacts (week 4 fixtures)', () => {
     }
   });
 
+  test('transactions are oldest first with a readable time, so loops read in the right order', () => {
+    const tx = facts.transactions;
+    for (let i = 1; i < tx.length; i++) expect(tx[i - 1]!.created).toBeLessThanOrEqual(tx[i]!.created);
+    expect(tx[0]!.when).toMatch(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) [A-Z][a-z]{2} \d{1,2}$/);
+  });
+
   test('flags a player dropped this week or last who scored 15+ as someone else\'s starter', () => {
     const starter = weeks[3]!.find(m => m.points === 167.68)!;
     const i = starter.starters_points.findIndex(p => p >= 15);

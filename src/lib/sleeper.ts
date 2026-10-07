@@ -50,6 +50,8 @@ export interface Transaction {
   drops: Record<string, number> | null;
   roster_ids: number[];
   leg: number;
+  /** Epoch ms. Sleeper lists transactions newest first. */
+  created?: number;
 }
 
 export interface Season {
