@@ -28,7 +28,7 @@ test('contrast helper matches known values', () => {
   expect(contrast('#FF5F05', '#ffffff')).toBeLessThan(4.5); // why raw orange can't be light mode text
 });
 
-for (const [fg, bg] of [['fg', 'bg'], ['accent-text', 'bg'], ['muted', 'bg'], ['fg', 'surface'], ['accent-text', 'surface']]) {
+for (const [fg, bg] of [['fg', 'bg'], ['accent-text', 'bg'], ['muted', 'bg'], ['fg', 'surface'], ['accent-text', 'surface'], ['up-text', 'surface'], ['down-text', 'surface']]) {
   test(`--${fg} on --${bg} meets WCAG AA in both themes`, () => {
     const [fl, fd] = token(fg!);
     const [bl, bd] = token(bg!);

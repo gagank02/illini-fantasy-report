@@ -13,6 +13,8 @@
   --win: #1a7f37;
   --loss: #c62828;
   --tie: #5f6b7a;
+  --up-text: light-dark(#1a7f37, #4ade80);
+  --down-text: light-dark(#c62828, #ff8a80);
   --serif: Georgia, 'Times New Roman', serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -120,6 +122,10 @@ th.left { width: 100%; }
 .whatif-list ul { list-style: none; margin: 0; padding: 0 0.8rem 0.7rem; }
 .whatif-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0.5rem; border-radius: 4px; }
 .whatif-list li + li { margin-top: 2px; }
+
+.move { font-weight: 700; }
+.move-up { color: var(--up-text); }
+.move-down { color: var(--down-text); }
 
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }

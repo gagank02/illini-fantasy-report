@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadSeason } from '../lib/sleeper';
+import { games, powerRankings, standings, type Record3 } from '../lib/stats';
+
+const { league, users, rosters, weeks } = await loadSeason();
+const all = games(weeks);
+const names = standings(rosters, users, all);
+const rows = powerRankings(all, weeks.length);
+const team = (id: number) => names.find(r => r.rosterId === id)!;
+
+const rec = (r: Record3) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+const pct = (r: Record3) => ((r.w + r.t / 2) / (r.w + r.l + r.t)).toFixed(3).replace(/^0/, '');
+---
+
+<Base title="Power Rankings">
+  <h1>Power Rankings</h1>
+  <p class="muted">
+    {league.season} through week {weeks.length}. Score out of 100: half all play record (your record if you played everyone every week),
+    30% total points, 20% points over the last 3 weeks. Arrows show the change since last week.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col" class="left">Team</th>
+          <th scope="col">Score</th>
+          <th scope="col" class="wide">All play</th>
+          <th scope="col" class="wide">PF</th>
+          <th scope="col" class="wide">Last 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(r => {
+          const t = team(r.rosterId);
+          return (
+            <tr>
+              <td>{r.rank}</td>
+              <th scope="row" class="left">
+                {t.team}
+                <span class="sub">{t.manager}</span>
+                <span class="sub narrow">All play {rec(r.allPlay)} ({pct(r.allPlay)})</span>
+              </th>
+              <td>
+                {r.score.toFixed(1)}
+                {r.move === null || r.move === 0 ? (
+                  <span class="sub move">–<span class="visually-hidden">no change</span></span>
+                ) : (
+                  <span class={`sub move ${r.move > 0 ? 'move-up' : 'move-down'}`}>
+                    {r.move > 0 ? '▲' : '▼'}{Math.abs(r.move)}
+                    <span class="visually-hidden">{r.move > 0 ? 'up' : 'down'} {Math.abs(r.move)} since last week</span>
+                  </span>
+                )}
+              </td>
+              <td class="wide">{rec(r.allPlay)} <span class="rk">{pct(r.allPlay)}</span></td>
+              <td class="wide">{r.pf.toFixed(2)}</td>
+              <td class="wide">{r.last3.toFixed(2)}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+</Base>

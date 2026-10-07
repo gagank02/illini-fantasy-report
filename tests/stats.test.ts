@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
-import { games, ordinal, rankBy, recordWithSchedule, standings, streak, whatIfMatrix } from '../src/lib/stats';
+import { allPlay, games, ordinal, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -163,5 +163,61 @@ describe('what if', () => {
       expect(row.best.w).toBeGreaterThanOrEqual(row.cells[i]!.w);
       expect(row.worst.w).toBeLessThanOrEqual(row.cells[i]!.w);
     }
+  });
+});
+
+describe('power rankings', () => {
+  const all = games(weeks);
+  const m = (id: number, pts: number, opp: number) => ({ roster_id: id, matchup_id: opp, points: pts, starters: [], starters_points: [] });
+
+  test('all play compares each week against every other team', () => {
+    const g = games([[m(1, 100, 1), m(2, 90, 1), m(3, 80, 2), m(4, 100, 2)]]);
+    expect(allPlay(g, 1)).toEqual({ w: 2, l: 0, t: 1 });
+    expect(allPlay(g, 3)).toEqual({ w: 0, l: 3, t: 0 });
+  });
+
+  test('all play over the real league: every team plays 11 per week, wins equal losses overall', () => {
+    const recs = rosters.map(r => allPlay(all, r.roster_id));
+    for (const r of recs) expect(r.w + r.l + r.t).toBe(11 * weeks.length);
+    expect(recs.reduce((s, r) => s + r.w, 0)).toBe(recs.reduce((s, r) => s + r.l, 0));
+  });
+
+  test('a team best at everything scores 100, worst at everything scores 0', () => {
+    const g = games([
+      [m(1, 150, 1), m(2, 100, 1), m(3, 120, 2), m(4, 60, 2)],
+      [m(1, 140, 1), m(3, 110, 1), m(2, 90, 2), m(4, 50, 2)],
+    ]);
+    const pr = powerRankings(g, 2);
+    expect(pr[0]).toMatchObject({ rosterId: 1, rank: 1, score: 100 });
+    expect(pr.at(-1)).toMatchObject({ rosterId: 4, rank: 4, score: 0 });
+  });
+
+  test('score follows 50% all play, 30% PF, 20% last 3 weeks', () => {
+    const pr = powerRankings(all, weeks.length);
+    const pfs = pr.map(r => r.pf), l3 = pr.map(r => r.last3);
+    const norm = (x: number, xs: number[]) => (x - Math.min(...xs)) / (Math.max(...xs) - Math.min(...xs));
+    for (const r of pr) {
+      const pct = (r.allPlay.w + r.allPlay.t / 2) / (r.allPlay.w + r.allPlay.l + r.allPlay.t);
+      expect(r.score).toBeCloseTo(100 * (0.5 * pct + 0.3 * norm(r.pf, pfs) + 0.2 * norm(r.last3, l3)), 1);
+    }
+    for (let i = 1; i < pr.length; i++) expect(pr[i - 1]!.score).toBeGreaterThanOrEqual(pr[i]!.score);
+  });
+
+  test('movement compares with the previous week; none in week 1', () => {
+    const g = games([
+      [m(1, 150, 1), m(2, 100, 1), m(3, 120, 2), m(4, 60, 2)],
+      [m(1, 40, 1), m(2, 160, 1), m(3, 120, 2), m(4, 60, 2)],
+    ]);
+    expect(powerRankings(g, 1).every(r => r.move === null)).toBe(true);
+    const wk2 = powerRankings(g, 2);
+    const t2 = wk2.find(r => r.rosterId === 2)!;
+    const t1 = wk2.find(r => r.rosterId === 1)!;
+    expect(t2.move).toBeGreaterThan(0);
+    expect(t1.move).toBeLessThan(0);
+  });
+
+  test('only counts weeks up to the requested week', () => {
+    const wk1 = powerRankings(all, 1);
+    for (const r of wk1) expect(r.allPlay.w + r.allPlay.l + r.allPlay.t).toBe(11);
   });
 });

@@ -113,13 +113,13 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Description:** Add `allPlay()` and `powerRankings(weeks, upToWeek)` using the 50/30/20 formula, with min/max normalization. Compute the rankings through the last week and the week before it to get the ▲/▼ movement.
 
 **Acceptance criteria:**
-- [ ] The scores follow the formula in the spec
-- [ ] The movement arrows reflect the rank change from last week, with no arrow in week 1
-- [ ] The page lists rank, team, score, all play record, and movement
+- [x] The scores follow the formula in the spec
+- [x] The movement arrows reflect the rank change from last week, with no arrow in week 1
+- [x] The page lists rank, team, score, all play record, and movement
 
 **Verification:**
-- [ ] `npm test`: all play math against fixtures, plus ordering
-- [ ] Manual: spot check one team's all play record by hand
+- [x] `npm test`: all play math against fixtures, plus ordering
+- [x] Manual: spot check one team's all play record by hand
 
 **Dependencies:** T3
 

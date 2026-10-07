@@ -140,3 +140,68 @@ export function whatIfMatrix(rows: StandingsRow[], all: Game[]): WhatIfRow[] {
     return { rosterId: a.rosterId, cells, best: sorted[0]!, worst: sorted.at(-1)! };
   });
 }
+
+/** Record if the team had played every other team every week. */
+export function allPlay(all: Game[], rosterId: number): Record3 {
+  const rec = { w: 0, l: 0, t: 0 };
+  for (const mine of all.filter(g => g.rosterId === rosterId)) {
+    for (const other of all.filter(g => g.week === mine.week && g.rosterId !== rosterId)) {
+      const r = result({ points: mine.points, opponentPoints: other.points });
+      rec[r === 'W' ? 'w' : r === 'L' ? 'l' : 't']++;
+    }
+  }
+  return rec;
+}
+
+export interface PowerRow {
+  rank: number;
+  rosterId: number;
+  /** 0 to 100. */
+  score: number;
+  allPlay: Record3;
+  pf: number;
+  /** Points over the last 3 weeks. */
+  last3: number;
+  /** Places gained since last week (negative = dropped). Null in week 1. */
+  move: number | null;
+}
+
+const normalize = (x: number, xs: number[]) => {
+  const [lo, hi] = [Math.min(...xs), Math.max(...xs)];
+  return hi === lo ? 1 : (x - lo) / (hi - lo);
+};
+
+function scoreWeeks(all: Game[], upToWeek: number): Omit<PowerRow, 'move'>[] {
+  const played = all.filter(g => g.week <= upToWeek);
+  const ids = [...new Set(played.map(g => g.rosterId))];
+  const base = ids.map(id => {
+    const mine = played.filter(g => g.rosterId === id);
+    return {
+      rosterId: id,
+      allPlay: allPlay(played, id),
+      pf: round2(mine.reduce((s, g) => s + g.points, 0)),
+      last3: round2(mine.filter(g => g.week > upToWeek - 3).reduce((s, g) => s + g.points, 0)),
+    };
+  });
+  const pfs = base.map(b => b.pf);
+  const l3 = base.map(b => b.last3);
+  return base
+    .map(b => {
+      const n = b.allPlay.w + b.allPlay.l + b.allPlay.t;
+      const pct = n ? (b.allPlay.w + b.allPlay.t / 2) / n : 0;
+      const score = 100 * (0.5 * pct + 0.3 * normalize(b.pf, pfs) + 0.2 * normalize(b.last3, l3));
+      return { ...b, rank: 0, score: Math.round(score * 10) / 10 };
+    })
+    .sort((a, b) => b.score - a.score || b.pf - a.pf)
+    .map((r, i) => ({ ...r, rank: i + 1 }));
+}
+
+/** 50% all play win %, 30% points for, 20% last 3 weeks' points (both scaled 0 to 1 across the league). */
+export function powerRankings(all: Game[], upToWeek: number): PowerRow[] {
+  const now = scoreWeeks(all, upToWeek);
+  const before = upToWeek > 1 ? scoreWeeks(all, upToWeek - 1) : [];
+  return now.map(r => {
+    const prev = before.find(p => p.rosterId === r.rosterId);
+    return { ...r, move: prev ? prev.rank - r.rank : null };
+  });
+}

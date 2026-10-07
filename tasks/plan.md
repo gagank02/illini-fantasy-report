@@ -33,7 +33,7 @@ Details for each task are in `tasks/todo.md`.
 
 ### Phase 2: League stats pages
 - [x] T5: What if matrix
-- [ ] T6: Overall power rankings
+- [x] T6: Overall power rankings
 - [ ] T7: Positional power rankings
 - [ ] T8: Interesting facts on standings
 
