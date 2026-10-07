@@ -78,5 +78,12 @@ tbody tr:last-child > * { border-bottom: 0; }
 .left { text-align: left; }
 tbody th { font-weight: 600; white-space: normal; min-width: 8rem; }
 th.left { width: 100%; }
-@media (max-width: 30rem) { th, td { padding: 0.5rem 0.4rem; } }
+@media (max-width: 30rem) { th, td { padding: 0.5rem 0.4rem; } tbody th { min-width: 6.5rem; } }
+
+/* Columns marked .wide fold into .narrow sub lines on phones so tables fit without scrolling. */
+.narrow { display: none; }
+@media (max-width: 40rem) {
+  .wide { display: none; }
+  .narrow { display: block; }
+}
 .sub { display: block; font-weight: 400; font-size: 0.8rem; color: var(--muted); }

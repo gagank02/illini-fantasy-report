@@ -19,8 +19,8 @@ const fmt = (n: number) => n.toFixed(2);
           <th scope="col" class="left">Team</th>
           <th scope="col">W-L-T</th>
           <th scope="col">PF</th>
-          <th scope="col">PA</th>
-          <th scope="col">Streak</th>
+          <th scope="col" class="wide">PA</th>
+          <th scope="col" class="wide">Streak</th>
         </tr>
       </thead>
       <tbody>
@@ -31,10 +31,10 @@ const fmt = (n: number) => n.toFixed(2);
               {r.team}
               <span class="sub">{r.manager}</span>
             </th>
-            <td>{r.w}-{r.l}-{r.t}</td>
-            <td>{fmt(r.pf)}</td>
-            <td>{fmt(r.pa)}</td>
-            <td>{r.streak}</td>
+            <td>{r.w}-{r.l}-{r.t}<span class="sub narrow">{r.streak}</span></td>
+            <td>{fmt(r.pf)}<span class="sub narrow">PA {fmt(r.pa)}</span></td>
+            <td class="wide">{fmt(r.pa)}</td>
+            <td class="wide">{r.streak}</td>
           </tr>
         ))}
       </tbody>
