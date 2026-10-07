@@ -293,3 +293,14 @@ export function facts(rows: StandingsRow[], all: Game[]): Fact[] {
   }
   return out;
 }
+
+/** Actual wins minus average wins across all schedules. Positive = lucky schedule. Luckiest first. */
+export function scheduleLuck(matrix: WhatIfRow[]): { rosterId: number; actualWins: number; avgWins: number; luck: number }[] {
+  return matrix
+    .map((row, i) => {
+      const avgWins = row.cells.reduce((s, c) => s + winPct(c), 0) / row.cells.length;
+      const actualWins = winPct(row.cells[i]!);
+      return { rosterId: row.rosterId, actualWins, avgWins, luck: actualWins - avgWins };
+    })
+    .sort((a, b) => b.luck - a.luck);
+}

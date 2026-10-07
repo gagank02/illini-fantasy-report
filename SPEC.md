@@ -27,7 +27,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 **1. Standings** (`/standings`)
 - Table with rank, team name, manager, W/L/T, points for, points against, streak.
 - Sorted by wins, then points for (Sleeper's default tiebreak).
-- An "interesting facts" block with 3 to 5 computed facts. Examples are highest single week score, unluckiest team (most points against), biggest blowout, and longest win streak.
+- Last 5 form badges, and league ranks for PF and PA.
 
 **2. What if matrix** (`/what-if`)
 - A 12×12 grid. The cell at row A, column B shows team A's record if A had played B's schedule.
@@ -46,7 +46,12 @@ The site is small, so all four modules live in this one spec and don't get separ
 - Written by Claude (`claude-opus-5-5`) with `writing-style.md` as the system prompt. The prompt also gets a facts bundle with scores, top players, standings changes, Sleeper injury statuses, trending adds/drops, and the latest headlines from an NFL RSS feed.
 - The model gets facts only and never invents stats. Every number in the report comes from the facts bundle.
 - A style check script fails the PR when the report contains em/en dashes, semicolons, emojis, `*`, hashtags, raw HTML, or phrases from a banned list (seeded from `writing-style.md`).
-- The home page (`/`) shows the latest report's headline and lede plus a top 3 standings snapshot.
+- The home page (`/`) is the weekly front door. It has these parts.
+  - The latest report's headline and lede, linking to the report (added in T9).
+  - Preview cards linking to each tab: the standings top 3, the power rankings top 3 with movement and the biggest riser, and What If's luckiest and unluckiest schedules. Luck is actual wins minus average wins across every schedule.
+  - "Around the league," 3 to 5 computed facts: the highest score, toughest luck (most points against), biggest blowout, closest game, and hottest team (2 or more straight wins).
+  - History is not previewed on the home page.
+- The report's facts bundle includes the same "Around the league" facts.
 - **Looks like a newspaper.** The page has these elements.
   - A masthead ("The Illini Fantasy Report") in a blackletter display font, with a dateline row showing volume (season), issue (week), and date.
   - A serif body (Georgia stack) on an off white "newsprint" background in light mode.

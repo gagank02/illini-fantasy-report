@@ -149,7 +149,7 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 ## Task 8: Interesting facts on standings
 
-**Description:** `facts()` returns 3 to 5 facts: the highest single week score, the most points against, the biggest blowout, the longest current win streak, and the closest game. Show them in a block on `/standings`.
+**Description:** `facts()` returns 3 to 5 facts: the highest single week score, the most points against, the biggest blowout, the longest current win streak, and the closest game. ~~Show them in a block on `/standings`.~~ Moved to the home page (see T8b).
 
 **Acceptance criteria:**
 - [x] Each fact names the team, the week, and the number
@@ -163,6 +163,21 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Files likely touched:** `src/lib/stats.ts`, `tests/stats.test.ts`, `src/pages/standings.astro`
 
 **Estimated scope:** S
+
+## Task 8b: Home page previews (added after T8 review)
+
+**Description:** The home page has a preview card for each tab (Standings, Power Rankings, What If), each linking to the full page, plus "Around the league." History is excluded. `scheduleLuck()` powers the What If card.
+
+**Acceptance criteria:**
+- [x] The cards show the standings top 3, the power top 3 with movement and the biggest riser, and the luckiest and unluckiest schedules
+- [x] "Around the league" lives on the home page and is gone from `/standings`
+- [x] No horizontal scroll at 360px
+
+**Verification:**
+- [x] `npm test`: scheduleLuck equals actual minus average wins, sorted luckiest first
+- [x] Manual: screenshots at 360px and 1280px
+
+**Dependencies:** T5, T6, T8
 
 ## Checkpoint B: Stats complete
 - [ ] All tests pass, and the build is clean
@@ -181,7 +196,7 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 - section rules
 - a box score sidebar built from the matchups
 
-Add the `/reports` index and the report pages. The home page shows the latest headline, the lede, and the top 3 in the standings. Write one sample report by hand for week 4. Raw HTML in the markdown must not render.
+Add the `/reports` index and the report pages. Add the latest report's headline and lede, linking to it, above the preview cards on the home page (cards came in T8b). Write one sample report by hand for week 4. Raw HTML in the markdown must not render.
 
 **Acceptance criteria:**
 - [ ] The report reads as a newspaper in light and dark mode, at 360px and on desktop
@@ -255,6 +270,7 @@ Add the `/reports` index and the report pages. The home page shows the latest he
 - power ranking changes
 - injury statuses of rostered starters
 - trending adds and drops
+- the "Around the league" facts from `facts()`
 - the top 10 ESPN RSS headlines, parsed with a simple regex on `<item><title>`
 
 The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt, plus rules: use only the facts given, name managers, use newspaper structure, and never copy headline or article wording from ESPN (restate the news in your own words). It writes the markdown with frontmatter, then runs the linter. If the lint fails, it retries once and sends the model the list of violations. Load the `claude-api` skill before writing this.

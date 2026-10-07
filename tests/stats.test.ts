@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
 import players from '../src/data/players.json';
-import { allPlay, facts, games, ordinal, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
+import { allPlay, facts, games, ordinal, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -312,5 +312,26 @@ describe('facts', () => {
     const out = facts(standings(rosters, users, wk1), wk1);
     expect(out.find(x => x.kind === 'streak')).toBeUndefined();
     expect(out.length).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('scheduleLuck', () => {
+  const all = games(weeks);
+  const rows = standings(rosters, users, all);
+  const luck = scheduleLuck(whatIfMatrix(rows, all));
+
+  test('luck = actual wins minus average wins across every schedule', () => {
+    const m = whatIfMatrix(rows, all);
+    for (const [i, row] of m.entries()) {
+      const avg = row.cells.reduce((s, c) => s + c.w + c.t / 2, 0) / row.cells.length;
+      const actual = row.cells[i]!.w + row.cells[i]!.t / 2;
+      const l = luck.find(x => x.rosterId === row.rosterId)!;
+      expect(l.avgWins).toBeCloseTo(avg, 5);
+      expect(l.luck).toBeCloseTo(actual - avg, 5);
+    }
+  });
+
+  test('sorted luckiest first', () => {
+    for (let i = 1; i < luck.length; i++) expect(luck[i - 1]!.luck).toBeGreaterThanOrEqual(luck[i]!.luck);
   });
 });

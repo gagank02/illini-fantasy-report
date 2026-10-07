@@ -1,0 +1,29 @@
+---
+// "Around the league" fact cards. Team names inside each sentence render bold.
+import type { Fact } from '../lib/stats';
+
+interface Props {
+  facts: Fact[];
+  teamNames: string[];
+}
+const { facts, teamNames } = Astro.props;
+
+// Longest names first so a name contained in another can't split it.
+const names = [...teamNames].sort((a, b) => b.length - a.length);
+const pattern = new RegExp(`(${names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
+const parts = (text: string) => text.split(pattern).filter(Boolean).map(p => ({ text: p, team: names.includes(p) }));
+---
+
+{facts.length > 0 && (
+  <section class="facts" aria-labelledby="facts-h">
+    <h2 id="facts-h">Around the league</h2>
+    <ul>
+      {facts.map(f => (
+        <li>
+          <span class="fact-title">{f.title}</span>
+          {parts(f.text).map(p => (p.team ? <strong>{p.text}</strong> : p.text))}
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

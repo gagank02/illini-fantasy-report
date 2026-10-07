@@ -1,8 +1,71 @@
 ---
+import Facts from '../components/Facts.astro';
+import Form from '../components/Form.astro';
+import Move from '../components/Move.astro';
 import Base from '../layouts/Base.astro';
+import { loadSeason } from '../lib/sleeper';
+import { facts, games, powerRankings, scheduleLuck, standings, whatIfMatrix } from '../lib/stats';
+
+const { league, users, rosters, weeks } = await loadSeason();
+const all = games(weeks);
+const rows = standings(rosters, users, all);
+const team = (id: number) => rows.find(r => r.rosterId === id)!;
+const power = powerRankings(all, weeks.length);
+const riser = power.filter(p => (p.move ?? 0) > 0).sort((a, b) => b.move! - a.move!)[0];
+const luck = scheduleLuck(whatIfMatrix(rows, all));
+const [luckiest, unluckiest] = [luck[0], luck.at(-1)];
+const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`; };
 ---
 
 <Base>
-  <h1>The Illini Fantasy Report</h1>
-  <p>This week's report and standings land here soon.</p>
+  <h1>Week {weeks.length} in the Illini Fantasy league</h1>
+  <p class="muted">{league.season} season. Tap any card for the full page.</p>
+
+  {weeks.length === 0 ? (
+    <p>No games are final yet. Check back after week 1.</p>
+  ) : (
+    <>
+      <div class="previews">
+        <a class="preview" href="/standings">
+          <h2>Standings</h2>
+          <ol role="list">
+            {rows.slice(0, 3).map(r => (
+              <li><span class="pv-rank">{r.rank}</span><span>{r.team}</span><span class="pv-num">{r.w}-{r.l}{r.t ? `-${r.t}` : ''}</span></li>
+            ))}
+          </ol>
+          <span class="pv-more">Full standings →</span>
+        </a>
+
+        <a class="preview" href="/power-rankings">
+          <h2>Power Rankings</h2>
+          <ol role="list">
+            {power.slice(0, 3).map(p => (
+              <li><span class="pv-rank">{p.rank}</span><span>{team(p.rosterId).team}</span><span class="pv-num">{p.score.toFixed(1)} <Move move={p.move} /></span></li>
+            ))}
+          </ol>
+          {riser && <p class="pv-note">Biggest riser: <strong>{team(riser.rosterId).team}</strong>, up {riser.move}.</p>}
+          <span class="pv-more">All rankings and positions →</span>
+        </a>
+
+        <a class="preview" href="/what-if">
+          <h2>What If</h2>
+          {luckiest && luckiest.luck > 0 && (
+            <p class="pv-note">
+              <span class="fact-title">Luckiest schedule</span>
+              <strong>{team(luckiest.rosterId).team}</strong> is {rec(luckiest.rosterId)} but would average {luckiest.avgWins.toFixed(1)} wins across every schedule.
+            </p>
+          )}
+          {unluckiest && unluckiest.luck < 0 && (
+            <p class="pv-note">
+              <span class="fact-title">Unluckiest schedule</span>
+              <strong>{team(unluckiest.rosterId).team}</strong> is {rec(unluckiest.rosterId)} but would average {unluckiest.avgWins.toFixed(1)} wins across every schedule.
+            </p>
+          )}
+          <span class="pv-more">Every team on every schedule →</span>
+        </a>
+      </div>
+
+      <Facts facts={facts(rows, all)} teamNames={rows.map(r => r.team)} />
+    </>
+  )}
 </Base>

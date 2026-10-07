@@ -2,17 +2,11 @@
 import Form from '../components/Form.astro';
 import Base from '../layouts/Base.astro';
 import { loadSeason } from '../lib/sleeper';
-import { facts, games, ordinal, standings } from '../lib/stats';
+import { games, ordinal, standings } from '../lib/stats';
 
 const { league, users, rosters, weeks } = await loadSeason();
 const all = games(weeks);
 const rows = standings(rosters, users, all);
-const notes = facts(rows, all);
-
-/** Split a fact sentence so team names can be bolded. Longest names first so one name inside another can't split it. */
-const names = rows.map(r => r.team).sort((a, b) => b.length - a.length);
-const pattern = new RegExp(`(${names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`);
-const parts = (text: string) => text.split(pattern).filter(Boolean).map(p => ({ text: p, team: names.includes(p) }));
 const fmt = (n: number) => n.toFixed(2);
 ---
 
@@ -50,17 +44,4 @@ const fmt = (n: number) => n.toFixed(2);
     </table>
   </div>
 
-  {notes.length > 0 && (
-    <section class="facts" aria-labelledby="facts-h">
-      <h2 id="facts-h">Around the league</h2>
-      <ul>
-        {notes.map(f => (
-          <li>
-            <span class="fact-title">{f.title}</span>
-            {parts(f.text).map(p => (p.team ? <strong>{p.text}</strong> : p.text))}
-          </li>
-        ))}
-      </ul>
-    </section>
-  )}
 </Base>
