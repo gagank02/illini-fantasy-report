@@ -34,7 +34,9 @@ jobs:
         run: npm install -g @anthropic-ai/claude-code@2.1.292
 
       # The only /players/nfl call of the week (Sleeper asks for at most one a day).
+      # Scheduled runs only: manual reruns use the committed list, so retries can't add calls.
       - name: Refresh player list
+        if: github.event_name == 'schedule'
         run: npm run players
 
       - name: Write the report

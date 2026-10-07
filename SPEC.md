@@ -109,7 +109,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 - **Sleeper rate limits:** Sleeper may IP block anyone above 1000 calls a minute, and asks that `/players/nfl` be called at most once a day.
   - **Per URL:** Each URL is fetched at most once per process. `get()` caches it.
   - **Rate limiter:** In `sleeper.ts`, it caps each process at 600 calls a minute. A normal build uses about 100. The cap only matters if a bug causes a call loop.
-  - **Players list:** `/players/nfl` is never called by builds or the dev server. `scripts/update-players.ts` writes a trimmed `src/data/players.json` (id, name, position, NFL team, injury status). The weekly report Action runs it, so the endpoint gets called once a week, and the file lands in the report PR.
+  - **Players list:** `/players/nfl` is never called by builds or the dev server. `scripts/update-players.ts` writes a trimmed `src/data/players.json` (id, name, position, NFL team, injury status). Only the scheduled Tuesday run of the weekly report Action runs it, so the endpoint gets called once a week, and the file lands in the report PR. Manual reruns use the committed file.
   - **History walk:** Following `previous_league_id` stops on a repeated ID or after 30 seasons.
 - **Report writer:** the `claude` CLI (Claude Code) in headless mode, run by Node 24. Its only data source is Sleeper. There's no SDK dependency. Locally it uses your logged in subscription. In GitHub Actions it uses `CLAUDE_CODE_OAUTH_TOKEN` (made with `claude setup-token`).
 - **Tests:** Vitest 5.
