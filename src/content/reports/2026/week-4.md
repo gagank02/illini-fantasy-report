@@ -60,9 +60,9 @@ Fujetus also cut Jayden Reed with no add, dropped kicker Cameron Dicker for Bren
 
 DumberBell dropped Brian Thomas for Sam Darnold.
 
-fr0styishere took Tre' Harris for Mack Hollins, then took Hollins back for Harris, then added Harris again. Make up your mind. fr0styishere also added Evan McPherson, who scored 5.
+fr0styishere added Tre' Harris on Thursday, cut him for Mack Hollins twenty minutes later, then claimed Harris back on waivers this week by dropping Hollins. Make up your mind. fr0styishere also added Evan McPherson, who scored 5.
 
-D00zer dropped Noah Fant for Dohnte Meyers, then added Fant back by dropping Oronde Gadsden. ritvik ran the same loop with Jaylen Wright, cutting Wright for Will Shipley and then picking Wright back up.
+D00zer added Noah Fant for Oronde Gadsden last Wednesday, then cut Fant on waivers this week to grab Dohnte Meyers. ritvik did something similar with Jaylen Wright, adding him over the weekend and then cutting him for Will Shipley on waivers.
 
 ritvik did land Keon Coleman, the most added player on Sleeper this week. Good grab.
 
