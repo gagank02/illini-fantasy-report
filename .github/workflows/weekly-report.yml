@@ -80,12 +80,15 @@ jobs:
           git commit -m "$title"
           git push --force origin "$branch"
 
-          if gh pr view "$branch" >/dev/null 2>&1; then
-            gh pr edit "$branch" --title "$title"
-            echo "Updated the existing PR: $title"
+          # Only an OPEN PR counts. gh pr view also finds merged/closed PRs, which made a rerun after
+          # merging silently update the old merged PR instead of opening a new one.
+          open_pr=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open_pr" ]; then
+            gh pr edit "$open_pr" --title "$title"
+            echo "Updated open PR #$open_pr: $title"
           else
             gh pr create --base main --head "$branch" --title "$title" --body "$(cat <<EOF
-          The ${season} week ${week} report, written by Claude from the Sleeper facts bundle and ESPN headlines.
+          The ${season} week ${week} report, written by Claude from the Sleeper facts bundle (Sleeper is the only data source).
 
           Before this PR opened, the workflow ran the tests, type check, build, secret scan, and style linter (\`ci.yml\` does not run on bot PRs).
 
