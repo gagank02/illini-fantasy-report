@@ -87,12 +87,13 @@ The site is small, so all four modules live in this one spec and don't get separ
 
 ## Tech Stack
 
-- **Astro 5** (static output) + TypeScript (strict). Ships almost no client JS. The theme toggle and position tabs are the only scripts.
+- **Astro 7** (static output) + TypeScript (strict). Ships almost no client JS. The theme toggle and position tabs are the only scripts.
 - **Report export:** `html-to-image` (about 10 KB, lazy loaded) for PNG. PDF uses the browser's print to PDF with a print stylesheet.
 - **Fonts:** One self hosted blackletter woff2 for the masthead (e.g. UnifrakturMaguntia, OFL licensed). Body text uses system serif fonts. Fonts live under `public/fonts/` because the CSP blocks third party font hosts.
 - **Data:** Sleeper public API (`https://api.sleeper.app/v1`). It's free with no key and allows about 1000 calls a minute. Fetching happens **at build time only**, so the browser never calls Sleeper.
-- **Report writer:** `@anthropic-ai/sdk`, plus a small RSS fetch with no parser dependency, run by Node 22 in GitHub Actions.
-- **Tests:** Vitest.
+- **Report writer:** `@anthropic-ai/sdk`, plus a small RSS fetch with no parser dependency, run by Node 24 in GitHub Actions.
+- **Tests:** Vitest 5.
+- **Toolchain:** Node 22 or newer with **npm 11**. npm 10 crashes while resolving Vitest 5's peer dependencies (`Cannot read properties of null (reading 'edgesOut')`). CI uses Node 24, which ships with npm 11.
 - **Hosting:** Cloudflare Pages (free), building from `main`. A scheduled GitHub Action calls a Pages deploy hook daily so data stays fresh.
 - **Domain (later):** Buy one through Cloudflare Registrar (sold at cost, about $10/yr for `.com`). Add it under Pages → Custom domains. No code changes needed.
 

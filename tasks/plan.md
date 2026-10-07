@@ -21,7 +21,7 @@ This is a static Astro site for the Illini Fantasy Sleeper league (`138610693792
 Details for each task are in `tasks/todo.md`.
 
 ### Phase 1: Foundation
-- [ ] T1: Scaffold Astro, Vitest, and CI
+- [x] T1: Scaffold Astro, Vitest, and CI
 - [ ] T2: Base layout, UIUC theme, and light/dark toggle
 - [ ] T3: Sleeper client and `/standings` page
 - [ ] T4: Deploy to Cloudflare Pages with security headers and daily refresh

@@ -9,13 +9,13 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Description:** Create the empty project. Astro 5 builds to static output with strict TypeScript. Vitest runs the tests. `.env.example` holds placeholders. A CI workflow runs test, check, build, audit, and the secret guard on every PR.
 
 **Acceptance criteria:**
-- [ ] `npm run dev` serves a blank page, and the `build`, `test`, and `check` scripts exist and pass
-- [ ] `.env.example` lists `SLEEPER_LEAGUE_ID`, `ANTHROPIC_API_KEY`, and `CF_DEPLOY_HOOK_URL` with placeholder values
-- [ ] `ci.yml` runs on PRs and pushes to `main`. It fails if `dist/` contains `sk-ant-` or `api.cloudflare.com/client/v4/pages/webhooks`
+- [x] `npm run dev` serves a blank page, and the `build`, `test`, and `check` scripts exist and pass
+- [x] `.env.example` lists `SLEEPER_LEAGUE_ID`, `ANTHROPIC_API_KEY`, and `CF_DEPLOY_HOOK_URL` with placeholder values
+- [x] `ci.yml` runs on PRs and pushes to `main`. It fails if `dist/` contains `sk-ant-` or `pages/webhooks/deploy_hooks`
 
 **Verification:**
-- [ ] `npm ci && npm test && npm run check && npm run build`
-- [ ] Manual: put `sk-ant-test` into a page, confirm the guard step fails, then revert
+- [x] `npm ci && npm test && npm run check && npm run build`
+- [x] Manual: put `sk-ant-test` into a page, confirm the guard step fails, then revert
 
 **Dependencies:** None
 

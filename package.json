@@ -1,0 +1,22 @@
+{
+  "name": "illini-fantasy-report",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "astro": "^7.3.6",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3"
+  }
+}
