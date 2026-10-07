@@ -1,0 +1,68 @@
+/* Tokens use light-dark(): data-theme on <html> overrides the OS setting. */
+:root {
+  color-scheme: light dark;
+  --orange: #ff5f05;
+  --blue: #13294b;
+  --bg: light-dark(#faf8f4, #0b1628);
+  --surface: light-dark(#ffffff, #13294b);
+  --fg: light-dark(#13294b, #eef1f6);
+  --muted: light-dark(#55606f, #a7b2c4);
+  --accent-text: light-dark(#b53d00, #ff5f05);
+  --rule: light-dark(#d9d4cb, #2a3b58);
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 1rem/1.55 var(--sans);
+  overflow-wrap: break-word;
+}
+
+h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
+
+a { color: var(--accent-text); }
+
+:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+
+.wrap { max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
+
+/* Header: Illini Blue in both themes with an orange underline. */
+.site-header { background: var(--blue); color: #fff; border-bottom: 4px solid var(--orange); }
+.site-header .wrap { display: flex; align-items: center; gap: 0.75rem; min-height: 3.5rem; }
+.wordmark { font: 700 1.25rem var(--serif); color: #fff; text-decoration: none; margin-right: auto; }
+
+.site-header button {
+  font: inherit; color: #fff; background: transparent;
+  border: 1px solid rgb(255 255 255 / 0.5); border-radius: 4px;
+  padding: 0.35rem 0.6rem; cursor: pointer;
+}
+
+/* Mobile: nav is a native popover opened by the Menu button. */
+#site-nav {
+  margin: 3.75rem 1rem auto auto; padding: 0.5rem;
+  background: var(--surface); color: var(--fg);
+  border: 1px solid var(--rule); border-radius: 6px;
+}
+#site-nav ul { list-style: none; margin: 0; padding: 0; }
+#site-nav a { display: block; padding: 0.6rem 0.9rem; color: inherit; text-decoration: none; }
+#site-nav a[aria-current='page'] { color: var(--accent-text); font-weight: 600; }
+
+/* Desktop: the popover becomes an always visible inline nav. */
+@media (min-width: 48rem) {
+  .menu-button { display: none; }
+  #site-nav { display: block; position: static; inset: auto; margin: 0; padding: 0; background: none; border: 0; color: #fff; }
+  #site-nav ul { display: flex; gap: 0.25rem; }
+  #site-nav a { padding: 0.4rem 0.6rem; }
+  #site-nav a[aria-current='page'] { color: #fff; box-shadow: inset 0 -3px var(--orange); }
+}
+
+main { padding-block: 1.5rem 3rem; }
+
+.site-footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.875rem; padding-block: 1rem; }

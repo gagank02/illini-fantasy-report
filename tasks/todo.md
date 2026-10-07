@@ -28,13 +28,13 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Description:** Build the shared layout with the nav (Home, Reports, Standings, Power Rankings, What If, History) and a footer. Add `global.css` with color tokens for light and dark. Add the theme toggle. A tiny inline script in `<head>` applies the saved theme before the page paints, so there's no flash. On mobile the nav collapses into a `<details>` menu, which needs no JS.
 
 **Acceptance criteria:**
-- [ ] The page follows the OS theme by default. The toggle overrides it, and the choice survives a reload with no flash
-- [ ] Orange text on the dark background meets WCAG AA (4.5:1). Use a lighter orange in dark mode if needed
-- [ ] No horizontal page scroll at 360px, and the nav works with the keyboard
+- [x] The page follows the OS theme by default. The toggle overrides it, and the choice survives a reload with no flash
+- [x] Orange text on the dark background meets WCAG AA (4.5:1). Use a lighter orange in dark mode if needed
+- [x] No horizontal page scroll at 360px, and the nav works with the keyboard
 
 **Verification:**
-- [ ] Build succeeds
-- [ ] Manual: toggle the theme, reload, and switch the OS theme in DevTools at 360px and desktop widths
+- [x] Build succeeds
+- [x] Manual: toggle the theme, reload, and switch the OS theme in DevTools at 360px and desktop widths
 
 **Dependencies:** T1
 

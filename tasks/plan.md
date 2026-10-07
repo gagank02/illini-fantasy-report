@@ -22,7 +22,7 @@ Details for each task are in `tasks/todo.md`.
 
 ### Phase 1: Foundation
 - [x] T1: Scaffold Astro, Vitest, and CI
-- [ ] T2: Base layout, UIUC theme, and light/dark toggle
+- [x] T2: Base layout, UIUC theme, and light/dark toggle
 - [ ] T3: Sleeper client and `/standings` page
 - [ ] T4: Deploy to Cloudflare Pages with security headers and daily refresh
 

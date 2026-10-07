@@ -1,0 +1,62 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+const fullTitle = title ? `${title} | The Illini Fantasy Report` : 'The Illini Fantasy Report';
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/reports', label: 'Reports' },
+  { href: '/standings', label: 'Standings' },
+  { href: '/power-rankings', label: 'Power Rankings' },
+  { href: '/what-if', label: 'What If' },
+  { href: '/history', label: 'History' },
+];
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <!-- Runs before paint so a saved theme never flashes. Its hash is allowed in public/_headers. -->
+    <script is:inline>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="wordmark" href="/">Illini Fantasy Report</a>
+        <button class="menu-button" popovertarget="site-nav">Menu</button>
+        <nav id="site-nav" popover aria-label="Main">
+          <ul>
+            {links.map(l => <li><a href={l.href} aria-current={isCurrent(l.href) ? 'page' : undefined}>{l.label}</a></li>)}
+          </ul>
+        </nav>
+        <button id="theme-toggle" type="button" aria-label="Switch color theme">◐</button>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">Illini Fantasy league data from Sleeper.</div>
+    </footer>
+    <script>
+      const root = document.documentElement;
+      const dark = () => (root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
+      document.getElementById('theme-toggle')!.addEventListener('click', () => {
+        const next = dark() ? 'light' : 'dark';
+        root.dataset.theme = next;
+        try { localStorage.setItem('theme', next); } catch {}
+      });
+    </script>
+  </body>
+</html>
