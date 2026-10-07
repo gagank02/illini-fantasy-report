@@ -66,3 +66,17 @@ a { color: var(--accent-text); }
 main { padding-block: 1.5rem 3rem; }
 
 .site-footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.875rem; padding-block: 1rem; }
+
+.muted { color: var(--muted); }
+
+/* Tables scroll inside their own box so the page never scrolls sideways. */
+.table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 0.55rem 0.7rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--rule); }
+thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 2px solid var(--orange); }
+tbody tr:last-child > * { border-bottom: 0; }
+.left { text-align: left; }
+tbody th { font-weight: 600; white-space: normal; min-width: 8rem; }
+th.left { width: 100%; }
+@media (max-width: 30rem) { th, td { padding: 0.5rem 0.4rem; } }
+.sub { display: block; font-weight: 400; font-size: 0.8rem; color: var(--muted); }

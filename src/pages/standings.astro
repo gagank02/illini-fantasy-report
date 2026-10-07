@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadSeason } from '../lib/sleeper';
+import { games, standings } from '../lib/stats';
+
+const { league, users, rosters, weeks } = await loadSeason();
+const rows = standings(rosters, users, games(weeks));
+const fmt = (n: number) => n.toFixed(2);
+---
+
+<Base title="Standings">
+  <h1>Standings</h1>
+  <p class="muted">{league.season} season, through week {weeks.length}.</p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col" class="left">Team</th>
+          <th scope="col">W-L-T</th>
+          <th scope="col">PF</th>
+          <th scope="col">PA</th>
+          <th scope="col">Streak</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(r => (
+          <tr>
+            <td>{r.rank}</td>
+            <th scope="row" class="left">
+              {r.team}
+              <span class="sub">{r.manager}</span>
+            </th>
+            <td>{r.w}-{r.l}-{r.t}</td>
+            <td>{fmt(r.pf)}</td>
+            <td>{fmt(r.pa)}</td>
+            <td>{r.streak}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Base>

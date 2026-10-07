@@ -1,0 +1,31 @@
+{
+ "league_id": "1386106937921253376",
+ "name": "Illini Fantasy",
+ "season": "2026",
+ "total_rosters": 12,
+ "previous_league_id": "1252429316080271360",
+ "draft_id": "1386106937933844480",
+ "status": "in_season",
+ "roster_positions": [
+  "QB",
+  "RB",
+  "RB",
+  "WR",
+  "WR",
+  "TE",
+  "FLEX",
+  "FLEX",
+  "K",
+  "DEF",
+  "BN",
+  "BN",
+  "BN",
+  "BN",
+  "BN"
+ ],
+ "settings": {
+  "playoff_week_start": 15,
+  "playoff_teams": 6,
+  "last_scored_leg": 4
+ }
+}

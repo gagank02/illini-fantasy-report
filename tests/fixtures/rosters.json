@@ -1,0 +1,206 @@
+[
+ {
+  "roster_id": 1,
+  "owner_id": "990766353801900032",
+  "settings": {
+   "wins": 3,
+   "losses": 1,
+   "ties": 0,
+   "fpts": 533,
+   "fpts_decimal": 64,
+   "fpts_against": 508,
+   "fpts_against_decimal": 0
+  },
+  "metadata": {
+   "record": "WLWW",
+   "streak": "2W"
+  }
+ },
+ {
+  "roster_id": 2,
+  "owner_id": "563450217770278912",
+  "settings": {
+   "wins": 1,
+   "losses": 3,
+   "ties": 0,
+   "fpts": 478,
+   "fpts_decimal": 74,
+   "fpts_against": 522,
+   "fpts_against_decimal": 92
+  },
+  "metadata": {
+   "record": "WLLL",
+   "streak": "3L"
+  }
+ },
+ {
+  "roster_id": 3,
+  "owner_id": "996597560926269440",
+  "settings": {
+   "wins": 3,
+   "losses": 1,
+   "ties": 0,
+   "fpts": 585,
+   "fpts_decimal": 16,
+   "fpts_against": 521,
+   "fpts_against_decimal": 82
+  },
+  "metadata": {
+   "record": "LWWW",
+   "streak": "3W"
+  }
+ },
+ {
+  "roster_id": 4,
+  "owner_id": "997232054540505088",
+  "settings": {
+   "wins": 2,
+   "losses": 2,
+   "ties": 0,
+   "fpts": 489,
+   "fpts_decimal": 18,
+   "fpts_against": 497,
+   "fpts_against_decimal": 36
+  },
+  "metadata": {
+   "record": "LWLW",
+   "streak": "1W"
+  }
+ },
+ {
+  "roster_id": 5,
+  "owner_id": "1130584216770670592",
+  "settings": {
+   "wins": 2,
+   "losses": 2,
+   "ties": 0,
+   "fpts": 510,
+   "fpts_decimal": 68,
+   "fpts_against": 492,
+   "fpts_against_decimal": 88
+  },
+  "metadata": {
+   "record": "WLWL",
+   "streak": "1L"
+  }
+ },
+ {
+  "roster_id": 6,
+  "owner_id": "1130587279673708544",
+  "settings": {
+   "wins": 3,
+   "losses": 1,
+   "ties": 0,
+   "fpts": 589,
+   "fpts_decimal": 24,
+   "fpts_against": 530,
+   "fpts_against_decimal": 32
+  },
+  "metadata": {
+   "record": "WLWW",
+   "streak": "2W"
+  }
+ },
+ {
+  "roster_id": 7,
+  "owner_id": "999132056972156928",
+  "settings": {
+   "wins": 2,
+   "losses": 2,
+   "ties": 0,
+   "fpts": 568,
+   "fpts_decimal": 36,
+   "fpts_against": 547,
+   "fpts_against_decimal": 74
+  },
+  "metadata": {
+   "record": "LWWL",
+   "streak": "1L"
+  }
+ },
+ {
+  "roster_id": 8,
+  "owner_id": "1130693469418364928",
+  "settings": {
+   "wins": 2,
+   "losses": 2,
+   "ties": 0,
+   "fpts": 552,
+   "fpts_decimal": 38,
+   "fpts_against": 533,
+   "fpts_against_decimal": 8
+  },
+  "metadata": {
+   "record": "WLLW",
+   "streak": "1W"
+  }
+ },
+ {
+  "roster_id": 9,
+  "owner_id": "706636554025627648",
+  "settings": {
+   "wins": 2,
+   "losses": 2,
+   "ties": 0,
+   "fpts": 532,
+   "fpts_decimal": 26,
+   "fpts_against": 533,
+   "fpts_against_decimal": 30
+  },
+  "metadata": {
+   "record": "LWLW",
+   "streak": "1W"
+  }
+ },
+ {
+  "roster_id": 10,
+  "owner_id": "999127451580162048",
+  "settings": {
+   "wins": 2,
+   "losses": 2,
+   "ties": 0,
+   "fpts": 443,
+   "fpts_decimal": 2,
+   "fpts_against": 454,
+   "fpts_against_decimal": 44
+  },
+  "metadata": {
+   "record": "WWLL",
+   "streak": "2L"
+  }
+ },
+ {
+  "roster_id": 11,
+  "owner_id": "1254735640692539392",
+  "settings": {
+   "wins": 1,
+   "losses": 3,
+   "ties": 0,
+   "fpts": 482,
+   "fpts_decimal": 40,
+   "fpts_against": 573,
+   "fpts_against_decimal": 84
+  },
+  "metadata": {
+   "record": "LWLL",
+   "streak": "2L"
+  }
+ },
+ {
+  "roster_id": 12,
+  "owner_id": "1255005504971751424",
+  "settings": {
+   "wins": 1,
+   "losses": 3,
+   "ties": 0,
+   "fpts": 493,
+   "fpts_decimal": 40,
+   "fpts_against": 542,
+   "fpts_against_decimal": 76
+  },
+  "metadata": {
+   "record": "LLWL",
+   "streak": "1L"
+  }
+ }
+]

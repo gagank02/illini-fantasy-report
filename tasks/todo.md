@@ -47,13 +47,13 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Description:** Write typed, memoized fetchers for the league, users, rosters, matchups for each week, and NFL state. Save fixtures from the real league, covering weeks 1 to 4 of 2026. Write `standings()` and `streak()` in `stats.ts` with tests. Render the `/standings` table.
 
 **Acceptance criteria:**
-- [ ] The table shows rank, team, manager, W/L/T, PF, PA, and streak, sorted by wins then PF
-- [ ] Only weeks `1..last_scored_leg` count
-- [ ] The values match the Sleeper app
+- [x] The table shows rank, team, manager, W/L/T, PF, PA, and streak, sorted by wins then PF
+- [x] Only weeks `1..last_scored_leg` count
+- [x] The values match the Sleeper app
 
 **Verification:**
-- [ ] `npm test`: standings sort order, ties, and streak, all against fixtures
-- [ ] Manual: compare `/standings` with the Sleeper app
+- [x] `npm test`: standings sort order, ties, and streak, all against fixtures
+- [x] Manual: compare `/standings` with the Sleeper app
 
 **Dependencies:** T2
 

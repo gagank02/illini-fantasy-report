@@ -1,0 +1,84 @@
+// Sleeper public API. Read only, no key. Called at build time only.
+const BASE = 'https://api.sleeper.app/v1';
+
+export interface League {
+  league_id: string;
+  name: string;
+  season: string;
+  total_rosters: number;
+  previous_league_id: string | null;
+  draft_id: string;
+  status: string;
+  roster_positions: string[];
+  settings: { playoff_week_start: number; playoff_teams: number; last_scored_leg?: number };
+}
+
+export interface User {
+  user_id: string;
+  display_name: string;
+  metadata: { team_name?: string | null };
+}
+
+export interface Roster {
+  roster_id: number;
+  owner_id: string;
+  settings: {
+    wins: number; losses: number; ties: number;
+    fpts: number; fpts_decimal: number; fpts_against: number; fpts_against_decimal: number;
+  };
+  metadata: { record?: string; streak?: string };
+}
+
+export interface Matchup {
+  roster_id: number;
+  matchup_id: number | null;
+  points: number;
+  starters: string[];
+  starters_points: number[];
+}
+
+export interface Season {
+  league: League;
+  users: User[];
+  rosters: Roster[];
+  /** weeks[i] holds week i + 1, regular season weeks that are final only. */
+  weeks: Matchup[][];
+}
+
+// One fetch per URL per build, shared by every page.
+const cache = new Map<string, Promise<unknown>>();
+
+function get<T>(path: string): Promise<T> {
+  let p = cache.get(path);
+  if (!p) {
+    p = fetch(BASE + path).then(res => {
+      if (!res.ok) throw new Error(`Sleeper ${path} returned ${res.status}`);
+      return res.json();
+    });
+    p.catch(() => cache.delete(path));
+    cache.set(path, p);
+  }
+  return p as Promise<T>;
+}
+
+export function currentLeagueId(): string {
+  const id = import.meta.env?.SLEEPER_LEAGUE_ID ?? process.env.SLEEPER_LEAGUE_ID;
+  if (!id) throw new Error('SLEEPER_LEAGUE_ID is not set. Copy .env.example to .env.');
+  return id;
+}
+
+/** Weeks that count toward the regular season: final weeks before the playoffs. */
+export function regularSeasonWeeks(league: League): number {
+  return Math.min(league.settings.last_scored_leg ?? 0, league.settings.playoff_week_start - 1);
+}
+
+export async function loadSeason(leagueId = currentLeagueId()): Promise<Season> {
+  const [league, users, rosters] = await Promise.all([
+    get<League>(`/league/${leagueId}`),
+    get<User[]>(`/league/${leagueId}/users`),
+    get<Roster[]>(`/league/${leagueId}/rosters`),
+  ]);
+  const n = regularSeasonWeeks(league);
+  const weeks = await Promise.all(Array.from({ length: n }, (_, i) => get<Matchup[]>(`/league/${leagueId}/matchups/${i + 1}`)));
+  return { league, users, rosters, weeks };
+}
