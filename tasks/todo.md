@@ -127,9 +127,10 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 ## Task 7: Positional power rankings
 
-**Description:** Add a memoized `players()` fetcher, trimmed to id, name, position, and team. Add `positionPoints()`, which sums `starters_points` by each player's real position. Add QB, RB, WR, TE, K, and DEF tabs to `/power-rankings`. The tabs use radio inputs and CSS, so they need no JS.
+**Description:** Add `scripts/update-players.ts` (`npm run players`). It calls `/players/nfl` **once** and writes `src/data/players.json`, trimmed to id → name, position, NFL team, and injury status, for fantasy positions only. Run it once and commit the file. Pages import the JSON, so builds never call the endpoint. Add `positionPoints()`, which sums `starters_points` by each player's real position. Add QB, RB, WR, TE, K, and DEF tabs to `/power-rankings`. The tabs use radio inputs and CSS, so they need no JS.
 
 **Acceptance criteria:**
+- [ ] No build or page calls `/players/nfl`. A grep for `players/nfl` finds it only in `scripts/update-players.ts`
 - [ ] A FLEX WR counts toward WR
 - [ ] Each tab ranks all 12 teams by season starter points at that position
 - [ ] The tabs work with the keyboard
@@ -140,9 +141,9 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 **Dependencies:** T6
 
-**Files likely touched:** `src/lib/sleeper.ts`, `src/lib/stats.ts`, `tests/stats.test.ts`, `src/pages/power-rankings.astro`
+**Files likely touched:** `scripts/update-players.ts`, `src/data/players.json`, `src/lib/stats.ts`, `tests/stats.test.ts`, `src/pages/power-rankings.astro`
 
-**Estimated scope:** S
+**Estimated scope:** M
 
 ## Task 8: Interesting facts on standings
 
@@ -270,10 +271,10 @@ The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt,
 
 ## Task 13: Weekly report GitHub Action
 
-**Description:** `weekly-report.yml` runs on cron `0 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It runs the writer for the last completed week, lints the result, and opens the PR `Week N report` on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
+**Description:** `weekly-report.yml` runs on cron `0 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It runs `npm run players` (the only weekly `/players/nfl` call), then runs the writer for the last completed week, lints the result, and opens the PR `Week N report` on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
 
 **Acceptance criteria:**
-- [ ] A manual dispatch opens a PR with the report file
+- [ ] A manual dispatch opens a PR with the report file and the refreshed `src/data/players.json`
 - [ ] A lint failure fails the job and opens no PR
 - [ ] The secret never shows up in the logs
 
@@ -295,7 +296,7 @@ The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt,
 
 ## Task 14: History data layer
 
-**Description:** `src/lib/history.ts` follows `previous_league_id` back to 2024 and loads each season's league, users, rosters, matchups, and winners bracket. It maps each roster to its `owner_id` (user_id). For each completed season it works out:
+**Description:** `src/lib/history.ts` follows `previous_league_id` back to 2024. It stops on a repeated league ID or after 30 seasons, so bad data can't cause a fetch loop and loads each season's league, users, rosters, matchups, and winners bracket. It maps each roster to its `owner_id` (user_id). For each completed season it works out:
 - the champion and runner up, from the winners bracket
 - the punishment loser, which is last place in the regular season `standings()`
 
@@ -308,6 +309,7 @@ The all time stats are:
 
 **Acceptance criteria:**
 - [ ] The 2025 champion is roster 6's owner, and 2024 is roster 3's owner
+- [ ] The chain walk stops on a cycle (tested with a fake `previous_league_id` loop)
 - [ ] The punishment loser for each season is the last place team in that season's regular season standings
 - [ ] Each manager's all time wins equal the sum of their per season wins across the 10 team and 12 team seasons
 - [ ] Each head to head pair is symmetric: A's wins against B equal B's losses against A

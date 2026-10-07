@@ -45,13 +45,29 @@ export interface Season {
   weeks: Matchup[][];
 }
 
+/** Sliding window rate limiter: resolves once a call fits within `max` per `windowMs`. */
+export function createLimiter(max: number, windowMs: number): () => Promise<void> {
+  const calls: number[] = [];
+  return async function wait() {
+    for (;;) {
+      const now = Date.now();
+      while (calls.length && now - calls[0]! >= windowMs) calls.shift();
+      if (calls.length < max) { calls.push(now); return; }
+      await new Promise(r => setTimeout(r, windowMs - (now - calls[0]!)));
+    }
+  };
+}
+
+// Sleeper may IP block above 1000 calls/min. Normal builds use ~100, so this only bites on a bug.
+const limit = createLimiter(600, 60_000);
+
 // One fetch per URL per build, shared by every page.
 const cache = new Map<string, Promise<unknown>>();
 
 function get<T>(path: string): Promise<T> {
   let p = cache.get(path);
   if (!p) {
-    p = fetch(BASE + path).then(res => {
+    p = limit().then(() => fetch(BASE + path)).then(res => {
       if (!res.ok) throw new Error(`Sleeper ${path} returned ${res.status}`);
       return res.json();
     });

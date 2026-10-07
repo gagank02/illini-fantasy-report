@@ -6,11 +6,13 @@ This is a static Astro site for the Illini Fantasy Sleeper league (`138610693792
 
 ## Architecture Decisions
 
-- **One data module, memoized.** `src/lib/sleeper.ts` caches each request in a module level promise `Map`, so pages that need the same data share one fetch per build. The players DB (about 5 MB) gets cut down to `{id → name, pos, team}` on first load.
+- **One data module, memoized.** `src/lib/sleeper.ts` caches each request in a module level promise `Map`, so pages that need the same data share one fetch per build. A sliding window limiter caps each process at 600 calls a minute (Sleeper may block above 1000). It's tested, and it only matters if a bug causes a call loop.
 - **Only final weeks count.** Weeks `1..state.last_scored_leg` count as complete, and the week in progress is ignored. This comes from probing `/state/nfl` and the league `settings`.
 - **Regular season and playoffs stay separate.** Weeks below `settings.playoff_week_start` (15) feed standings, what if, power rankings, and all time W/L. Playoff games only show up in brackets and the playoff appearance and title counts.
 - **Champions come from brackets.** The winner of the `p: 1` match in `/winners_bracket` is the champion. This matches `metadata.latest_league_winner_roster_id = 6` for 2025.
 - **The punishment loser comes from the regular season standings.** It's the last place team in `standings()`, so no extra logic is needed. `/losers_bracket` is never fetched.
+- **Players list comes from a committed file.** Sleeper asks that `/players/nfl` (about 5 MB) be called at most once a day. Builds can run several times a day (daily refresh, pushes, PR previews), so builds never call it. `scripts/update-players.ts` writes a trimmed `src/data/players.json` (fantasy positions only, about 400 KB, never shipped to the browser). It runs once in T7 to create the file, then weekly inside the report Action, which also gets fresh injury statuses that way.
+- **Sleeper call budget per build:** about 20 calls for the current season, about 23 per past season, and about 25 for the report script. That's about 100 today and about 300 after 10 seasons, far under 1000 a minute.
 - **Draft hits and busts use league scoring.** Each player's season points are summed from `players_points` across that season's matchups. That counts points scored while on any roster in this league, so free agent weeks are left out. This is good enough to judge draft value, and it avoids Sleeper's undocumented stats API.
 - **Position points use the player's real position, not the lineup slot.** A WR in a FLEX slot counts as WR.
 - **Pure stats code.** `src/lib/stats.ts` and `src/lib/history.ts` take plain data and return plain data. Tests run them against saved fixtures and never hit the network.
@@ -69,7 +71,8 @@ T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and
 | Claude ignores the style rules | Med | T11's linter blocks the PR. The prompt includes the banned list, and you review before merge |
 | The model invents a stat | High | The prompt passes only the facts bundle and tells the model to use only those numbers. Human review is the final check |
 | Theme flash breaks the strict CSP | Low | The inline theme script is allowed by its hash in `_headers`, and T4 verifies it with the browser console |
-| The players DB fetch slows builds | Low | It's fetched once per build, memoized, and trimmed |
+| A bug causes a call loop and Sleeper IP blocks us | Med | A rate limiter in `get()` (600 a minute), per URL memoization, and a guard on repeated IDs in the history walk |
+| Builds call `/players/nfl` too often | Med | Builds read the committed `src/data/players.json`. Only the weekly Action calls the endpoint |
 | Actions can't open PRs by default | Low | Enable "Allow GitHub Actions to create pull requests" in repo settings during T13 |
 
 ## Things You Need To Do (Claude can't)

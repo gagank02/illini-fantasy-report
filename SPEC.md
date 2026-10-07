@@ -12,7 +12,7 @@ A lightweight website for our 12 team Sleeper fantasy football league. League me
 
 | Module id | Responsibility | Depends on |
 |---|---|---|
-| `sleeper-data` | Fetch and type Sleeper league, rosters, users, matchups, players, trending | none |
+| `sleeper-data` | Fetch and type Sleeper league, rosters, users, matchups, trending. Rate limited. Players come from a committed file | none |
 | `league-stats` | Pure functions: standings, what if matrix, power rankings, fun facts | `sleeper-data` |
 | `site` | Astro pages, layout, UIUC theme, light/dark toggle | `league-stats` |
 | `weekly-report` | Script + GitHub Action that drafts the recap with Claude and opens a PR | `league-stats`, `sleeper-data` |
@@ -90,7 +90,12 @@ The site is small, so all four modules live in this one spec and don't get separ
 - **Astro 7** (static output) + TypeScript (strict). Ships almost no client JS. The theme toggle and position tabs are the only scripts.
 - **Report export:** `html-to-image` (about 10 KB, lazy loaded) for PNG. PDF uses the browser's print to PDF with a print stylesheet.
 - **Fonts:** One self hosted blackletter woff2 for the masthead (e.g. UnifrakturMaguntia, OFL licensed). Body text uses system serif fonts. Fonts live under `public/fonts/` because the CSP blocks third party font hosts.
-- **Data:** Sleeper public API (`https://api.sleeper.app/v1`). It's free with no key and allows about 1000 calls a minute. Fetching happens **at build time only**, so the browser never calls Sleeper.
+- **Data:** Sleeper public API (`https://api.sleeper.app/v1`). It's free with no key. Fetching happens **at build time only**, so the browser never calls Sleeper.
+- **Sleeper rate limits:** Sleeper may IP block anyone above 1000 calls a minute, and asks that `/players/nfl` be called at most once a day.
+  - **Per URL:** Each URL is fetched at most once per process. `get()` caches it.
+  - **Rate limiter:** In `sleeper.ts`, it caps each process at 600 calls a minute. A normal build uses about 100. The cap only matters if a bug causes a call loop.
+  - **Players list:** `/players/nfl` is never called by builds or the dev server. `scripts/update-players.ts` writes a trimmed `src/data/players.json` (id, name, position, NFL team, injury status). The weekly report Action runs it, so the endpoint gets called once a week, and the file lands in the report PR.
+  - **History walk:** Following `previous_league_id` stops on a repeated ID or after 30 seasons.
 - **Report writer:** `@anthropic-ai/sdk`, plus a small RSS fetch with no parser dependency, run by Node 24 in GitHub Actions.
 - **Tests:** Vitest 5.
 - **Toolchain:** Node 22 or newer with **npm 11**. npm 10 crashes while resolving Vitest 5's peer dependencies (`Cannot read properties of null (reading 'edgesOut')`). CI uses Node 24, which ships with npm 11.
@@ -136,6 +141,7 @@ src/
   content/reports/{season}/week-{n}.md  → published reports (content collection)
 scripts/
   write-report.ts         → builds facts bundle, calls Claude, writes markdown
+  update-players.ts       → fetches /players/nfl once, writes trimmed src/data/players.json
   lint-report.ts          → style rule checker
 .env.example              → placeholder env vars (real .env is gitignored)
 tests/
@@ -192,7 +198,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 
 - **Always:** Keep Sleeper fetches at build time. Run `npm test && npm run check` before committing. Pass reports through `lint:report`. Use `writing-style.md` verbatim as the system prompt.
 - **Ask first:** Adding any npm dependency. Changing the power ranking formula. Switching the Claude model. Adding client side JS beyond the theme toggle, tabs, and report export buttons. Changing hosting.
-- **Never:** Commit API keys or `.env`. Call the Anthropic API from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
+- **Never:** Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call the Anthropic API from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
 
 ## Success Criteria
 
