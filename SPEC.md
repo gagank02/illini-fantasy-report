@@ -42,8 +42,18 @@ The site is small, so all four modules live in this one spec and don't get separ
 - Positional tab for QB, RB, WR, TE, K, DEF. Teams are ranked by season total starter points at that position.
 
 **4. Weekly report** (`/reports`, `/reports/{season}/week-{n}`)
-- Reads like a sports page, with a headline, a lede, a game by game recap, and short items on the top performer, the bust of the week, and NFL news that matters for fantasy.
-- Written by Claude (`claude-opus-5-5`) with `writing-style.md` as the system prompt. The prompt also gets a facts bundle with scores, top players, standings changes, Sleeper injury statuses, trending adds/drops, and the latest headlines from an NFL RSS feed.
+- Reads like a sports page. Sections, in order:
+  1. **Headline and lede.**
+  2. **Game by game:** every matchup, with jabs.
+  3. **Player of the week and bust of the week.**
+  4. **Bench blunders:** points each manager left on the bench compared with their best possible lineup. Includes a "Coach of the week" (closest to the best lineup) and a "Worst coach" (most points left on the bench, especially in a loss they would have won).
+  5. **Stock up and stock down:** the biggest power ranking risers and fallers, and why.
+  6. **Transactions:** this week's adds, drops, and trades in our league, plus callouts like a dropped player who scored big elsewhere.
+  7. **Injury report:** rostered starters listed Out, Doubtful, Questionable, or on IR, and which teams they hurt.
+  8. **NFL news:** ESPN headlines that matter for fantasy, restated in the report's own words.
+  9. **Next week:** each matchup with both teams' form and season scoring, plus a pick. Sleeper's public API has no projections, so picks use only our own stats.
+- **Tone:** friendly trash talk, by name. Jabs target decisions and results (bad starts, bench blunders, blowouts, waiver misses), never anything personal.
+- Written by Claude (`claude-opus-5-5`) with `writing-style.md` as the system prompt. The prompt also gets a facts bundle with scores, top players, standings changes, the "Around the league" facts, bench blunders, power ranking movers, league transactions, Sleeper injury statuses, trending adds/drops, next week's matchups, and the latest headlines from an NFL RSS feed.
 - The model gets facts only and never invents stats. Every number in the report comes from the facts bundle.
 - A style check script fails the PR when the report contains em/en dashes, semicolons, emojis, `*`, hashtags, raw HTML, or phrases from a banned list (seeded from `writing-style.md`).
 - The home page (`/`) is the weekly front door. It has these parts.
@@ -227,7 +237,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 - League ID: `1386106937921253376`.
 - News source: Sleeper data plus the ESPN NFL RSS feed (`espn.com/espn/rss/nfl/news`). If the feed fails, the report falls back to Sleeper data alone.
 - Hyphens: allowed only inside player names that match Sleeper's player list. Banned everywhere else.
-- Tone: the report calls out managers by name.
+- Tone: friendly trash talk by name, aimed at decisions and results, never personal.
 - Power rankings: 50/30/20 weights.
 - The punishment loser is the last place team in the regular season standings, not the loser of a bracket.
 - History starts at 2024. There are no seasons before Sleeper.

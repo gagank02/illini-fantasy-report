@@ -261,29 +261,50 @@ Add the `/reports` index and the report pages. Add the latest report's headline 
 
 **Estimated scope:** S
 
-## Task 12: Report writer script
+## Task 12a: Report facts bundle
 
-**Description:** `npm run report -- --week N` builds a facts bundle. The bundle includes:
-- the scores
-- each matchup's top and bottom starters
-- standings changes
-- power ranking changes
-- injury statuses of rostered starters
-- trending adds and drops
-- the "Around the league" facts from `facts()`
-- the top 10 ESPN RSS headlines, parsed with a simple regex on `<item><title>`
-
-The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt, plus rules: use only the facts given, name managers, use newspaper structure, and never copy headline or article wording from ESPN (restate the news in your own words). It writes the markdown with frontmatter, then runs the linter. If the lint fails, it retries once and sends the model the list of violations. Load the `claude-api` skill before writing this.
+**Description:** Pure, tested functions in `src/lib/report-facts.ts` that build everything the writer may cite. `buildFacts(season, week)` returns one JSON object with:
+- **Scores and matchups:** every game, with each side's top and bottom starter.
+- **Bench blunders:** `optimalLineup()` fills fixed slots (QB, RB, RB, WR, WR, TE, K, DEF) with the best eligible players, then FLEX with the best remaining RB, WR, or TE. Points left on bench = optimal minus actual. Flags "would have won with the best lineup" and picks a coach of the week (smallest gap) and a worst coach.
+- **Power ranking movers:** the biggest risers and fallers, with score, all play, and last 3 changes.
+- **Transactions:** completed adds, drops, and trades for the week from `/league/{id}/transactions/{week}` (failed waiver claims skipped). Flags a player dropped earlier who scored 15 or more for another team this week.
+- **Injury report:** rostered starters with an injury status from `players.json`.
+- **Next week:** pairings from `/matchups/{week + 1}`, with each team's record, last 3 points, and power rank.
+- **Also:** standings changes, `facts()`, and Sleeper trending adds and drops.
 
 **Acceptance criteria:**
-- [ ] It writes `src/content/reports/{season}/week-{N}.md`, and the file passes `lint:report`
-- [ ] If the RSS fetch fails, the run still finishes and logs a warning
+- [ ] `optimalLineup()` is tested on a hand built roster, including a FLEX case and an empty slot
+- [ ] Every number in the bundle traces to Sleeper data, and a test checks the bundle against week 4 fixtures
+- [ ] Fetching adds at most about 5 Sleeper calls on top of `loadSeason()`
+
+**Verification:**
+- [ ] `npm test`: `tests/report-facts.test.ts`
+- [ ] Manual: print the week 4 bundle and spot check bench points for two teams in the Sleeper app
+
+**Dependencies:** T6, T7, T8
+
+**Files likely touched:** `src/lib/report-facts.ts`, `src/lib/sleeper.ts`, `tests/report-facts.test.ts`, `tests/fixtures/transactions-4.json`
+
+**Estimated scope:** M
+
+## Task 12b: Report writer script
+
+**Description:** `npm run report -- --week N` calls `buildFacts()`, adds the top 10 ESPN RSS headlines (parsed with a simple regex on `<item><title>`), and calls `claude-opus-5-5`. The system prompt is `writing-style.md`, plus rules for the nine sections in `SPEC.md`:
+- Use only the facts given, and never invent stats or news.
+- Friendly trash talk by name, aimed at decisions and results, never personal.
+- Never copy ESPN wording.
+
+The script writes the markdown with frontmatter and runs the linter. If the lint fails, it retries once with the list of violations. Load the `claude-api` skill before writing this.
+
+**Acceptance criteria:**
+- [ ] It writes `src/content/reports/{season}/week-{N}.md` with all nine sections, and the file passes `lint:report`
+- [ ] If the RSS fetch fails, the run still finishes, skips the NFL news section, and logs a warning
 - [ ] Without `ANTHROPIC_API_KEY`, the script stops with a clear message before calling the API
 
 **Verification:**
-- [ ] Manual: run it locally for week 4 with your key, read the output, and check every number against the Sleeper app
+- [ ] Manual: run it locally for week 4 with your key, read the output, and check every number against the bundle
 
-**Dependencies:** T6, T7, T9, T11
+**Dependencies:** T12a, T9, T11
 
 **Files likely touched:** `scripts/write-report.ts`, `package.json`
 
@@ -308,7 +329,7 @@ Notes:
 **Verification:**
 - [ ] Manual: dispatch the workflow, read the PR, merge it, and confirm the report goes live
 
-**Dependencies:** T12, T4
+**Dependencies:** T12b, T4
 
 **Files likely touched:** `.github/workflows/weekly-report.yml`
 
