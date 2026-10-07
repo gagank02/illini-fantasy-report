@@ -15,6 +15,9 @@ const ESPN_RSS = 'https://www.espn.com/espn/rss/nfl/news';
 const ESPN_JSON = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=20';
 const UA = { 'User-Agent': 'IlliniFantasyReport/1.0 (+https://illini-fantasy-report.pages.dev)' };
 
+// In GitHub Actions, ::warning:: lines also show on the run's public summary page.
+const warn = (msg: string) => console.warn(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `Warning: ${msg}`);
+
 const fail = (msg: string): never => {
   console.error(`\n${msg}`);
   process.exit(1);
@@ -49,10 +52,11 @@ for (const [name, url, parse] of [
     console.log(`Got ${headlines.length} headlines from ${name}.`);
     break;
   } catch (err) {
-    console.warn(`Warning: ${name} failed (${(err as Error).message}).`);
+    const e = err as Error & { cause?: { code?: string } };
+    warn(`${name} failed (${e.message}${e.cause?.code ? `, ${e.cause.code}` : ''}).`);
   }
 }
-if (!headlines.length) console.warn('Warning: no NFL headlines. Writing without the NFL news section.');
+if (!headlines.length) warn('No NFL headlines. Writing without the NFL news section.');
 
 // 3. Ask Claude. Tools off, no user settings or plugins, our own system prompt.
 const system = `${readFileSync('writing-style.md', 'utf8')}\n\n${REPORT_RULES}`;
