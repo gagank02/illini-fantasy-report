@@ -14,6 +14,11 @@ describe('parseRss', () => {
     ]);
   });
 
+  test('decodes numeric entities and trims whitespace (CBS style)', () => {
+    const xml = '<rss><item><title>\n   Eagles&#039; Lane Johnson retires &#8217;26  \n</title><description>A&#x27;s</description></item></rss>';
+    expect(parseRss(xml)).toEqual([{ title: "Eagles' Lane Johnson retires \u201926", description: "A's" }]);
+  });
+
   test('caps the number of items and survives junk', () => {
     const many = '<rss>' + Array.from({ length: 30 }, (_, i) => `<item><title>T${i}</title></item>`).join('') + '</rss>';
     expect(parseRss(many, 10)).toHaveLength(10);
@@ -38,11 +43,12 @@ describe('parseEspnJson (fallback when the RSS feed fails)', () => {
 describe('buildPrompt', () => {
   test('includes the facts as JSON and the headlines, and drops the news section without headlines', () => {
     const facts = { season: 2026, week: 4, games: [] };
-    const withNews = buildPrompt(facts, [{ title: 'Big injury', description: 'Out for the year' }]);
+    const withNews = buildPrompt(facts, [{ title: 'Big injury', description: 'Out for the year' }], 'CBS Sports');
     expect(withNews).toContain('"week": 4');
     expect(withNews).toContain('Big injury');
     expect(withNews).toContain('## NFL news');
-    const noNews = buildPrompt(facts, []);
+    expect(withNews).toContain('NFL headlines from CBS Sports');
+    const noNews = buildPrompt(facts, [], '');
     expect(noNews).not.toContain('## NFL news');
   });
 });
@@ -85,7 +91,7 @@ describe('REPORT_RULES guard rails (each came from a real bad draft)', () => {
     ['superlatives need the whole list', /Check the full list/],
     ['news only from the headline, no invented details', /Never add details, predictions, or a different story/],
     ['skip crime, legal, and health stories', /Skip stories about crimes, lawsuits, trials/],
-    ['never copy ESPN wording', /Never copy ESPN wording/],
+    ['never copy the source\'s wording', /Never copy the source's wording/],
     ['facts only', /Never invent stats/],
     ['no invented context like divisions or rivalries', /divisions, rivalries/],
   ])('%s', (_, re) => {

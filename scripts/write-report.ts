@@ -11,8 +11,6 @@ import { buildPrompt, fixPrompt, missingSections, parseDraft, parseEspnJson, par
 import { leagueUsers, loadSeason } from '../src/lib/sleeper.ts';
 
 const MODEL = 'claude-opus-5-5';
-const ESPN_RSS = 'https://www.espn.com/espn/rss/nfl/news';
-const ESPN_JSON = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=20';
 const UA = { 'User-Agent': 'IlliniFantasyReport/1.0 (+https://illini-fantasy-report.pages.dev)' };
 
 // In GitHub Actions, ::warning:: lines also show on the run's public summary page.
@@ -34,29 +32,35 @@ if (spawnSync('claude', ['--version'], { encoding: 'utf8' }).status !== 0) {
 // 2. Facts and headlines.
 const players = JSON.parse(readFileSync('src/data/players.json', 'utf8'));
 const facts = await buildFacts(week, players);
-// Headlines: ESPN RSS first, then ESPN's JSON news endpoint. Without either, the NFL news section is skipped.
-async function headlinesFrom(url: string, parse: (body: string) => Headline[]): Promise<Headline[]> {
-  const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(10_000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const list = parse(await res.text());
-  if (!list.length) throw new Error('no headlines in the response');
-  return list;
-}
+// Headlines: first source that returns any wins. ESPN blocks GitHub's servers (empty RSS, JSON 403),
+// so other feeds follow. Headlines are inputs only; the report restates them in its own words.
+const SOURCES: [name: string, url: string, parse: (body: string) => Headline[]][] = [
+  ['ESPN', 'https://www.espn.com/espn/rss/nfl/news', b => parseRss(b, 10)],
+  ['CBS Sports', 'https://www.cbssports.com/rss/headlines/nfl/', b => parseRss(b, 10)],
+  ['Yahoo Sports', 'https://sports.yahoo.com/nfl/rss.xml', b => parseRss(b, 10)],
+  ['Pro Football Talk', 'https://profootballtalk.nbcsports.com/feed/', b => parseRss(b, 10)],
+  ['ESPN', 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=20', b => parseEspnJson(JSON.parse(b), 10)],
+];
 let headlines: Headline[] = [];
-for (const [name, url, parse] of [
-  ['ESPN RSS', ESPN_RSS, (b: string) => parseRss(b, 10)],
-  ['ESPN JSON', ESPN_JSON, (b: string) => parseEspnJson(JSON.parse(b), 10)],
-] as const) {
+let source = '';
+for (const [name, url, parse] of SOURCES) {
   try {
-    headlines = await headlinesFrom(url, parse);
-    console.log(`Got ${headlines.length} headlines from ${name}.`);
+    const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const body = await res.text();
+    const list = parse(body);
+    // Say what came back instead, so a block page is visible in the run summary.
+    if (!list.length) throw new Error(`no headlines; got ${res.headers.get('content-type')}: ${body.slice(0, 80).replace(/\s+/g, ' ')}`);
+    headlines = list;
+    source = name;
+    console.log(`Got ${headlines.length} headlines from ${name} (${new URL(url).host}).`);
     break;
   } catch (err) {
     const e = err as Error & { cause?: { code?: string } };
-    warn(`${name} failed (${e.message}${e.cause?.code ? `, ${e.cause.code}` : ''}).`);
+    warn(`${name} (${new URL(url).host}) failed: ${e.message}${e.cause?.code ? `, ${e.cause.code}` : ''}`);
   }
 }
-if (!headlines.length) warn('No NFL headlines. Writing without the NFL news section.');
+if (!headlines.length) warn('No NFL headlines from any source. Writing without the NFL news section.');
 
 // 3. Ask Claude. Tools off, no user settings or plugins, our own system prompt.
 const system = `${readFileSync('writing-style.md', 'utf8')}\n\n${REPORT_RULES}`;
@@ -90,7 +94,7 @@ function check(text: string): { markdown?: string; problems: string[] } {
   return { markdown, problems };
 }
 
-let text = claude(buildPrompt(facts, headlines));
+let text = claude(buildPrompt(facts, headlines, source));
 let result = check(text);
 if (result.problems.length) {
   console.log(`First draft had ${result.problems.length} problem(s). Asking for one fix.`);

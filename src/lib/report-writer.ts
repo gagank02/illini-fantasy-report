@@ -44,7 +44,7 @@ Bench blunders. Use benchBlunders, coachOfTheWeek, and worstCoach. Lead with any
 Stock up and stock down. Use powerMovers. Explain the move with numbers from the facts.
 Transactions. Highlight the interesting moves, not every one. Call out droppedAndScored if present.
 Injury report. List injured starters and whose team they hurt.
-NFL news. Pick 3 to 5 headlines that matter for fantasy. Restate each in your own words. Never copy ESPN wording.
+NFL news. Pick 3 to 5 headlines that matter for fantasy. Restate each in your own words. Never copy the source's wording.
 Use only what each headline and description actually says. Never add details, predictions, or a different story.
 Skip stories about crimes, lawsuits, trials, discipline, health or mental health, and personal matters, even for fantasy relevant players.
 Next week. One line per matchup with a pick, based only on records, last3, and powerRank. Call it a pick, not a projection.
@@ -59,7 +59,10 @@ export interface Headline {
 
 const decode = (s: string) =>
   s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&apos;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
     .trim();
 
 /** Item titles and descriptions from an RSS feed. Regex, not a parser: we only need two fields. */
@@ -80,7 +83,8 @@ export function parseEspnJson(json: unknown, limit = 10): Headline[] {
     .map(a => ({ title: a.headline!.trim(), description: (a.description ?? '').trim() }));
 }
 
-export function buildPrompt(facts: unknown, headlines: Headline[]): string {
+/** `source` names where the headlines came from (ESPN, CBS Sports, ...). */
+export function buildPrompt(facts: unknown, headlines: Headline[], source: string): string {
   const sections = SECTIONS.filter(s => s !== 'NFL news' || headlines.length > 0);
   return [
     'Write this week\'s report from these facts.',
@@ -94,7 +98,7 @@ export function buildPrompt(facts: unknown, headlines: Headline[]): string {
     '```',
     '',
     headlines.length
-      ? ['NFL headlines from ESPN (inputs only, restate in your own words):', ...headlines.map(h => `- ${h.title}. ${h.description}`)].join('\n')
+      ? [`NFL headlines from ${source} (inputs only, restate in your own words):`, ...headlines.map(h => `- ${h.title}. ${h.description}`)].join('\n')
       : 'No NFL headlines this week. Leave out the NFL news section.',
   ].join('\n');
 }

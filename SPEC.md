@@ -213,7 +213,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 
 - **Always:** Make icons and graphics ourselves (inline SVG or Unicode). Ship a font's license file next to the font. Keep the footer line saying the site isn't affiliated with the University of Illinois, Sleeper, or the NFL. Keep Sleeper fetches at build time. Run `npm test && npm run check` before committing. Pass reports through `lint:report`. Use `writing-style.md` verbatim as the system prompt.
 - **Ask first:** Adding any npm dependency. Changing the power ranking formula. Switching the Claude model. Adding client side JS beyond the theme toggle, tabs, and report export buttons. Changing hosting.
-- **Never:** Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy ESPN article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call Claude from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
+- **Never:** Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy news article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call Claude from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
 
 ## Success Criteria
 
@@ -235,7 +235,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 ## Decisions
 
 - League ID: `1386106937921253376`.
-- News source: Sleeper data plus the ESPN NFL RSS feed (`espn.com/espn/rss/nfl/news`). If the feed fails, the report falls back to Sleeper data alone.
+- News source: Sleeper data plus NFL headlines. ESPN's RSS feed comes first, but ESPN blocks GitHub's servers (empty feed, JSON 403), so the writer falls back in order to CBS Sports, Yahoo Sports, Pro Football Talk, and ESPN's JSON endpoint. The first source with headlines wins. If all fail, the NFL news section is skipped.
 - Hyphens: allowed only inside player names that match Sleeper's player list. Banned everywhere else.
 - Tone: friendly trash talk by name, aimed at decisions and results, never personal.
 - Power rankings: 50/30/20 weights.
