@@ -63,7 +63,7 @@ function get<T>(path: string): Promise<T> {
 
 export function currentLeagueId(): string {
   const id = import.meta.env?.SLEEPER_LEAGUE_ID ?? process.env.SLEEPER_LEAGUE_ID;
-  if (!id) throw new Error('SLEEPER_LEAGUE_ID is not set. Copy .env.example to .env.');
+  if (!id) throw new Error('SLEEPER_LEAGUE_ID is not set. Add it to .env (see .env.example), then restart npm run dev.');
   return id;
 }
 
