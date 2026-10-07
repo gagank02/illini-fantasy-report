@@ -50,7 +50,7 @@ The site is small, so all four modules live in this one spec and don't get separ
   5. **Stock up and stock down:** the biggest power ranking risers and fallers, and why.
   6. **Transactions:** this week's adds, drops, and trades in our league, plus callouts like a dropped player who scored big elsewhere.
   7. **Injury report:** rostered starters listed Out, Doubtful, Questionable, or on IR, and which teams they hurt.
-  8. **NFL news:** ESPN headlines that matter for fantasy, restated in the report's own words.
+  8. **Fantasy news:** injury statuses and Sleeper's trending adds and drops. No outside news sites (see Decisions).
   9. **Next week:** each matchup with both teams' form and season scoring, plus a pick. Sleeper's public API has no projections, so picks use only our own stats.
 - **Tone:** friendly trash talk, by name. Jabs target decisions and results (bad starts, bench blunders, blowouts, waiver misses), never anything personal.
 - Written by Claude (`claude-opus-5-5`) through **Claude Code in headless mode** (`claude -p`) on the commissioner's Claude Pro or Max **subscription**, not a paid API key. It runs with `writing-style.md` plus the report rules as the system prompt, all tools disabled, and no user settings or plugins. The prompt also gets a facts bundle with scores, top players, standings changes, the "Around the league" facts, bench blunders, power ranking movers, league transactions, Sleeper injury statuses, trending adds/drops, and next week's matchups.
@@ -111,7 +111,7 @@ The site is small, so all four modules live in this one spec and don't get separ
   - **Rate limiter:** In `sleeper.ts`, it caps each process at 600 calls a minute. A normal build uses about 100. The cap only matters if a bug causes a call loop.
   - **Players list:** `/players/nfl` is never called by builds or the dev server. `scripts/update-players.ts` writes a trimmed `src/data/players.json` (id, name, position, NFL team, injury status). The weekly report Action runs it, so the endpoint gets called once a week, and the file lands in the report PR.
   - **History walk:** Following `previous_league_id` stops on a repeated ID or after 30 seasons.
-- **Report writer:** the `claude` CLI (Claude Code) in headless mode, plus a small RSS fetch with no parser dependency, run by Node 24. There's no SDK dependency. Locally it uses your logged in subscription. In GitHub Actions it uses `CLAUDE_CODE_OAUTH_TOKEN` (made with `claude setup-token`).
+- **Report writer:** the `claude` CLI (Claude Code) in headless mode, run by Node 24. Its only data source is Sleeper. There's no SDK dependency. Locally it uses your logged in subscription. In GitHub Actions it uses `CLAUDE_CODE_OAUTH_TOKEN` (made with `claude setup-token`).
 - **Tests:** Vitest 5.
 - **Toolchain:** Node 22 or newer with **npm 11**. npm 10 crashes while resolving Vitest 5's peer dependencies (`Cannot read properties of null (reading 'edgesOut')`). CI uses Node 24, which ships with npm 11.
 - **Hosting:** Cloudflare Pages (free), building from `main`. A scheduled GitHub Action calls a Pages deploy hook daily so data stays fresh.
@@ -213,7 +213,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 
 - **Always:** Make icons and graphics ourselves (inline SVG or Unicode). Ship a font's license file next to the font. Keep the footer line saying the site isn't affiliated with the University of Illinois, Sleeper, or the NFL. Keep Sleeper fetches at build time. Run `npm test && npm run check` before committing. Pass reports through `lint:report`. Use `writing-style.md` verbatim as the system prompt.
 - **Ask first:** Adding any npm dependency. Changing the power ranking formula. Switching the Claude model. Adding client side JS beyond the theme toggle, tabs, and report export buttons. Changing hosting.
-- **Never:** Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy news article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call Claude from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
+- **Never:** Add ads, paid features, or anything commercial (Sleeper's free API is non-commercial only). Feed outside news sites to the report writer without first confirming their terms allow automated access and use with AI. Use NFL, team, or University of Illinois logos (including the Block I), player headshots, or Sleeper avatars. Copy news article text into reports (headlines are inputs only, and the report states the facts in its own words). Add any image, icon, or font without a license that allows it. Call `/players/nfl` from a build or page. Read `src/data/players.json` instead. Commit API keys or `.env`. Call Claude from the browser. Auto merge a report PR. Let the model state numbers that aren't in the facts bundle. Render raw HTML from report markdown.
 
 ## Success Criteria
 
@@ -235,7 +235,8 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 ## Decisions
 
 - League ID: `1386106937921253376`.
-- News source: Sleeper data plus NFL headlines. ESPN's RSS feed comes first, but ESPN blocks GitHub's servers (empty feed, JSON 403), so the writer falls back in order to CBS Sports, Yahoo Sports, Pro Football Talk, and ESPN's JSON endpoint. The first source with headlines wins. If all fail, the NFL news section is skipped.
+- News source: **Sleeper only.** ESPN's terms (Disney) forbid automated access and using their content in "prompting, fine-tuning, training" of AI tools, and its RSS terms forbid modifying headlines. Yahoo's terms forbid automated collection. CBS Sports and Pro Football Talk terms couldn't be verified. So the report's "Fantasy news" section uses only Sleeper injury statuses and trending data. Checked 2026-10-07. This is a cautious reading, not legal advice.
+- Sleeper's API is free for **non-commercial** use only, and its trending data needs attribution. Every report shows a Sleeper credit line, and the site carries no ads or paid features.
 - Hyphens: allowed only inside player names that match Sleeper's player list. Banned everywhere else.
 - Tone: friendly trash talk by name, aimed at decisions and results, never personal.
 - Power rankings: 50/30/20 weights.
