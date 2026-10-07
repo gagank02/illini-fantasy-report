@@ -128,8 +128,9 @@ export function assembleFacts(input: FactsInput) {
     const pr = power.find(p => p.rosterId === m.roster_id);
     return { ...who(m.roster_id), wins: row?.w ?? 0, losses: row?.l ?? 0, ties: row?.t ?? 0, last3: pr?.last3 ?? 0, powerRank: pr?.rank ?? null };
   };
-  // Who in our league rosters each player this week (null = free agent here).
-  const owner = new Map(thisWeek.flatMap(m => (m.players ?? []).map(id => [id, m.roster_id] as const)));
+  // Who in our league rosters each player RIGHT NOW (null = free agent here). Trending is the last 24 hours,
+  // so ownership must be current too: last week's games miss this week's waiver pickups.
+  const owner = new Map(rosters.flatMap(r => (r.players ?? []).map(id => [id, r.roster_id] as const)));
   const trend = (list: { player_id: string; count: number }[]) =>
     list.filter(t => players[t.player_id]).map(t => {
       const rid = owner.get(t.player_id);

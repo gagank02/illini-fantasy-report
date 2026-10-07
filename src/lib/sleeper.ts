@@ -27,6 +27,8 @@ export interface Roster {
     fpts: number; fpts_decimal: number; fpts_against: number; fpts_against_decimal: number;
   };
   metadata: { record?: string; streak?: string };
+  /** Current roster player ids (as of the fetch, not any past week). */
+  players?: string[];
 }
 
 export interface Matchup {
