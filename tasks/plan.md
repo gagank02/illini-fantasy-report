@@ -26,10 +26,10 @@ Details for each task are in `tasks/todo.md`.
 - [x] T1: Scaffold Astro, Vitest, and CI
 - [x] T2: Base layout, UIUC theme, and light/dark toggle
 - [x] T3: Sleeper client and `/standings` page
-- [ ] T4: Deploy to Cloudflare Pages with security headers and daily refresh
+- [x] T4: Deploy to Cloudflare Pages with security headers and daily refresh
 
 ### Checkpoint A: Live skeleton
-- [ ] A deployed URL shows the real standings, the theme toggle works, and CI is green
+- [x] A deployed URL shows the real standings, the theme toggle works, and CI is green
 
 ### Phase 2: League stats pages
 - [ ] T5: What if matrix

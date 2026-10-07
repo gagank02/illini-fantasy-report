@@ -70,11 +70,11 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Acceptance criteria:**
 - [x] The site is live at https://illini-fantasy-report.pages.dev, and the browser console shows no CSP errors
 - [x] securityheaders.com grades the site A or better. securityheaders.com blocks automated scans, so Mozilla HTTP Observatory was used instead and graded it **A+** (130/100, 12 of 12 tests passed, 2026-10-07)
-- [ ] A manual `workflow_dispatch` of `refresh.yml` triggers a new deploy
+- [x] A manual `workflow_dispatch` of `refresh.yml` triggers a new deploy
 
 **Verification:**
 - [x] Manual: open the live URL, check the console, and run securityheaders.com
-- [ ] Manual: run the refresh workflow and watch the Pages deploy log
+- [x] Manual: run the refresh workflow and watch the Pages deploy log
 
 **Dependencies:** T3
 
@@ -83,9 +83,9 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Estimated scope:** S
 
 ## Checkpoint A: Live skeleton
-- [ ] All tests pass, and the build is clean
-- [ ] The live URL shows the real standings, and the theme toggle works there
-- [ ] Review with the human before going on
+- [x] All tests pass, and the build is clean
+- [x] The live URL shows the real standings, and the theme toggle works there
+- [x] Review with the human before going on
 
 ## Phase 2: League stats pages
 
