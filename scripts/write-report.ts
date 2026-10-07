@@ -1,20 +1,16 @@
 // npm run report -- [--week N]
-// Builds the facts bundle, asks Claude (through Claude Code on your subscription) to write the report,
-// lints it, retries once with the problems, and writes src/content/reports/{season}/week-{N}.md.
+// Builds the facts bundle (Sleeper data only), asks Claude (through Claude Code on your subscription) to write
+// the report, lints it, retries once with the problems, and writes src/content/reports/{season}/week-{N}.md.
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { lintReport } from '../src/lib/lint-report.ts';
 import { buildFacts } from '../src/lib/report-facts.ts';
-import { buildPrompt, fixPrompt, missingSections, parseDraft, parseEspnJson, parseRss, REPORT_RULES, toMarkdown, type Headline } from '../src/lib/report-writer.ts';
+import { buildPrompt, fixPrompt, missingSections, parseDraft, REPORT_RULES, toMarkdown } from '../src/lib/report-writer.ts';
 import { leagueUsers, loadSeason } from '../src/lib/sleeper.ts';
 
 const MODEL = 'claude-opus-5-5';
-const UA = { 'User-Agent': 'IlliniFantasyReport/1.0 (+https://illini-fantasy-report.pages.dev)' };
-
-// In GitHub Actions, ::warning:: lines also show on the run's public summary page.
-const warn = (msg: string) => console.warn(process.env.GITHUB_ACTIONS ? `::warning::${msg}` : `Warning: ${msg}`);
 
 const fail = (msg: string): never => {
   console.error(`\n${msg}`);
@@ -29,38 +25,9 @@ if (spawnSync('claude', ['--version'], { encoding: 'utf8' }).status !== 0) {
   fail('The `claude` command (Claude Code) was not found. Install it and log in with your Claude subscription, or set CLAUDE_CODE_OAUTH_TOKEN in CI.');
 }
 
-// 2. Facts and headlines.
+// 2. Facts, from Sleeper only. No outside news feeds: ESPN and Yahoo terms forbid feeding their content to AI tools.
 const players = JSON.parse(readFileSync('src/data/players.json', 'utf8'));
 const facts = await buildFacts(week, players);
-// Headlines: first source that returns any wins. ESPN blocks GitHub's servers (empty RSS, JSON 403),
-// so other feeds follow. Headlines are inputs only; the report restates them in its own words.
-const SOURCES: [name: string, url: string, parse: (body: string) => Headline[]][] = [
-  ['ESPN', 'https://www.espn.com/espn/rss/nfl/news', b => parseRss(b, 10)],
-  ['CBS Sports', 'https://www.cbssports.com/rss/headlines/nfl/', b => parseRss(b, 10)],
-  ['Yahoo Sports', 'https://sports.yahoo.com/nfl/rss.xml', b => parseRss(b, 10)],
-  ['Pro Football Talk', 'https://profootballtalk.nbcsports.com/feed/', b => parseRss(b, 10)],
-  ['ESPN', 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=20', b => parseEspnJson(JSON.parse(b), 10)],
-];
-let headlines: Headline[] = [];
-let source = '';
-for (const [name, url, parse] of SOURCES) {
-  try {
-    const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const body = await res.text();
-    const list = parse(body);
-    // Say what came back instead, so a block page is visible in the run summary.
-    if (!list.length) throw new Error(`no headlines; got ${res.headers.get('content-type')}: ${body.slice(0, 80).replace(/\s+/g, ' ')}`);
-    headlines = list;
-    source = name;
-    console.log(`Got ${headlines.length} headlines from ${name} (${new URL(url).host}).`);
-    break;
-  } catch (err) {
-    const e = err as Error & { cause?: { code?: string } };
-    warn(`${name} (${new URL(url).host}) failed: ${e.message}${e.cause?.code ? `, ${e.cause.code}` : ''}`);
-  }
-}
-if (!headlines.length) warn('No NFL headlines from any source. Writing without the NFL news section.');
 
 // 3. Ask Claude. Tools off, no user settings or plugins, our own system prompt.
 const system = `${readFileSync('writing-style.md', 'utf8')}\n\n${REPORT_RULES}`;
@@ -88,13 +55,13 @@ function check(text: string): { markdown?: string; problems: string[] } {
   }
   const markdown = toMarkdown({ ...draft, season: facts.season, week, date });
   const problems = [
-    ...missingSections(draft.body, headlines.length > 0).map(s => `Missing the "## ${s}" section.`),
+    ...missingSections(draft.body).map(s => `Missing the "## ${s}" section.`),
     ...lintReport(markdown, names).map(v => `Line ${v.line} breaks the ${v.rule} rule near "${v.snippet}".`),
   ];
   return { markdown, problems };
 }
 
-let text = claude(buildPrompt(facts, headlines, source));
+let text = claude(buildPrompt(facts));
 let result = check(text);
 if (result.problems.length) {
   console.log(`First draft had ${result.problems.length} problem(s). Asking for one fix.`);

@@ -98,16 +98,6 @@ Gibbs me a Woody has kicker Chase McLaughlin listed as Questionable.
 
 Riceman szn 🥶🧊👌🏽 has Rashee Rice listed as Questionable.
 
-## NFL news
-
-Lamar Jackson has a sprained ankle, and sources say he has only a slim chance to play Sunday against the Falcons. Fujetus, line up a backup now.
-
-The Falcons have flipped their season. Atlanta scored just 16 points in its first two games, the fewest in the NFL. Then the offense put up a league high 80 points over the next two, capped by a 45 to 24 Monday night win over the Saints. Michael Penix keeps winning, and the Falcons now sit at 2 and 2.
-
-Giants receiver Braxton Berrios says he will have foot surgery that ends his season. He returned kicks for New York.
-
-ESPN updated its NFL power rankings after four weeks, with three teams still unbeaten heading into Week 5.
-
 ## Next week
 
 Andthony Borrdain vs Gibbs me a Woody. Pick is Andthony Borrdain. Both teams are 2 and 2, but m4n4s ranks 3rd in power and has 446.22 over the last three to 401.7.

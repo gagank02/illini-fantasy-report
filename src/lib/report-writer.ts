@@ -1,6 +1,6 @@
 // Pure helpers for the weekly report writer (scripts/write-report.ts). No imports, so plain Node runs it.
 
-/** Report sections, in order. "NFL news" is only required when there are headlines. */
+/** Report sections, in order. All required. */
 export const SECTIONS = [
   'Game by game',
   'Player of the week',
@@ -9,7 +9,7 @@ export const SECTIONS = [
   'Stock up and stock down',
   'Transactions',
   'Injury report',
-  'NFL news',
+  'Fantasy news',
   'Next week',
 ] as const;
 
@@ -44,62 +44,26 @@ Bench blunders. Use benchBlunders, coachOfTheWeek, and worstCoach. Lead with any
 Stock up and stock down. Use powerMovers. Explain the move with numbers from the facts.
 Transactions. Highlight the interesting moves, not every one. Call out droppedAndScored if present.
 Injury report. List injured starters and whose team they hurt.
-NFL news. Pick 3 to 5 headlines that matter for fantasy. Restate each in your own words. Never copy the source's wording.
-Use only what each headline and description actually says. Never add details, predictions, or a different story.
-Skip stories about crimes, lawsuits, trials, discipline, health or mental health, and personal matters, even for fantasy relevant players.
+Fantasy news. Use only injuries and trending from the facts. Trending lists the players most added and dropped across all Sleeper leagues. Point out trending pickups that could help a team in this league, and trending drops on our rosters.
+You have no news sources. Never mention NFL games, trades, signings, suspensions, coaching news, or any event that is not in the facts, even if you remember it.
 Next week. One line per matchup with a pick, based only on records, last3, and powerRank. Call it a pick, not a projection.
 
 Aim for 900 to 1300 words in the body.
 `.trim();
 
-export interface Headline {
-  title: string;
-  description: string;
-}
-
-const decode = (s: string) =>
-  s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-    .replace(/&apos;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-/** Item titles and descriptions from an RSS feed. Regex, not a parser: we only need two fields. */
-export function parseRss(xml: string, limit = 10): Headline[] {
-  return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, limit).map(([, item]) => ({
-    title: decode(item!.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? ''),
-    description: decode(item!.match(/<description>([\s\S]*?)<\/description>/)?.[1] ?? ''),
-  })).filter(h => h.title);
-}
-
-/** Fallback source: ESPN's JSON news endpoint (a different host from the RSS feed). */
-export function parseEspnJson(json: unknown, limit = 10): Headline[] {
-  const articles = (json as { articles?: { headline?: string; description?: string }[] } | null)?.articles;
-  if (!Array.isArray(articles)) return [];
-  return articles
-    .filter(a => a?.headline)
-    .slice(0, limit)
-    .map(a => ({ title: a.headline!.trim(), description: (a.description ?? '').trim() }));
-}
-
-/** `source` names where the headlines came from (ESPN, CBS Sports, ...). */
-export function buildPrompt(facts: unknown, headlines: Headline[], source: string): string {
-  const sections = SECTIONS.filter(s => s !== 'NFL news' || headlines.length > 0);
+// No outside news feeds: ESPN (Disney) and Yahoo terms forbid automated collection and use with AI tools.
+// Everything comes from Sleeper, whose API is free for non-commercial use.
+export function buildPrompt(facts: unknown): string {
   return [
     'Write this week\'s report from these facts.',
     '',
     'Required sections, in this order:',
-    ...sections.map(s => `## ${s}`),
+    ...SECTIONS.map(s => `## ${s}`),
     '',
     'Facts (JSON):',
     '```json',
     JSON.stringify(facts, null, 1),
     '```',
-    '',
-    headlines.length
-      ? [`NFL headlines from ${source} (inputs only, restate in your own words):`, ...headlines.map(h => `- ${h.title}. ${h.description}`)].join('\n')
-      : 'No NFL headlines this week. Leave out the NFL news section.',
   ].join('\n');
 }
 
@@ -125,9 +89,9 @@ export function parseDraft(text: string): { headline: string; lede: string; body
   };
 }
 
-export function missingSections(body: string, hasNews: boolean): string[] {
+export function missingSections(body: string): string[] {
   const headings = new Set([...body.matchAll(/^## (.+)$/gm)].map(m => m[1]!.trim()));
-  return SECTIONS.filter(s => (s !== 'NFL news' || hasNews) && !headings.has(s));
+  return SECTIONS.filter(s => !headings.has(s));
 }
 
 export function toMarkdown(r: { headline: string; lede: string; season: number; week: number; date: string; body: string }): string {
