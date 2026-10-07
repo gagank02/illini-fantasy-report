@@ -53,7 +53,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] A manual workflow run opens a PR that passes the linter and reads well
 
 ### Phase 4: League history (can run in parallel with Phase 3)
-- [ ] T14: History data layer (season chain, managers, champions)
+- [x] T14: History data layer (season chain, managers, champions)
 - [ ] T15: `/history` overview page
 - [ ] T16: `/history/{season}` with the draft board
 

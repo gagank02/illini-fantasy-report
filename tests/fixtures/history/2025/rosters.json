@@ -1,0 +1,170 @@
+[
+ {
+  "roster_id": 1,
+  "owner_id": "990766353801900032",
+  "settings": {
+   "wins": 7,
+   "losses": 7,
+   "ties": 0,
+   "fpts": 1902,
+   "fpts_decimal": 22,
+   "fpts_against": 1902,
+   "fpts_against_decimal": 24
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 2,
+  "owner_id": "563450217770278912",
+  "settings": {
+   "wins": 3,
+   "losses": 11,
+   "ties": 0,
+   "fpts": 1583,
+   "fpts_decimal": 12,
+   "fpts_against": 1750,
+   "fpts_against_decimal": 30
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 3,
+  "owner_id": "996597560926269440",
+  "settings": {
+   "wins": 11,
+   "losses": 3,
+   "ties": 0,
+   "fpts": 1908,
+   "fpts_decimal": 32,
+   "fpts_against": 1685,
+   "fpts_against_decimal": 82
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 4,
+  "owner_id": "997232054540505088",
+  "settings": {
+   "wins": 11,
+   "losses": 3,
+   "ties": 0,
+   "fpts": 1933,
+   "fpts_decimal": 12,
+   "fpts_against": 1760,
+   "fpts_against_decimal": 34
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 5,
+  "owner_id": "1130584216770670592",
+  "settings": {
+   "wins": 6,
+   "losses": 8,
+   "ties": 0,
+   "fpts": 1653,
+   "fpts_decimal": 28,
+   "fpts_against": 1860,
+   "fpts_against_decimal": 54
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 6,
+  "owner_id": "1130587279673708544",
+  "settings": {
+   "wins": 9,
+   "losses": 5,
+   "ties": 0,
+   "fpts": 1831,
+   "fpts_decimal": 6,
+   "fpts_against": 1686,
+   "fpts_against_decimal": 4
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 7,
+  "owner_id": "999132056972156928",
+  "settings": {
+   "wins": 7,
+   "losses": 7,
+   "ties": 0,
+   "fpts": 1858,
+   "fpts_decimal": 6,
+   "fpts_against": 1665,
+   "fpts_against_decimal": 88
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 8,
+  "owner_id": "1130693469418364928",
+  "settings": {
+   "wins": 7,
+   "losses": 7,
+   "ties": 0,
+   "fpts": 1773,
+   "fpts_decimal": 34,
+   "fpts_against": 1771,
+   "fpts_against_decimal": 26
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 9,
+  "owner_id": "706636554025627648",
+  "settings": {
+   "wins": 5,
+   "losses": 9,
+   "ties": 0,
+   "fpts": 1697,
+   "fpts_decimal": 96,
+   "fpts_against": 1852,
+   "fpts_against_decimal": 40
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 10,
+  "owner_id": "999127451580162048",
+  "settings": {
+   "wins": 10,
+   "losses": 4,
+   "ties": 0,
+   "fpts": 2012,
+   "fpts_decimal": 28,
+   "fpts_against": 1713,
+   "fpts_against_decimal": 98
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 11,
+  "owner_id": "1254735640692539392",
+  "settings": {
+   "wins": 2,
+   "losses": 12,
+   "ties": 0,
+   "fpts": 1514,
+   "fpts_decimal": 24,
+   "fpts_against": 1866,
+   "fpts_against_decimal": 99
+  },
+  "metadata": {}
+ },
+ {
+  "roster_id": 12,
+  "owner_id": "1255005504971751424",
+  "settings": {
+   "wins": 6,
+   "losses": 8,
+   "ties": 0,
+   "fpts": 1609,
+   "fpts_decimal": 74,
+   "fpts_against": 1760,
+   "fpts_against_decimal": 94
+  },
+  "metadata": {}
+ }
+]

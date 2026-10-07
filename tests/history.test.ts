@@ -1,0 +1,125 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, test } from 'vitest';
+import { buildHistory, walkChain, type BracketMatch, type SeasonData } from '../src/lib/history';
+import type { League, Matchup, Roster, User } from '../src/lib/sleeper';
+import { games, standings } from '../src/lib/stats';
+
+const load = <T>(path: string): T => JSON.parse(readFileSync(`tests/fixtures/${path}.json`, 'utf8'));
+const past = (year: string, weeks: number): SeasonData => ({
+  league: load<League>(`history/${year}/league`),
+  users: load<User[]>(`history/${year}/users`),
+  rosters: load<Roster[]>(`history/${year}/rosters`),
+  weeks: Array.from({ length: weeks }, (_, i) => load<Matchup[]>(`history/${year}/matchups-${i + 1}`)),
+  bracket: load<BracketMatch[]>(`history/${year}/winners_bracket`),
+});
+const current: SeasonData = {
+  league: load<League>('league'),
+  users: load<User[]>('users'),
+  rosters: load<Roster[]>('rosters'),
+  weeks: [1, 2, 3, 4].map(w => load<Matchup[]>(`matchups-${w}`)),
+  bracket: null,
+};
+const seasons = [current, past('2025', 14), past('2024', 14)];
+const h = buildHistory(seasons);
+const ownerOf = (s: SeasonData, rosterId: number) => s.rosters.find(r => r.roster_id === rosterId)!.owner_id;
+
+describe('walkChain', () => {
+  const leagues: Record<string, Partial<League>> = {
+    c: { league_id: 'c', season: '2026', previous_league_id: 'b' },
+    b: { league_id: 'b', season: '2025', previous_league_id: 'a' },
+    a: { league_id: 'a', season: '2024', previous_league_id: null },
+    x: { league_id: 'x', season: '2026', previous_league_id: 'y' },
+    y: { league_id: 'y', season: '2025', previous_league_id: 'x' },
+  };
+  const fetchLeague = async (id: string) => leagues[id] as League;
+
+  test('follows previous_league_id back to the first season, newest first', async () => {
+    expect((await walkChain('c', fetchLeague)).map(l => l.season)).toEqual(['2026', '2025', '2024']);
+  });
+  test('stops on a repeated league id instead of looping', async () => {
+    expect((await walkChain('x', fetchLeague)).map(l => l.league_id)).toEqual(['x', 'y']);
+  });
+  test('stops after the max number of seasons', async () => {
+    const endless = async (id: string) => ({ league_id: id, season: id, previous_league_id: String(Number(id) - 1) }) as League;
+    expect(await walkChain('100', endless, 30)).toHaveLength(30);
+  });
+});
+
+describe('buildHistory', () => {
+  test('champions and runners up come from the winners bracket final', () => {
+    const s2025 = h.seasons.find(s => s.season === 2025)!;
+    const s2024 = h.seasons.find(s => s.season === 2024)!;
+    expect(s2025.champion!.userId).toBe(ownerOf(seasons[1]!, 6));
+    expect(s2024.champion!.userId).toBe(ownerOf(seasons[2]!, 3));
+    expect(s2024.runnerUp!.userId).toBe(ownerOf(seasons[2]!, 8));
+  });
+
+  test('the punishment loser is last in the regular season standings', () => {
+    for (const s of h.seasons.filter(x => !x.inProgress)) {
+      expect(s.punishment!.userId).toBe(s.standings.at(-1)!.userId);
+    }
+  });
+
+  test('the season in progress has standings but no champion or punishment yet', () => {
+    const s2026 = h.seasons.find(s => s.season === 2026)!;
+    expect(s2026.inProgress).toBe(true);
+    expect(s2026.champion).toBeNull();
+    expect(s2026.punishment).toBeNull();
+    expect(s2026.standings).toHaveLength(12);
+  });
+
+  test('all time wins equal the sum of Sleeper season wins, across 10 and 12 team seasons', () => {
+    for (const m of h.managers) {
+      const sleeperWins = seasons.reduce((sum, s) => sum + (s.rosters.find(r => r.owner_id === m.userId)?.settings.wins ?? 0), 0);
+      expect(m.w).toBe(sleeperWins);
+    }
+    expect(h.managers).toHaveLength(12);
+  });
+
+  test('win % is rounded to three decimals', () => {
+    for (const m of h.managers) expect(m.pct).toBe(Math.round(((m.w + m.t / 2) / (m.w + m.l + m.t)) * 1000) / 1000);
+    expect(h.managers.every(m => String(m.pct).length <= 5)).toBe(true);
+  });
+
+  test('seasons played counts late joiners correctly', () => {
+    expect(h.managers.filter(m => m.seasons === 3)).toHaveLength(10);
+    expect(h.managers.filter(m => m.seasons === 2)).toHaveLength(2);
+  });
+
+  test('one title and one punishment per completed season; playoff spots match bracket size', () => {
+    expect(h.managers.reduce((s, m) => s + m.titles, 0)).toBe(2);
+    expect(h.managers.reduce((s, m) => s + m.punishments, 0)).toBe(2);
+    expect(h.managers.reduce((s, m) => s + m.playoffs, 0)).toBe(12); // 6 playoff teams x 2 seasons
+  });
+
+  test('head to head is symmetric and adds up to each manager\'s all time record', () => {
+    for (const a of h.managers) {
+      let w = 0;
+      for (const b of h.managers) {
+        if (a.userId === b.userId) continue;
+        const ab = h.h2h[a.userId]?.[b.userId] ?? { w: 0, l: 0, t: 0 };
+        const ba = h.h2h[b.userId]?.[a.userId] ?? { w: 0, l: 0, t: 0 };
+        expect([ab.w, ab.l, ab.t]).toEqual([ba.l, ba.w, ba.t]);
+        w += ab.w;
+      }
+      expect(w).toBe(a.w);
+    }
+  });
+
+  test('records book: highest and lowest scores are the true extremes', () => {
+    const all = seasons.flatMap(s => s.weeks.flatMap((wk, i) => wk.filter(m => m.matchup_id != null).map(m => ({ p: m.points, week: i + 1, season: Number(s.league.season) }))));
+    const max = all.reduce((a, b) => (b.p > a.p ? b : a));
+    const min = all.reduce((a, b) => (b.p < a.p ? b : a));
+    expect(h.records.highScore).toMatchObject({ value: max.p, season: max.season, week: max.week });
+    expect(h.records.lowScore).toMatchObject({ value: min.p, season: min.season, week: min.week });
+    expect(h.records.blowout.margin).toBeGreaterThan(0);
+    const runs = (c: string) => Math.max(...seasons.flatMap(s => standings(s.rosters, s.users, games(s.weeks)).map(r => Math.max(0, ...(r.record.match(new RegExp(`${c}+`, 'g')) ?? []).map(x => x.length)))));
+    expect(h.records.longestWinStreak.n).toBe(runs('W'));
+    expect(h.records.longestLosingStreak.n).toBe(runs('L'));
+  });
+
+  test('best and worst completed seasons by win rate', () => {
+    expect(h.records.bestSeason.w).toBeGreaterThanOrEqual(h.records.worstSeason.w);
+    expect([2024, 2025]).toContain(h.records.bestSeason.season);
+  });
+});

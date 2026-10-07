@@ -358,14 +358,14 @@ The all time stats are:
 - the head to head matrix
 
 **Acceptance criteria:**
-- [ ] The 2025 champion is roster 6's owner, and 2024 is roster 3's owner
-- [ ] The chain walk stops on a cycle (tested with a fake `previous_league_id` loop)
-- [ ] The punishment loser for each season is the last place team in that season's regular season standings
-- [ ] Each manager's all time wins equal the sum of their per season wins across the 10 team and 12 team seasons
-- [ ] Each head to head pair is symmetric: A's wins against B equal B's losses against A
+- [x] The 2025 champion is roster 6's owner, and 2024 is roster 3's owner
+- [x] The chain walk stops on a cycle (tested with a fake `previous_league_id` loop)
+- [x] The punishment loser for each season is the last place team in that season's regular season standings
+- [x] Each manager's all time wins equal the sum of their per season wins across the 10 team and 12 team seasons
+- [x] Each head to head pair is symmetric: A's wins against B equal B's losses against A
 
 **Verification:**
-- [ ] `npm test`: `tests/history.test.ts` with trimmed fixtures from 2024 and 2025
+- [x] `npm test`: `tests/history.test.ts` with trimmed fixtures from 2024 and 2025
 
 **Dependencies:** T3, T8 (reuses the standings and facts helpers)
 

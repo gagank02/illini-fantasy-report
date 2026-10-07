@@ -1,0 +1,31 @@
+{
+ "league_id": "1252429316080271360",
+ "name": "Illini Fantasy",
+ "season": "2025",
+ "total_rosters": 12,
+ "previous_league_id": "1130237165650362368",
+ "draft_id": "1252429316097048576",
+ "status": "complete",
+ "roster_positions": [
+  "QB",
+  "RB",
+  "RB",
+  "WR",
+  "WR",
+  "TE",
+  "FLEX",
+  "FLEX",
+  "K",
+  "DEF",
+  "BN",
+  "BN",
+  "BN",
+  "BN",
+  "BN"
+ ],
+ "settings": {
+  "playoff_week_start": 15,
+  "playoff_teams": 6,
+  "last_scored_leg": 17
+ }
+}

@@ -1,0 +1,86 @@
+[
+ {
+  "roster_id": 1,
+  "matchup_id": 3,
+  "points": 111.02,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 2,
+  "matchup_id": 6,
+  "points": 129.28,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 3,
+  "matchup_id": 2,
+  "points": 147.12,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 4,
+  "matchup_id": 3,
+  "points": 127.94,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 5,
+  "matchup_id": 1,
+  "points": 119.7,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 6,
+  "matchup_id": 5,
+  "points": 124.98,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 7,
+  "matchup_id": 6,
+  "points": 126.32,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 8,
+  "matchup_id": 2,
+  "points": 96.1,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 9,
+  "matchup_id": 4,
+  "points": 118.96,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 10,
+  "matchup_id": 4,
+  "points": 144.18,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 11,
+  "matchup_id": 1,
+  "points": 131.22,
+  "starters": [],
+  "starters_points": []
+ },
+ {
+  "roster_id": 12,
+  "matchup_id": 5,
+  "points": 122.26,
+  "starters": [],
+  "starters_points": []
+ }
+]

@@ -101,6 +101,15 @@ export function regularSeasonWeeks(league: League): number {
   return Math.min(league.settings.last_scored_leg ?? 0, league.settings.playoff_week_start - 1);
 }
 
+export function leagueById(leagueId: string): Promise<League> {
+  return get<League>(`/league/${leagueId}`);
+}
+
+/** Playoff bracket. The match with p === 1 is the final: w = champion roster, l = runner up. */
+export function winnersBracket(leagueId: string): Promise<{ r: number; m: number; t1: number | null; t2: number | null; w: number | null; l: number | null; p?: number }[]> {
+  return get(`/league/${leagueId}/winners_bracket`);
+}
+
 export function weekMatchups(week: number, leagueId = currentLeagueId()): Promise<Matchup[]> {
   return get<Matchup[]>(`/league/${leagueId}/matchups/${week}`);
 }

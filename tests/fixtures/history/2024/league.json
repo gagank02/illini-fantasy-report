@@ -1,0 +1,31 @@
+{
+ "league_id": "1130237165650362368",
+ "name": "Illini Fantasy",
+ "season": "2024",
+ "total_rosters": 10,
+ "previous_league_id": null,
+ "draft_id": "1130237166405230592",
+ "status": "complete",
+ "roster_positions": [
+  "QB",
+  "RB",
+  "RB",
+  "WR",
+  "WR",
+  "TE",
+  "FLEX",
+  "FLEX",
+  "K",
+  "DEF",
+  "BN",
+  "BN",
+  "BN",
+  "BN",
+  "BN"
+ ],
+ "settings": {
+  "playoff_week_start": 15,
+  "playoff_teams": 6,
+  "last_scored_leg": 17
+ }
+}
