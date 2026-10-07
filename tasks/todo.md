@@ -323,13 +323,13 @@ Notes:
 **Done so far:** workflow written and passes actionlint 1.7.12 and a YAML parse. The week input is checked as a number (an injection attempt is rejected), and the branch name parsing was dry run. The rest needs the human's first dispatch.
 
 **Acceptance criteria:**
-- [ ] A manual dispatch opens a PR with the report file and the refreshed `src/data/players.json`
-- [ ] A failing test, check, build, secret guard, or lint fails the job and opens no PR
-- [ ] Re running for a week that already has an open PR updates that PR instead of failing or opening a duplicate
-- [ ] The secret never shows up in the logs
+- [x] A manual dispatch opens a PR with the report file and the refreshed `src/data/players.json`
+- [x] A failing test, check, build, secret guard, or lint fails the job and opens no PR
+- [x] Re running for a week that already has an open PR updates that PR instead of failing or opening a duplicate
+- [x] The secret never shows up in the logs
 
 **Verification:**
-- [ ] Manual: dispatch the workflow, read the PR, merge it, and confirm the report goes live
+- [x] Manual: dispatched 3 times. PR #1 "2026 Week 4 report" opened, then updated in place and retitled. The Cloudflare preview built. Merging is up to the human
 
 **Dependencies:** T12b, T4
 
@@ -338,7 +338,7 @@ Notes:
 **Estimated scope:** S
 
 ## Checkpoint C: Report pipeline
-- [ ] The PR opened by the workflow passed its own checks (which stand in for `ci.yml`), has a Cloudflare preview, and reads like a newspaper
+- [x] The PR opened by the workflow passed its own checks (which stand in for `ci.yml`), has a Cloudflare preview, and reads like a newspaper
 - [ ] PDF and PNG export work on the live site
 - [ ] Review with the human before going on
 

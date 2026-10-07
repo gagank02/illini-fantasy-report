@@ -47,10 +47,10 @@ Details for each task are in `tasks/todo.md`.
 - [x] T11: Report style linter
 - [x] T12a: Report facts bundle (bench blunders, transactions, injuries, movers, next week)
 - [x] T12b: Report writer script (RSS, Claude, lint retry)
-- [ ] T13: Weekly report GitHub Action that opens a PR
+- [x] T13: Weekly report GitHub Action that opens a PR
 
 ### Checkpoint C: Report pipeline
-- [ ] A manual workflow run opens a PR that passes the linter and reads well
+- [x] A manual workflow run opens a PR that passes the linter and reads well
 
 ### Phase 4: League history (can run in parallel with Phase 3)
 - [ ] T14: History data layer (season chain, managers, champions)
