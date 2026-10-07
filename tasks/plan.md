@@ -74,12 +74,15 @@ T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and
 | A bug causes a call loop and Sleeper IP blocks us | Med | A rate limiter in `get()` (600 a minute), per URL memoization, and a guard on repeated IDs in the history walk |
 | Builds call `/players/nfl` too often | Med | Builds read the committed `src/data/players.json`. Only the weekly Action calls the endpoint |
 | Actions can't open PRs by default | Low | Enable "Allow GitHub Actions to create pull requests" in repo settings during T13 |
+| `ci.yml` doesn't run on PRs opened by an Action's built in token | Med | The weekly job runs test, check, build, secret guard, and lint itself before opening the PR (T13) |
+| GitHub turns off cron workflows after 60 days with no activity | Low | Weekly merges keep the repo active during the season. Re enable at the start of the season if needed |
 
 ## Things You Need To Do (Claude can't)
 
 - **T4:** Create a Cloudflare account, connect the repo in Pages, set `SLEEPER_LEAGUE_ID`, and create a deploy hook. Then add `CF_DEPLOY_HOOK_URL` as a GitHub secret.
 - **T4:** Turn on GitHub secret scanning push protection.
 - **T12/T13:** Create an Anthropic API key, set a monthly spend limit, and add `ANTHROPIC_API_KEY` as a GitHub secret.
+- **T13:** Under GitHub → Settings → Actions → General, turn on "Allow GitHub Actions to create and approve pull requests". If you add branch protection to `main`, don't make `ci.yml` a required check, because it won't run on the report PRs.
 
 ## Open Questions
 

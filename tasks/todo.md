@@ -6,7 +6,7 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 ## Task 1: Scaffold Astro, Vitest, and CI
 
-**Description:** Create the empty project. Astro 5 builds to static output with strict TypeScript. Vitest runs the tests. `.env.example` holds placeholders. A CI workflow runs test, check, build, audit, and the secret guard on every PR.
+**Description:** Create the empty project. Astro 7 builds to static output with strict TypeScript. Vitest runs the tests. `.env.example` holds placeholders. A CI workflow runs test, check, build, audit, and the secret guard on every PR.
 
 **Acceptance criteria:**
 - [x] `npm run dev` serves a blank page, and the `build`, `test`, and `check` scripts exist and pass
@@ -273,9 +273,16 @@ The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt,
 
 **Description:** `weekly-report.yml` runs on cron `0 15 * * 2` (Tuesdays) and on `workflow_dispatch`, with a week input. It runs `npm run players` (the only weekly `/players/nfl` call), then runs the writer for the last completed week, lints the result, and opens the PR `Week N report` on the branch `report/{season}-week-{N}`. The workflow only has `contents: write` and `pull-requests: write` permissions.
 
+GitHub doesn't run `ci.yml` on PRs opened with the built in `GITHUB_TOKEN`. That's on purpose, to prevent workflow loops. So this job runs the same checks itself **before** it opens the PR: `npm test`, `npm run check`, `npm run build`, the `dist/` secret guard, and `lint:report`. The PR body says the checks ran in the weekly job. Cloudflare still builds its own preview of the PR, because that comes from Cloudflare's GitHub app, not from Actions.
+
+Notes:
+- Cron times are in UTC. `0 15 * * 2` is Tuesday 10am Central Daylight Time and 9am Central Standard Time. Monday night games finish well before then.
+- GitHub turns off scheduled workflows after 60 days with no repo activity. Merging the weekly PRs counts as activity, so this only matters in the offseason. The first run of each season may need a manual re enable.
+
 **Acceptance criteria:**
 - [ ] A manual dispatch opens a PR with the report file and the refreshed `src/data/players.json`
-- [ ] A lint failure fails the job and opens no PR
+- [ ] A failing test, check, build, secret guard, or lint fails the job and opens no PR
+- [ ] Re running for a week that already has an open PR updates that PR instead of failing or opening a duplicate
 - [ ] The secret never shows up in the logs
 
 **Verification:**
@@ -288,7 +295,7 @@ The script calls `claude-opus-5-5` with `writing-style.md` as the system prompt,
 **Estimated scope:** S
 
 ## Checkpoint C: Report pipeline
-- [ ] The PR opened by the workflow passes CI and reads like a newspaper
+- [ ] The PR opened by the workflow passed its own checks (which stand in for `ci.yml`), has a Cloudflare preview, and reads like a newspaper
 - [ ] PDF and PNG export work on the live site
 - [ ] Review with the human before going on
 
