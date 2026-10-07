@@ -120,6 +120,18 @@ describe('assembleFacts (week 4 fixtures)', () => {
     expect(new Set(teams).size).toBe(12);
   });
 
+  test('trending players say which team in our league has them, or null if free', () => {
+    const owner = new Map(weeks[3]!.flatMap(m => (m.players ?? []).map(id => [id, m.roster_id] as const)));
+    const byName = new Map(Object.entries(P).map(([id, p]) => [p.name, id]));
+    for (const t of [...facts.trending.adds, ...facts.trending.drops]) {
+      const rid = owner.get(byName.get(t.name)!);
+      const team = rid ? users.find(u => u.user_id === rosters.find(r => r.roster_id === rid)!.owner_id)! : null;
+      expect(t.rosteredBy).toBe(team ? team.metadata.team_name || team.display_name : null);
+    }
+    expect(facts.trending.adds.some(t => t.rosteredBy === null)).toBe(true);
+    expect(facts.trending.adds.some(t => t.rosteredBy !== null)).toBe(true);
+  });
+
   test('trending players resolve to names', () => {
     expect(facts.trending.adds.length).toBeGreaterThan(0);
     for (const t of [...facts.trending.adds, ...facts.trending.drops]) expect(t.name).toBeTruthy();

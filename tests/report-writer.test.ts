@@ -52,6 +52,7 @@ describe('REPORT_RULES guard rails (each came from a real bad draft)', () => {
     ['no invented context like divisions or rivalries', /divisions, rivalries/],
     ['no outside news: the model must not use its own memory of NFL events', /You have no news sources/],
     ['fantasy news comes only from injuries and Sleeper trending data', /Fantasy news\. Use only injuries and trending/],
+    ['only suggest pickups that are free in our league', /rosteredBy is null/],
   ])('%s', (_, re) => {
     expect(REPORT_RULES).toMatch(re);
   });

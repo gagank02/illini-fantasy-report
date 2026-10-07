@@ -128,8 +128,16 @@ export function assembleFacts(input: FactsInput) {
     const pr = power.find(p => p.rosterId === m.roster_id);
     return { ...who(m.roster_id), wins: row?.w ?? 0, losses: row?.l ?? 0, ties: row?.t ?? 0, last3: pr?.last3 ?? 0, powerRank: pr?.rank ?? null };
   };
+  // Who in our league rosters each player this week (null = free agent here).
+  const owner = new Map(thisWeek.flatMap(m => (m.players ?? []).map(id => [id, m.roster_id] as const)));
   const trend = (list: { player_id: string; count: number }[]) =>
-    list.filter(t => players[t.player_id]).map(t => ({ name: players[t.player_id]!.name, pos: players[t.player_id]!.pos, nflTeam: players[t.player_id]!.team, count: t.count }));
+    list.filter(t => players[t.player_id]).map(t => {
+      const rid = owner.get(t.player_id);
+      return {
+        name: players[t.player_id]!.name, pos: players[t.player_id]!.pos, nflTeam: players[t.player_id]!.team, count: t.count,
+        rosteredBy: rid ? who(rid).team : null,
+      };
+    });
 
   return {
     season: Number(league.season),
