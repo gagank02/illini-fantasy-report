@@ -1,4 +1,5 @@
 ---
+import Move from '../components/Move.astro';
 import Base from '../layouts/Base.astro';
 import { loadSeason } from '../lib/sleeper';
 import players from '../data/players.json';
@@ -10,6 +11,7 @@ const names = standings(rosters, users, all);
 const rows = powerRankings(all, weeks.length);
 const team = (id: number) => names.find(r => r.rosterId === id)!;
 const byPos = positionPoints(weeks, players as Players);
+const byPosLastWeek = weeks.length > 1 ? positionPoints(weeks.slice(0, -1), players as Players) : undefined;
 const tabs = ['Overall', ...POSITIONS];
 
 const rec = (r: Record3) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
@@ -62,14 +64,7 @@ const pct = (r: Record3) => ((r.w + r.t / 2) / (r.w + r.l + r.t)).toFixed(3).rep
               </th>
               <td>
                 {r.score.toFixed(1)}
-                {r.move === null || r.move === 0 ? (
-                  <span class="sub move">–<span class="visually-hidden">no change</span></span>
-                ) : (
-                  <span class={`sub move ${r.move > 0 ? 'move-up' : 'move-down'}`}>
-                    {r.move > 0 ? '▲' : '▼'}{Math.abs(r.move)}
-                    <span class="visually-hidden">{r.move > 0 ? 'up' : 'down'} {Math.abs(r.move)} since last week</span>
-                  </span>
-                )}
+                <Move move={r.move} />
               </td>
               <td class="wide">{rec(r.allPlay)} <span class="rk">{pct(r.allPlay)}</span></td>
               <td class="wide">{r.pf.toFixed(2)}</td>
@@ -94,11 +89,11 @@ const pct = (r: Record3) => ((r.w + r.t / 2) / (r.w + r.l + r.t)).toFixed(3).rep
           </tr>
         </thead>
         <tbody>
-          {positionRankings(byPos, pos).map(r => (
+          {positionRankings(byPos, pos, byPosLastWeek).map(r => (
             <tr>
               <td>{r.rank}</td>
               <th scope="row" class="left">{team(r.rosterId).team}<span class="sub">{team(r.rosterId).manager}</span></th>
-              <td>{r.points.toFixed(2)}</td>
+              <td>{r.points.toFixed(2)}<Move move={r.move} /></td>
               <td>{(r.points / weeks.length).toFixed(2)}</td>
             </tr>
           ))}
@@ -107,5 +102,5 @@ const pct = (r: Record3) => ((r.w + r.t / 2) / (r.w + r.l + r.t)).toFixed(3).rep
     </div>
   ))}
   </div>
-  <p class="muted legend">Position tabs rank teams by points scored by their starters at that position. A WR in a flex spot counts as a WR.</p>
+  <p class="muted legend">Position tabs rank teams by points scored by their starters at that position. A WR in a flex spot counts as a WR. Arrows show the change since last week.</p>
 </Base>

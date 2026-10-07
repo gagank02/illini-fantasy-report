@@ -231,8 +231,20 @@ export function positionPoints(weeks: Matchup[][], players: Players): PositionPo
   return [...byRoster].map(([rosterId, points]) => ({ rosterId, points }));
 }
 
-export function positionRankings(all: PositionPoints[], pos: Position): { rank: number; rosterId: number; points: number }[] {
-  const sorted = all.map(p => ({ rosterId: p.rosterId, points: p.points[pos] })).sort((a, b) => b.points - a.points);
-  const ranks = rankBy(sorted.map(s => s.points));
-  return sorted.map((s, i) => ({ ...s, rank: ranks[i]! }));
+/** Pass `previous` (position points through last week) to get movement; otherwise move is null. */
+export function positionRankings(
+  all: PositionPoints[],
+  pos: Position,
+  previous?: PositionPoints[],
+): { rank: number; rosterId: number; points: number; move: number | null }[] {
+  const rank = (pp: PositionPoints[]) => {
+    const sorted = pp.map(p => ({ rosterId: p.rosterId, points: p.points[pos] })).sort((a, b) => b.points - a.points);
+    const ranks = rankBy(sorted.map(s => s.points));
+    return sorted.map((s, i) => ({ ...s, rank: ranks[i]! }));
+  };
+  const before = previous ? rank(previous) : [];
+  return rank(all).map(r => {
+    const prev = before.find(p => p.rosterId === r.rosterId);
+    return { ...r, move: prev ? prev.rank - r.rank : null };
+  });
 }

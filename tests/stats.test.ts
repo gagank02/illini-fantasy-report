@@ -249,6 +249,18 @@ describe('positional rankings', () => {
     expect(positionPoints([[fake]], P)[0]!.points).toMatchObject({ DEF: 10, QB: 0 });
   });
 
+  test('movement compares with the rankings through the previous week', () => {
+    const wk = (a: number, b: number) => [
+      { roster_id: 1, matchup_id: 1, points: a, starters: ['DET'], starters_points: [a] },
+      { roster_id: 2, matchup_id: 1, points: b, starters: ['CHI'], starters_points: [b] },
+    ];
+    const two = [wk(10, 5), wk(0, 20)];
+    const now = positionRankings(positionPoints(two, P), 'DEF', positionPoints(two.slice(0, 1), P));
+    expect(now.find(r => r.rosterId === 2)).toMatchObject({ rank: 1, move: 1 });
+    expect(now.find(r => r.rosterId === 1)).toMatchObject({ rank: 2, move: -1 });
+    expect(positionRankings(positionPoints(two.slice(0, 1), P), 'DEF').every(r => r.move === null)).toBe(true);
+  });
+
   test('rankings per position are sorted with ranks 1..n', () => {
     for (const pos of POSITIONS) {
       const ranked = positionRankings(pp, pos);
