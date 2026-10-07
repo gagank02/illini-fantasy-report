@@ -68,12 +68,12 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Done locally (verified with `wrangler pages dev` and headless Chrome):** `_headers` is served on every path. The hashed inline script and the external scripts run with no CSP violations. `/standings` is served with no redirect (`build.format: 'file'`). `tests/headers.test.ts` fails if the theme script changes without its hash.
 
 **Acceptance criteria:**
-- [ ] The site is live at `*.pages.dev`, and the browser console shows no CSP errors
-- [ ] securityheaders.com grades the site A or better
+- [x] The site is live at https://illini-fantasy-report.pages.dev, and the browser console shows no CSP errors
+- [x] securityheaders.com grades the site A or better. securityheaders.com blocks automated scans, so Mozilla HTTP Observatory was used instead and graded it **A+** (130/100, 12 of 12 tests passed, 2026-10-07)
 - [ ] A manual `workflow_dispatch` of `refresh.yml` triggers a new deploy
 
 **Verification:**
-- [ ] Manual: open the live URL, check the console, and run securityheaders.com
+- [x] Manual: open the live URL, check the console, and run securityheaders.com
 - [ ] Manual: run the refresh workflow and watch the Pages deploy log
 
 **Dependencies:** T3
