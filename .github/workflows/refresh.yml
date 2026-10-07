@@ -1,0 +1,20 @@
+name: Daily refresh
+
+# Rebuilds the site on Cloudflare so Sleeper data stays current.
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  deploy-hook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages build
+        env:
+          HOOK: ${{ secrets.CF_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "CF_DEPLOY_HOOK_URL secret is not set"; exit 1; fi
+          curl -fsS -X POST "$HOOK" -o /dev/null

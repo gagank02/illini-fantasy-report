@@ -65,6 +65,8 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 
 **Description:** Add `public/_headers` with a strict CSP that allows the inline theme script by its hash, plus `nosniff`, `Referrer-Policy`, and `frame-ancestors 'none'`. Add `refresh.yml`, which runs daily at 10:00 UTC and POSTs to `CF_DEPLOY_HOOK_URL`. **You** do the Cloudflare and GitHub setup listed in `plan.md`.
 
+**Done locally (verified with `wrangler pages dev` and headless Chrome):** `_headers` is served on every path. The hashed inline script and the external scripts run with no CSP violations. `/standings` is served with no redirect (`build.format: 'file'`). `tests/headers.test.ts` fails if the theme script changes without its hash.
+
 **Acceptance criteria:**
 - [ ] The site is live at `*.pages.dev`, and the browser console shows no CSP errors
 - [ ] securityheaders.com grades the site A or better
