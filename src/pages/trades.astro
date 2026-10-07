@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro';
+import players from '../data/players.json';
+import { loadValues, queryFor, valueMap, valuesMode } from '../lib/fantasycalc';
+import { loadSeason } from '../lib/sleeper';
+import { games, standings, type Players } from '../lib/stats';
+import { tradeBoard, valuedRosters, type Trade } from '../lib/trades';
+
+const { league, users, rosters, weeks } = await loadSeason();
+const mode = valuesMode();
+const values = await loadValues(league);
+const rows = standings(rosters, users, games(weeks));
+const teams = [...rows].sort((a, b) => a.team.localeCompare(b.team));
+const team = (id: number) => rows.find(r => r.rosterId === id)!;
+const board = values ? tradeBoard(valuedRosters(rosters, valueMap(values, queryFor(league).isDynasty)), league.roster_positions) : null;
+
+const info = (id: string) => (players as Players)[id];
+const pct = (g: number) => `+${(g * 100).toFixed(1)}%`;
+const num = (n: number) => Math.round(n).toLocaleString('en-US');
+
+// One panel per team against anyone, and one per pair. Pairs are keyed low id first; the script sorts the same way.
+const panels: { key: string; title: string; trades: Trade[] }[] = board
+  ? [
+      ...teams.map(t => ({ key: `${t.rosterId}-any`, title: `Best trades for ${t.team}`, trades: board.byTeam.get(t.rosterId) ?? [] })),
+      ...[...board.pairs].map(([key, trades]) => {
+        const [a, b] = key.split('-').map(Number) as [number, number];
+        return { key, title: `${team(a).team} and ${team(b).team}`, trades };
+      }),
+    ]
+  : [];
+const first = teams[0]?.rosterId;
+---
+
+<Base title="Trade Finder">
+  <h1>Trade Finder</h1>
+  {!board ? (
+    <p class="muted">The trade finder is not turned on yet.</p>
+  ) : (
+    <>
+      <p class="muted">
+        Trades that make both teams' starting lineups better, with player values that come out close.
+        Bench players count for a little because depth covers byes and injuries. Kickers and defenses aren't included.
+      </p>
+      <p class="trade-credit">
+        {mode === 'sample'
+          ? 'Sample values for local testing. These are made up.'
+          : <>Player values from <a href="https://fantasycalc.com">FantasyCalc.com</a>, refreshed daily. Rosters from Sleeper.</>}
+      </p>
+
+      <form class="trade-pick" id="trade-pick">
+        <label>Team
+          <select name="a">
+            {teams.map(t => <option value={t.rosterId} selected={t.rosterId === first}>{t.team}</option>)}
+          </select>
+        </label>
+        <label>Trade with
+          <select name="b">
+            <option value="any" selected>Any team</option>
+            {teams.map(t => <option value={t.rosterId}>{t.team}</option>)}
+          </select>
+        </label>
+      </form>
+
+      {panels.map(p => (
+        <section class="trade-panel" data-key={p.key} hidden={p.key !== `${first}-any`}>
+          <h2>{p.title}</h2>
+          {p.trades.length === 0 ? (
+            <p class="muted">No trade helps both of these teams right now.</p>
+          ) : (
+            <ol class="trades">
+              {p.trades.map(t => (
+                <li class="trade">
+                  {([[t.a, t.aGets, t.aGain], [t.b, t.bGets, t.bGain]] as const).map(([id, gets, gain]) => (
+                    <div class="trade-side">
+                      <h3>{team(id).team} gets</h3>
+                      <ul>
+                        {gets.map(pid => (
+                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}{info(pid)?.injury ? ` · ${info(pid)!.injury}` : ''}</span></li>
+                        ))}
+                      </ul>
+                      <span class="trade-gain move-up">Lineup {pct(gain)}</span>
+                    </div>
+                  ))}
+                  <span class="sub trade-value">Value {num(t.aGetsValue)} for {num(t.bGetsValue)}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      ))}
+    </>
+  )}
+</Base>
+
+<script>
+  const form = document.getElementById('trade-pick') as HTMLFormElement | null;
+  const show = () => {
+    if (!form) return;
+    const a = (form.elements.namedItem('a') as HTMLSelectElement).value;
+    const b = (form.elements.namedItem('b') as HTMLSelectElement).value;
+    const key = b === 'any' || b === a ? `${a}-any` : [Number(a), Number(b)].sort((x, y) => x - y).join('-');
+    for (const el of document.querySelectorAll<HTMLElement>('.trade-panel')) el.hidden = el.dataset.key !== key;
+  };
+  form?.addEventListener('change', show);
+  show();
+</script>
