@@ -199,13 +199,13 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 Add the `/reports` index and the report pages. Add the latest report's headline and lede, linking to it, above the preview cards on the home page (cards came in T8b). Write one sample report by hand for week 4. Raw HTML in the markdown must not render.
 
 **Acceptance criteria:**
-- [ ] The report reads as a newspaper in light and dark mode, at 360px and on desktop
-- [ ] HTML put into the sample report shows up escaped, or not at all
-- [ ] The home page links to the latest report
+- [x] The report reads as a newspaper in light and dark mode, at 360px and on desktop
+- [x] HTML put into the sample report shows up escaped, or not at all
+- [x] The home page links to the latest report
 
 **Verification:**
-- [ ] Build succeeds
-- [ ] Manual: look at the page at three widths in both themes
+- [x] Build succeeds
+- [x] Manual: look at the page at three widths in both themes
 
 **Dependencies:** T3 (scores for the box score)
 

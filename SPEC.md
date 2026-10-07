@@ -84,7 +84,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 - Fully static output. No server, no database, no user input.
 - The Anthropic API key exists only as a GitHub Actions secret and never reaches the client bundle.
 - Strict CSP via Cloudflare `_headers`: `default-src 'self'`, no inline scripts except the theme snippet (hashed), plus `X-Content-Type-Options`, `Referrer-Policy`, and `frame-ancestors 'none'`.
-- Report markdown renders with raw HTML disabled.
+- Report markdown renders with raw HTML disabled. `src/lib/markdown.ts` is a Sätteri plugin (Astro 7's markdown engine) that turns raw HTML into visible text and images into alt text. Tests prove Sätteri passes `<script>` through without it.
 - `npm audit --omit=dev` runs clean in CI.
 
 ### Out of scope for v1 (stretch)
@@ -94,7 +94,7 @@ The site is small, so all four modules live in this one spec and don't get separ
 
 - **Astro 7** (static output) + TypeScript (strict). Ships almost no client JS. The theme toggle and position tabs are the only scripts.
 - **Report export:** `html-to-image` (about 10 KB, lazy loaded) for PNG. PDF uses the browser's print to PDF with a print stylesheet.
-- **Fonts:** One self hosted blackletter woff2 for the masthead (UnifrakturMaguntia, SIL Open Font License 1.1). The license text ships as `public/fonts/OFL.txt` next to the font. Don't rename the font, because OFL reserves the font name for unmodified copies. Body text uses system serif fonts. Fonts live under `public/fonts/` because the CSP blocks third party font hosts.
+- **Fonts:** One self hosted blackletter font for the masthead: `public/fonts/UnifrakturMaguntia-Book.ttf`, unmodified from the google/fonts repo (SIL Open Font License 1.1, Reserved Font Name "UnifrakturMaguntia"). It ships as TTF, not converted to woff2, so it stays an unmodified copy that may keep its name. The license text ships as `public/fonts/OFL.txt`. Body text uses system serif fonts. Fonts live under `public/fonts/` because the CSP blocks third party font hosts.
 - **Data:** Sleeper public API (`https://api.sleeper.app/v1`). It's free with no key. Fetching happens **at build time only**, so the browser never calls Sleeper.
 - **Sleeper rate limits:** Sleeper may IP block anyone above 1000 calls a minute, and asks that `/players/nfl` be called at most once a day.
   - **Per URL:** Each URL is fetched at most once per process. `get()` caches it.

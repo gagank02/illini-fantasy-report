@@ -42,7 +42,7 @@ Details for each task are in `tasks/todo.md`.
 - [ ] All stats pages match the Sleeper app for the current week
 
 ### Phase 3: Weekly report (can run in parallel with Phase 4)
-- [ ] T9: Newspaper report page, home page, and a sample report
+- [x] T9: Newspaper report page, home page, and a sample report
 - [ ] T10: Save PDF and Save image export
 - [ ] T11: Report style linter
 - [ ] T12: Report writer script (facts bundle, RSS, Claude)

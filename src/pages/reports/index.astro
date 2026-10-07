@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const reports = (await getCollection('reports')).sort((a, b) => b.data.season - a.data.season || b.data.week - a.data.week);
+---
+
+<Base title="Reports">
+  <h1>Weekly Reports</h1>
+  {reports.length === 0 ? (
+    <p class="muted">The first report lands after week 1.</p>
+  ) : (
+    <ul class="report-list">
+      {reports.map(r => (
+        <li>
+          <a href={`/reports/${r.id}`}>
+            <span class="fact-title">{r.data.season} week {r.data.week}</span>
+            <strong class="rl-headline">{r.data.headline}</strong>
+            <span class="rl-lede">{r.data.lede}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</Base>

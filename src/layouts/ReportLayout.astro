@@ -1,0 +1,63 @@
+---
+import Base from './Base.astro';
+import '../styles/report.css';
+import type { Matchup, User, Roster } from '../lib/sleeper';
+import { teamNames } from '../lib/stats';
+
+interface Props {
+  headline: string;
+  lede: string;
+  season: number;
+  week: number;
+  date: Date;
+  /** That week's matchups for the box score, if available. */
+  matchups?: Matchup[];
+  users: User[];
+  rosters: Roster[];
+}
+const { headline, lede, season, week, date, matchups = [], users, rosters } = Astro.props;
+
+const name = (rosterId: number) => {
+  const r = rosters.find(x => x.roster_id === rosterId);
+  return r ? teamNames(users, r.owner_id).team : `Team ${rosterId}`;
+};
+const games = Object.values(
+  Object.groupBy(matchups.filter(m => m.matchup_id != null), m => String(m.matchup_id)),
+).map(pair => [...pair!].sort((a, b) => b.points - a.points));
+const longDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<Base title={`Week ${week}: ${headline}`}>
+  <article class="paper">
+    <header class="masthead">
+      <div class="mast-title" aria-hidden="true">The Illini Fantasy Report</div>
+      <div class="dateline">
+        <span>Vol. {season}, No. {week}</span>
+        <time datetime={date.toISOString().slice(0, 10)}>{longDate}</time>
+        <span>Week {week} edition</span>
+      </div>
+    </header>
+
+    <h1 class="headline">{headline}</h1>
+    <p class="lede">{lede}</p>
+
+    <div class="paper-body">
+      <div class="columns">
+        <slot />
+      </div>
+      {games.length > 0 && (
+        <aside class="boxscore" aria-labelledby="box-h">
+          <h2 id="box-h">Box Score</h2>
+          <table>
+            {games.map(([w, l]) => (
+              <tbody>
+                <tr class="win"><th scope="row" class="left">{name(w!.roster_id)}</th><td>{w!.points.toFixed(2)}</td></tr>
+                {l && <tr><th scope="row" class="left">{name(l.roster_id)}</th><td>{l.points.toFixed(2)}</td></tr>}
+              </tbody>
+            ))}
+          </table>
+        </aside>
+      )}
+    </div>
+  </article>
+</Base>

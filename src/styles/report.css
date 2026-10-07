@@ -1,0 +1,67 @@
+/* Newspaper look for weekly reports. Loaded only on report pages. */
+@font-face {
+  font-family: 'UnifrakturMaguntia';
+  src: url('/fonts/UnifrakturMaguntia-Book.ttf') format('truetype');
+  font-display: swap;
+}
+
+.paper {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  padding: 1.25rem 1rem 2rem;
+  border: 1px solid var(--rule);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+.masthead { text-align: center; border-bottom: 3px double var(--ink); padding-bottom: 0.5rem; }
+.mast-title {
+  font-family: 'UnifrakturMaguntia', var(--serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 8vw, 4.25rem);
+  line-height: 1.05;
+  margin: 0.25rem 0 0.4rem;
+}
+.dateline {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 1rem;
+  border-top: 1px solid var(--ink); padding-top: 0.35rem;
+  font-family: var(--sans); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted);
+}
+
+.headline { font-size: clamp(1.75rem, 5vw, 3rem); line-height: 1.1; margin: 1.25rem 0 0.75rem; text-align: center; }
+.lede { font-size: 1.15rem; line-height: 1.6; margin: 0 0 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--ink-muted); }
+.lede::first-letter {
+  /* No text-transform: the lede often starts with a username. */
+  float: left; font-family: var(--serif); font-weight: 700;
+  font-size: 3.4em; line-height: 0.8; padding: 0.06em 0.08em 0 0; color: var(--accent-text);
+}
+
+.paper-body { display: grid; gap: 1.5rem; }
+/* Left aligned: justified text leaves big word gaps in narrow columns. */
+.columns { line-height: 1.6; hyphens: auto; }
+.columns h2 {
+  font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em;
+  border-top: 2px solid var(--ink); padding-top: 0.4rem; margin: 1.25rem 0 0.5rem;
+  break-after: avoid;
+}
+.columns h2:first-child { margin-top: 0; }
+.columns p { margin: 0 0 0.8rem; orphans: 3; widows: 3; }
+
+.boxscore { font-family: var(--sans); font-size: 0.9rem; align-self: start; border: 1px solid var(--ink); padding: 0.75rem; }
+.boxscore h2 { font-family: var(--serif); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 0.5rem; text-align: center; border-bottom: 1px solid var(--ink); padding-bottom: 0.35rem; }
+.boxscore table { font-size: 0.85rem; }
+.boxscore th, .boxscore td { padding: 0.2rem 0.25rem; border: 0; color: var(--ink); text-transform: none; letter-spacing: 0; font-size: inherit; white-space: normal; }
+.boxscore tbody + tbody tr:first-child > * { border-top: 1px solid var(--ink-muted); padding-top: 0.4rem; }
+.boxscore .win { font-weight: 700; }
+
+@media (min-width: 40rem) {
+  .paper { padding: 2rem 2rem 2.5rem; }
+  .columns { columns: 2; column-gap: 2rem; column-rule: 1px solid var(--ink-muted); }
+}
+@media (min-width: 64rem) {
+  .paper-body { grid-template-columns: 1fr 15rem; }
+  .columns { columns: 2; }
+}
+@media (min-width: 80rem) {
+  .columns { columns: 3; }
+}

@@ -16,8 +16,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@astrojs/markdown-satteri": "^0.4.3",
     "@types/node": "^24.19.1",
     "astro": "^7.3.6",
+    "satteri": "^0.10.5",
     "typescript": "^6.0.3",
     "vitest": "^5.0.3"
   }

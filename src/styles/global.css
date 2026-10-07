@@ -13,6 +13,10 @@
   --win: #1a7f37;
   --loss: #c62828;
   --tie: #5f6b7a;
+  /* Newsprint for reports. */
+  --paper: light-dark(#f3eee2, #1d1b18);
+  --ink: light-dark(#1d1b17, #ebe5d6);
+  --ink-muted: light-dark(#5b554a, #b3ab9a);
   --up-text: light-dark(#1a7f37, #4ade80);
   --down-text: light-dark(#c62828, #ff8a80);
   --serif: Georgia, 'Times New Roman', serif;
@@ -163,6 +167,16 @@ th.left { width: 100%; }
 .pv-num .sub { display: inline; margin-left: 0.2rem; }
 .pv-note { margin: 0; font-size: 0.95rem; }
 .pv-more { margin-top: auto; color: var(--accent-text); font-weight: 600; font-size: 0.9rem; }
+
+/* Home lead story and the reports list: newsprint cards. */
+.lead-story, .report-list a { display: block; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-top: 4px double var(--ink); border-radius: 4px; padding: 1rem 1.1rem; text-decoration: none; }
+.lead-story { margin-bottom: 1rem; }
+.lead-story:hover, .report-list a:hover { border-color: var(--orange); }
+.lead-story h2 { font-size: clamp(1.4rem, 4vw, 2rem); margin: 0.2rem 0 0.4rem; }
+.lead-story p { font-family: var(--serif); font-size: 1.05rem; margin: 0 0 0.6rem; }
+.report-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.rl-headline { display: block; font-family: var(--serif); font-size: 1.3rem; margin: 0.15rem 0 0.3rem; }
+.rl-lede { display: block; font-family: var(--serif); color: var(--ink-muted); }
 
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }

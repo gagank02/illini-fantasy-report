@@ -1,0 +1,20 @@
+---
+import { getCollection, render } from 'astro:content';
+import ReportLayout from '../../layouts/ReportLayout.astro';
+import { loadSeason } from '../../lib/sleeper';
+
+export async function getStaticPaths() {
+  const reports = await getCollection('reports');
+  return reports.map(entry => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { league, users, rosters, weeks } = await loadSeason();
+// Box score only for the current season's final weeks.
+const matchups = String(entry.data.season) === league.season ? weeks[entry.data.week - 1] : undefined;
+---
+
+<ReportLayout {...entry.data} matchups={matchups} users={users} rosters={rosters}>
+  <Content />
+</ReportLayout>
