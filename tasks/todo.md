@@ -132,14 +132,14 @@ Each task needs `npm test && npm run check && npm run build` to pass before it c
 **Description:** Add `scripts/update-players.ts` (`npm run players`). It calls `/players/nfl` **once** and writes `src/data/players.json`, trimmed to id → name, position, NFL team, and injury status, for fantasy positions only. Run it once and commit the file. Pages import the JSON, so builds never call the endpoint. Add `positionPoints()`, which sums `starters_points` by each player's real position. Add QB, RB, WR, TE, K, and DEF tabs to `/power-rankings`. The tabs use radio inputs and CSS, so they need no JS.
 
 **Acceptance criteria:**
-- [ ] No build or page calls `/players/nfl`. A grep for `players/nfl` finds it only in `scripts/update-players.ts`
-- [ ] A FLEX WR counts toward WR
-- [ ] Each tab ranks all 12 teams by season starter points at that position
-- [ ] The tabs work with the keyboard
+- [x] No build or page calls `/players/nfl`. A grep for `players/nfl` finds it only in `scripts/update-players.ts`
+- [x] A FLEX WR counts toward WR
+- [x] Each tab ranks all 12 teams by season starter points at that position
+- [x] The tabs work with the keyboard
 
 **Verification:**
-- [ ] `npm test`: position sums against fixtures, including a FLEX case
-- [ ] Manual: switch tabs on mobile and desktop
+- [x] `npm test`: position sums against fixtures, including a FLEX case
+- [x] Manual: switch tabs on mobile and desktop
 
 **Dependencies:** T6
 

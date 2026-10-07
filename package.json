@@ -11,7 +11,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "players": "node scripts/update-players.ts"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

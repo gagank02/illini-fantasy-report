@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
-import { allPlay, games, ordinal, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix } from '../src/lib/stats';
+import players from '../src/data/players.json';
+import { allPlay, games, ordinal, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -219,5 +220,43 @@ describe('power rankings', () => {
   test('only counts weeks up to the requested week', () => {
     const wk1 = powerRankings(all, 1);
     for (const r of wk1) expect(r.allPlay.w + r.allPlay.l + r.allPlay.t).toBe(11);
+  });
+});
+
+describe('positional rankings', () => {
+  const P = players as Players;
+  const pp = positionPoints(weeks, P);
+
+  test('position points add up to each team\'s real weekly totals', () => {
+    for (const r of rosters) {
+      const total = weeks.flat().filter(m => m.roster_id === r.roster_id).reduce((s, m) => s + m.points, 0);
+      const byPos = pp.find(x => x.rosterId === r.roster_id)!.points;
+      expect(POSITIONS.reduce((s, pos) => s + byPos[pos], 0)).toBeCloseTo(total, 1);
+    }
+  });
+
+  test('a WR in a FLEX slot counts as WR', () => {
+    const flex = league.roster_positions.indexOf('FLEX');
+    const m = weeks.flat().find(x => P[x.starters[flex]!]?.pos === 'WR')!;
+    const fake = { ...m, starters: [m.starters[flex]!], starters_points: [m.starters_points[flex]!] };
+    const out = positionPoints([[fake]], P)[0]!;
+    expect(out.points.WR).toBe(m.starters_points[flex]);
+    expect(out.points.RB + out.points.TE).toBe(0);
+  });
+
+  test('empty lineup slots ("0") and unknown players are skipped', () => {
+    const fake = { roster_id: 1, matchup_id: 1, points: 10, starters: ['0', 'nobody', 'DET'], starters_points: [5, 3, 10] };
+    expect(positionPoints([[fake]], P)[0]!.points).toMatchObject({ DEF: 10, QB: 0 });
+  });
+
+  test('rankings per position are sorted with ranks 1..n', () => {
+    for (const pos of POSITIONS) {
+      const ranked = positionRankings(pp, pos);
+      expect(ranked).toHaveLength(12);
+      ranked.forEach((r, i) => {
+        if (i) expect(ranked[i - 1]!.points).toBeGreaterThanOrEqual(r.points);
+        expect(r.rank).toBeLessThanOrEqual(i + 1);
+      });
+    }
   });
 });

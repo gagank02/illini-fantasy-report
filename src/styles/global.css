@@ -130,6 +130,20 @@ th.left { width: 100%; }
 .move-up { color: var(--up-text); }
 .move-down { color: var(--down-text); }
 
+/* Tabs: radio inputs + labels, no JS. Panel n shows when radio n is checked. */
+.tab-list { border: 0; margin: 0 0 0.75rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.tab-list label { padding: 0.35rem 0.75rem; border: 1px solid var(--rule); border-radius: 999px; cursor: pointer; font-size: 0.9rem; background: var(--surface); }
+.tab-list input:checked + label { background: var(--orange); border-color: var(--orange); color: var(--blue); font-weight: 600; }
+.tab-list input:focus-visible + label { outline: 3px solid var(--orange); outline-offset: 2px; }
+.tabs .tab-panel { display: none; }
+.tabs:has(input:nth-of-type(1):checked) .tab-panel:nth-of-type(1),
+.tabs:has(input:nth-of-type(2):checked) .tab-panel:nth-of-type(2),
+.tabs:has(input:nth-of-type(3):checked) .tab-panel:nth-of-type(3),
+.tabs:has(input:nth-of-type(4):checked) .tab-panel:nth-of-type(4),
+.tabs:has(input:nth-of-type(5):checked) .tab-panel:nth-of-type(5),
+.tabs:has(input:nth-of-type(6):checked) .tab-panel:nth-of-type(6),
+.tabs:has(input:nth-of-type(7):checked) .tab-panel:nth-of-type(7) { display: block; }
+
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }

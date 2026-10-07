@@ -205,3 +205,34 @@ export function powerRankings(all: Game[], upToWeek: number): PowerRow[] {
     return { ...r, move: prev ? prev.rank - r.rank : null };
   });
 }
+
+export const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as const;
+export type Position = (typeof POSITIONS)[number];
+
+/** Trimmed Sleeper player list from src/data/players.json (scripts/update-players.ts). */
+export type Players = Record<string, { name: string; pos: string; team: string | null; injury: string | null }>;
+
+export interface PositionPoints {
+  rosterId: number;
+  points: Record<Position, number>;
+}
+
+/** Starter points per team by each player's real position (a FLEX WR counts as WR). */
+export function positionPoints(weeks: Matchup[][], players: Players): PositionPoints[] {
+  const byRoster = new Map<number, Record<Position, number>>();
+  for (const m of weeks.flat()) {
+    const pts = byRoster.get(m.roster_id) ?? { QB: 0, RB: 0, WR: 0, TE: 0, K: 0, DEF: 0 };
+    m.starters.forEach((id, i) => {
+      const pos = players[id]?.pos as Position | undefined;
+      if (pos && pos in pts) pts[pos] = round2(pts[pos] + (m.starters_points[i] ?? 0));
+    });
+    byRoster.set(m.roster_id, pts);
+  }
+  return [...byRoster].map(([rosterId, points]) => ({ rosterId, points }));
+}
+
+export function positionRankings(all: PositionPoints[], pos: Position): { rank: number; rosterId: number; points: number }[] {
+  const sorted = all.map(p => ({ rosterId: p.rosterId, points: p.points[pos] })).sort((a, b) => b.points - a.points);
+  const ranks = rankBy(sorted.map(s => s.points));
+  return sorted.map((s, i) => ({ ...s, rank: ranks[i]! }));
+}
