@@ -1,7 +1,8 @@
 ---
+import Form from '../components/Form.astro';
 import Base from '../layouts/Base.astro';
 import { loadSeason } from '../lib/sleeper';
-import { games, standings } from '../lib/stats';
+import { games, ordinal, standings } from '../lib/stats';
 
 const { league, users, rosters, weeks } = await loadSeason();
 const rows = standings(rosters, users, games(weeks));
@@ -10,7 +11,7 @@ const fmt = (n: number) => n.toFixed(2);
 
 <Base title="Standings">
   <h1>Standings</h1>
-  <p class="muted">{league.season} season, through week {weeks.length}.</p>
+  <p class="muted">{league.season} season, through week {weeks.length}. Small numbers next to PF and PA rank each team in the league, 1st being the most points.</p>
   <div class="table-scroll">
     <table>
       <thead>
@@ -20,7 +21,7 @@ const fmt = (n: number) => n.toFixed(2);
           <th scope="col">W-L-T</th>
           <th scope="col">PF</th>
           <th scope="col" class="wide">PA</th>
-          <th scope="col" class="wide">Streak</th>
+          <th scope="col" class="wide">Last 5</th>
         </tr>
       </thead>
       <tbody>
@@ -30,11 +31,12 @@ const fmt = (n: number) => n.toFixed(2);
             <th scope="row" class="left">
               {r.team}
               <span class="sub">{r.manager}</span>
+              <span class="sub narrow"><Form record={r.record} /></span>
             </th>
-            <td>{r.w}-{r.l}-{r.t}<span class="sub narrow">{r.streak}</span></td>
-            <td>{fmt(r.pf)}<span class="sub narrow">PA {fmt(r.pa)}</span></td>
-            <td class="wide">{fmt(r.pa)}</td>
-            <td class="wide">{r.streak}</td>
+            <td>{r.w}-{r.l}-{r.t}</td>
+            <td>{fmt(r.pf)} <span class="rk">{ordinal(r.pfRank)}</span><span class="sub narrow">PA {fmt(r.pa)} <span class="rk">{ordinal(r.paRank)}</span></span></td>
+            <td class="wide">{fmt(r.pa)} <span class="rk">{ordinal(r.paRank)}</span></td>
+            <td class="wide"><Form record={r.record} /></td>
           </tr>
         ))}
       </tbody>

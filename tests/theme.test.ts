@@ -36,3 +36,11 @@ for (const [fg, bg] of [['fg', 'bg'], ['accent-text', 'bg'], ['muted', 'bg'], ['
     expect(contrast(fd, bd)).toBeGreaterThanOrEqual(4.5);
   });
 }
+
+for (const name of ['win', 'loss', 'tie']) {
+  test(`white text on --${name} badge meets WCAG AA`, () => {
+    const hex = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'i'))?.[1];
+    expect(hex, `--${name} token`).toBeDefined();
+    expect(contrast('#ffffff', hex!)).toBeGreaterThanOrEqual(4.5);
+  });
+}

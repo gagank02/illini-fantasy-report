@@ -9,6 +9,10 @@
   --muted: light-dark(#55606f, #a7b2c4);
   --accent-text: light-dark(#b53d00, #ff5f05);
   --rule: light-dark(#d9d4cb, #2a3b58);
+  /* Result badges keep white text at AA in both themes. */
+  --win: #1a7f37;
+  --loss: #c62828;
+  --tie: #5f6b7a;
   --serif: Georgia, 'Times New Roman', serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -78,12 +82,22 @@ tbody tr:last-child > * { border-bottom: 0; }
 .left { text-align: left; }
 tbody th { font-weight: 600; white-space: normal; min-width: 8rem; }
 th.left { width: 100%; }
-@media (max-width: 30rem) { th, td { padding: 0.5rem 0.4rem; } tbody th { min-width: 6.5rem; } }
+.rk { font-size: 0.7rem; color: var(--muted); display: inline-block; min-width: 2.1em; text-align: left; }
+@media (max-width: 30rem) { th, td { padding: 0.5rem 0.4rem; } tbody th { min-width: 6rem; } .rk { min-width: 0; } td .sub { white-space: normal; } }
 
+.sub { display: block; font-weight: 400; font-size: 0.8rem; color: var(--muted); }
+
+.form { display: inline-flex; gap: 3px; vertical-align: middle; }
+.f { display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 3px; font-size: 0.65rem; font-weight: 700; color: #fff; }
+.f-W { background: var(--win); }
+.f-L { background: var(--loss); }
+.f-T { background: var(--tie); }
+.sub .form { margin-top: 0.3rem; }
+
+/* Keep last: must override .sub's display. */
 /* Columns marked .wide fold into .narrow sub lines on phones so tables fit without scrolling. */
 .narrow { display: none; }
 @media (max-width: 40rem) {
   .wide { display: none; }
   .narrow { display: block; }
 }
-.sub { display: block; font-weight: 400; font-size: 0.8rem; color: var(--muted); }

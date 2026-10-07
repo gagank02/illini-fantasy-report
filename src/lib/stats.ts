@@ -21,6 +21,10 @@ export interface StandingsRow {
   t: number;
   pf: number;
   pa: number;
+  /** 1 = most points for in the league. */
+  pfRank: number;
+  /** 1 = most points against in the league. */
+  paRank: number;
   /** Results in week order, e.g. "WLWW". */
   record: string;
   /** e.g. "2W". */
@@ -57,6 +61,16 @@ export function teamNames(users: User[], ownerId: string): { team: string; manag
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
+/** Rank 1 = highest value. Ties share a rank (1, 2, 2, 4). */
+export function rankBy(values: number[]): number[] {
+  return values.map(v => values.filter(o => o > v).length + 1);
+}
+
+export function ordinal(n: number): string {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  return n + (teen ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th');
+}
+
 /** Sorted by win% (a tie counts as half a win), then points for. */
 export function standings(rosters: Roster[], users: User[], all: Game[]): StandingsRow[] {
   return rosters
@@ -72,10 +86,17 @@ export function standings(rosters: Roster[], users: User[], all: Game[]): Standi
         t: mine.filter(g => result(g) === 'T').length,
         pf: round2(mine.reduce((s, g) => s + g.points, 0)),
         pa: round2(mine.reduce((s, g) => s + g.opponentPoints, 0)),
+        pfRank: 0,
+        paRank: 0,
         record,
         streak: streak(record),
       };
     })
     .sort((a, b) => b.w + b.t / 2 - (a.w + a.t / 2) || b.pf - a.pf)
-    .map((row, i) => ({ ...row, rank: i + 1 }));
+    .map((row, i, rows) => ({
+      ...row,
+      rank: i + 1,
+      pfRank: rankBy(rows.map(r => r.pf))[i]!,
+      paRank: rankBy(rows.map(r => r.pa))[i]!,
+    }));
 }

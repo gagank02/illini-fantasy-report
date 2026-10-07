@@ -1,0 +1,16 @@
+---
+// Soccer style form guide: last N results as W/L/T badges, oldest to newest.
+interface Props {
+  record: string;
+  n?: number;
+}
+const { record, n = 5 } = Astro.props;
+const recent = [...record.slice(-n)];
+const words = { W: 'win', L: 'loss', T: 'tie' } as Record<string, string>;
+---
+
+{recent.length > 0 && (
+  <span class="form" role="img" aria-label={`Last ${recent.length}, oldest to newest: ${recent.map(c => words[c]).join(', ')}`}>
+    {recent.map(c => <span class={`f f-${c}`} aria-hidden="true">{c}</span>)}
+  </span>
+)}

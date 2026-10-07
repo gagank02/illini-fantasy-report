@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
-import { games, standings, streak } from '../src/lib/stats';
+import { games, ordinal, rankBy, standings, streak } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -92,5 +92,33 @@ describe('streak', () => {
     ['', ''],
   ])('%s → %s', (record, want) => {
     expect(streak(record)).toBe(want);
+  });
+});
+
+describe('rankBy', () => {
+  test('highest value is rank 1, ties share a rank', () => {
+    expect(rankBy([10, 30, 20, 30])).toEqual([4, 1, 3, 1]);
+  });
+});
+
+describe('PF and PA ranks in standings', () => {
+  const rows = standings(rosters, users, games(weeks));
+  test('rank 1 has the most points for and the most points against', () => {
+    const maxPf = Math.max(...rows.map(r => r.pf));
+    const maxPa = Math.max(...rows.map(r => r.pa));
+    expect(rows.find(r => r.pfRank === 1)!.pf).toBe(maxPf);
+    expect(rows.find(r => r.paRank === 1)!.pa).toBe(maxPa);
+  });
+  test('every team gets a rank from 1 to 12', () => {
+    for (const r of rows) {
+      expect(r.pfRank).toBeGreaterThanOrEqual(1);
+      expect(r.paRank).toBeLessThanOrEqual(12);
+    }
+  });
+});
+
+describe('ordinal', () => {
+  test.each([[1, '1st'], [2, '2nd'], [3, '3rd'], [4, '4th'], [11, '11th'], [12, '12th'], [13, '13th'], [21, '21st'], [22, '22nd']])('%i → %s', (n, want) => {
+    expect(ordinal(n)).toBe(want);
   });
 });
