@@ -60,6 +60,7 @@ The site is small, so all four modules live in this one spec and don't get separ
   - The latest report's headline and lede, linking to the report (added in T9).
   - Preview cards linking to each tab: the standings top 3, the power rankings top 3 with movement and the biggest riser, and What If's luckiest and unluckiest schedules. Luck is actual wins minus average wins across every schedule.
   - "Around the league," 3 to 5 computed facts: the highest score, toughest luck (most points against), biggest blowout, closest game, and hottest team (2 or more straight wins).
+  - A Trends card: the 3 regulars (8+ points a game, on a roster here for at least half of each season's weeks) scoring most above last season, with small points lines, and the biggest FantasyCalc market riser among regulars once momentum exists. A credit line under the cards links FantasyCalc.com and Sleeper (cards are links, so credits can't sit inside them).
   - History is not previewed on the home page.
 - The report's facts bundle includes the same "Around the league" facts.
 - **Looks like a newspaper.** The page has these elements.

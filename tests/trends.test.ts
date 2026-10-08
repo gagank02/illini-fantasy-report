@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { momentumPct, sampleMomentum, serializeMomentum, sparkline, trendRows, weeklyPoints } from '../src/lib/trends';
+import { heatingUp, marketMover, momentumPct, sampleMomentum, serializeMomentum, sparkline, trendRows, weeklyPoints, type TrendRow } from '../src/lib/trends';
 import type { Matchup } from '../src/lib/sleeper';
 import type { Players } from '../src/lib/stats';
 
@@ -57,4 +57,19 @@ test('the committed momentum file holds percentages only, never values', () => {
   const text = serializeMomentum('2026-10-09', { a: 0.123, b: -0.05 });
   expect(JSON.parse(text)).toEqual({ fetched: '2026-10-09', momentum: { a: 0.123, b: -0.05 } });
   expect(text).not.toMatch(/"(value|values|redraftValue|trend30Day)"/);
+});
+
+test('home card picks: biggest gains vs last season, and the biggest market riser, among regulars only', () => {
+  const r = (id: string, avg26: number | null, diff: number | null, momentum: number | null): TrendRow => ({ id, pos: 'WR', s25: [1, 1], s26: [1, 1], avg26, diff, momentum });
+  const rows = [r('bench', 3, 9, 7.5), r('a', 20, 5, 0.1), r('b', 15, 8, -0.2), r('c', 12, 2, 0.3), r('rookie', 18, null, 0.05)];
+  expect(heatingUp(rows).map(x => x.id)).toEqual(['b', 'a', 'c']);
+  expect(marketMover(rows)!.id).toBe('c');
+  expect(marketMover(rows.map(x => ({ ...x, momentum: null })))).toBeNull();
+});
+
+test('heating up needs at least half of each season\'s weeks, so a few backup games don\'t count', () => {
+  const full = (n: number, v: number) => Array.from({ length: n }, () => v);
+  const sparse: TrendRow = { id: 'sparse', pos: 'QB', s25: [5, ...full(13, null as unknown as number)], s26: [25, 25, 25, 25], avg26: 25, diff: 20, momentum: null };
+  const steady: TrendRow = { id: 'steady', pos: 'WR', s25: full(14, 10), s26: [14, 14, 14, 14], avg26: 14, diff: 4, momentum: null };
+  expect(heatingUp([sparse, steady]).map(x => x.id)).toEqual(['steady']);
 });

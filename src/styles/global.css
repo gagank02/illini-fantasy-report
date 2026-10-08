@@ -245,6 +245,10 @@ table.draft td { position: relative; padding-bottom: 1.15rem; }
 .trade-value { grid-column: 1 / -1; display: block; }
 @media (max-width: 30rem) { .trade { grid-template-columns: 1fr; } }
 
+.pv-trend { align-items: center; }
+.pv-trend .spark { margin-left: auto; }
+.previews + .trade-credit { margin: 0.5rem 0 0; font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+
 /* Trends: one table, position filter by radio + :has(), no JS. */
 .trends:has(#pos-QB:checked) tr[data-pos]:not([data-pos="QB"]),
 .trends:has(#pos-RB:checked) tr[data-pos]:not([data-pos="RB"]),

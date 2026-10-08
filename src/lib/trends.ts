@@ -92,3 +92,21 @@ export function sampleMomentum(ids: string[]): Record<string, number> {
     return [id, Math.round((((h >>> 0) % 601) / 1000 - 0.3) * 1000) / 1000];
   }));
 }
+
+/** Players averaging at least this many points count as regulars for home page picks (keeps deep bench noise out). */
+export const REGULAR_AVG = 8;
+
+/** Biggest scoring gains vs last season among regulars, for the home page. */
+export function heatingUp(rows: TrendRow[], n = 3): TrendRow[] {
+  // At least half of each season's weeks on a roster here, so a few backup games don't make a "trend".
+  const enough = (xs: (number | null)[]) => xs.length > 0 && xs.filter(x => x !== null).length * 2 >= xs.length;
+  return rows
+    .filter(r => r.diff !== null && (r.avg26 ?? 0) >= REGULAR_AVG && enough(r.s25) && enough(r.s26))
+    .sort((a, b) => b.diff! - a.diff!)
+    .slice(0, n);
+}
+
+/** Biggest 30 day market riser among regulars, or null before momentum exists. */
+export function marketMover(rows: TrendRow[]): TrendRow | null {
+  return rows.filter(r => r.momentum !== null && (r.avg26 ?? 0) >= REGULAR_AVG).sort((a, b) => b.momentum! - a.momentum!)[0] ?? null;
+}

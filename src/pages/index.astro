@@ -3,9 +3,13 @@ import { getCollection } from 'astro:content';
 import Facts from '../components/Facts.astro';
 import Form from '../components/Form.astro';
 import Move from '../components/Move.astro';
+import Sparkline from '../components/Sparkline.astro';
+import players from '../data/players.json';
+import { loadMomentum } from '../lib/fantasycalc';
 import Base from '../layouts/Base.astro';
 import { loadSeason } from '../lib/sleeper';
-import { facts, games, powerRankings, scheduleLuck, standings, whatIfMatrix } from '../lib/stats';
+import { facts, games, powerRankings, scheduleLuck, standings, whatIfMatrix, type Players } from '../lib/stats';
+import { heatingUp, marketMover, trendRows } from '../lib/trends';
 
 const { league, users, rosters, weeks } = await loadSeason();
 const all = games(weeks);
@@ -16,6 +20,13 @@ const riser = power.filter(p => (p.move ?? 0) > 0).sort((a, b) => b.move! - a.mo
 const luck = scheduleLuck(whatIfMatrix(rows, all));
 const [luckiest, unluckiest] = [luck[0], luck.at(-1)];
 const latest = (await getCollection('reports')).sort((a, b) => b.data.season - a.data.season || b.data.week - a.data.week)[0];
+// Trends card: real points vs last season, plus FantasyCalc momentum once the daily job has saved it.
+const P = players as Players;
+const last = league.previous_league_id ? await loadSeason(league.previous_league_id) : null;
+const momentum = loadMomentum(process.env, rosters.flatMap(r => r.players ?? []));
+const trendList = trendRows(rosters, P, weeks, last?.weeks ?? [], momentum?.momentum ?? {});
+const hot = heatingUp(trendList);
+const mover = marketMover(trendList);
 const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`; };
 ---
 
@@ -74,7 +85,32 @@ const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `
           )}
           <span class="pv-more">Every team on every schedule →</span>
         </a>
+
+        <a class="preview" href="/trends">
+          <h2>Trends</h2>
+          <span class="fact-title">Heating up vs. {last?.league.season ?? 'last season'}</span>
+          <ol role="list">
+            {hot.map(r => (
+              <li class="pv-trend">
+                <span>{P[r.id]!.name}</span>
+                <Sparkline series={[...r.s25, null, ...r.s26]} divider={r.s25.length} width={64} height={22} label={`${P[r.id]!.name} points by week`} tooltip={`${league.season} average ${r.avg26!.toFixed(1)}, up ${r.diff!.toFixed(1)}`} />
+                <span class="pv-num move move-up">▲{r.diff!.toFixed(1)}</span>
+              </li>
+            ))}
+          </ol>
+          {mover && (
+            <p class="pv-note">
+              Market mover: <strong>{P[mover.id]!.name}</strong>, {mover.momentum! >= 0 ? 'up' : 'down'} {Math.abs(Math.round(mover.momentum! * 100))}% in 30 days.
+            </p>
+          )}
+          <span class="pv-more">Every player's trend →</span>
+        </a>
       </div>
+      <p class="trade-credit">
+        {mover
+          ? <>Market moves from <a href="https://fantasycalc.com">FantasyCalc.com</a>{momentum?.sample ? ' (made up for local testing)' : ''}. Points from <a href="https://sleeper.com">Sleeper</a>.</>
+          : <>Scores and trends from <a href="https://sleeper.com">Sleeper</a>.</>}
+      </p>
 
       <Facts facts={facts(rows, all)} teamNames={rows.map(r => r.team)} />
     </>
