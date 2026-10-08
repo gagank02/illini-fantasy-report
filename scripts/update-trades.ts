@@ -8,6 +8,9 @@ import { scriptPlayers } from '../src/lib/players.ts';
 import { currentLeagueId, leagueById, leagueRosters } from '../src/lib/sleeper.ts';
 import { tradeBoard, valuedRosters } from '../src/lib/trades.ts';
 
+// In GitHub Actions, ::notice:: lines also show on the run's public summary page (logs need a login).
+const note = (msg: string) => console.log(process.env.GITHUB_ACTIONS ? `::notice::${msg}` : msg);
+
 const today = new Date().toISOString().slice(0, 10);
 if (!mayFetch(process.env, readSaved(), today)) {
   console.log(process.env.FANTASYCALC === 'live' ? `Trades already saved for ${today}, skipping.` : 'FANTASYCALC is not live, skipping.');
@@ -26,9 +29,9 @@ const values = keepRostered(body as FcValue[], new Set(rostered), query.isDynast
 // Check the join with Sleeper before saving. The run log shows any gaps; a broken list is never used.
 const players = scriptPlayers();
 const c = checkCoverage(values, rostered, players);
-console.log(`Coverage: ${c.valued} of ${c.skill} rostered QB/RB/WR/TE have a value.`);
-if (c.missing.length) console.log(`No value (left out of trades): ${c.missing.join(', ')}`);
-if (c.posMismatch.length) console.log(`Position differs: ${c.posMismatch.join(', ')}`);
+note(`Coverage: ${c.valued} of ${c.skill} rostered QB/RB/WR/TE have a FantasyCalc value.`);
+if (c.missing.length) note(`No value (left out of trades): ${c.missing.join(', ')}`);
+if (c.posMismatch.length) note(`Position differs: ${c.posMismatch.join(', ')}`);
 if (!c.ok) throw new Error('Too few rostered players have a value, so this list looks broken. Keeping yesterday\'s trades.');
 
 const board = tradeBoard(valuedRosters(rosters, new Map(Object.entries(values))), league.roster_positions);

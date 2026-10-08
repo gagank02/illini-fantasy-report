@@ -10,6 +10,9 @@ import { FULL_PATH, readFull, SITE_PATH, type FullPlayers } from '../src/lib/pla
 import { draftPicks, loadSeason } from '../src/lib/sleeper.ts';
 import { siteIds, siteSubset, trimPlayers, type Players } from '../src/lib/stats.ts';
 
+// In GitHub Actions, ::notice:: lines also show on the run's public summary page (logs need a login).
+const note = (msg: string) => console.log(process.env.GITHUB_ACTIONS ? `::notice::${msg}` : msg);
+
 const today = new Date().toISOString().slice(0, 10);
 let full = readFull();
 if (full?.fetched === today) {
@@ -22,7 +25,7 @@ if (full?.fetched === today) {
   writeFileSync(FULL_PATH, JSON.stringify(full));
   const injured = Object.values(full.players).filter(p => p.injury);
   // Sleeper's docs don't show injury_body_part, so log how many came back; 0 means the field isn't sent.
-  console.log(`Fetched ${Object.keys(full.players).length} players (${injured.length} injured, ${injured.filter(p => p.body).length} with a body part).`);
+  note(`Fetched ${Object.keys(full.players).length} players (${injured.length} injured, ${injured.filter(p => p.body).length} with a body part).`);
 }
 
 const season = await loadSeason();
