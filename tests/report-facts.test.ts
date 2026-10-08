@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import players from '../src/data/players.json';
+import players from './fixtures/players.json';
 import { assembleFacts, optimalLineup, type FactsInput, type Transaction } from '../src/lib/report-facts';
 import type { League, Matchup, Roster, User } from '../src/lib/sleeper';
 import type { Players } from '../src/lib/stats';

@@ -35,6 +35,7 @@ jobs:
         run: npm install -g @anthropic-ai/claude-code@2.1.292
 
       # Player list (names, positions, injuries): at most one /players/nfl call per UTC day, as Sleeper asks.
+      # The full list lives in .cache (never committed) and is shared with refresh.yml through this cache key.
       # The first run of the day fetches it and caches it right away; later runs that day reuse the cache,
       # so reruns never add calls, even if the job fails afterwards or the PR isn't merged.
       - name: Today's date (UTC)
@@ -44,16 +45,16 @@ jobs:
         id: players-cache
         uses: actions/cache/restore@v4
         with:
-          path: src/data/players.json
+          path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
-      - name: Refresh player list (first run of the day only)
-        if: steps.players-cache.outputs.cache-hit != 'true'
+      # Always runs: fetches only if the cache missed, then writes the site's subset from today's rosters.
+      - name: Update player lists
         run: npm run players
       - name: Cache today's player list
         if: steps.players-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
-          path: src/data/players.json
+          path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
 
       - name: Write the report

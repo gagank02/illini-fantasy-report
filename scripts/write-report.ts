@@ -6,6 +6,7 @@ import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { lintReport } from '../src/lib/lint-report.ts';
+import { scriptPlayers } from '../src/lib/players.ts';
 import { buildFacts } from '../src/lib/report-facts.ts';
 import { buildPrompt, fixPrompt, missingSections, parseDraft, REPORT_RULES, toMarkdown } from '../src/lib/report-writer.ts';
 import { leagueUsers, loadSeason } from '../src/lib/sleeper.ts';
@@ -26,7 +27,8 @@ if (spawnSync('claude', ['--version'], { encoding: 'utf8' }).status !== 0) {
 }
 
 // 2. Facts, from Sleeper only. No outside news feeds: ESPN and Yahoo terms forbid feeding their content to AI tools.
-const players = JSON.parse(readFileSync('src/data/players.json', 'utf8'));
+// Full list: trending pickups and transactions can name anyone, not just our rosters.
+const players = scriptPlayers();
 const facts = await buildFacts(week, players);
 
 // 3. Ask Claude. Tools off, no user settings or plugins, our own system prompt.

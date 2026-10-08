@@ -209,7 +209,7 @@ export function powerRankings(all: Game[], upToWeek: number): PowerRow[] {
 export const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as const;
 export type Position = (typeof POSITIONS)[number];
 
-/** Trimmed Sleeper player list from src/data/players.json (scripts/update-players.ts). */
+/** Trimmed Sleeper players. The committed src/data/players.json holds only the site's subset (see siteSubset). */
 /** body: injury body part (e.g. "Ankle"), only for injured players and only when Sleeper sends one. */
 export type Players = Record<string, { name: string; pos: string; team: string | null; injury: string | null; body?: string }>;
 
@@ -338,4 +338,24 @@ export function scheduleLuck(matrix: WhatIfRow[]): { rosterId: number; actualWin
       return { rosterId: row.rosterId, actualWins, avgWins, luck: actualWins - avgWins };
     })
     .sort((a, b) => b.luck - a.luck);
+}
+
+/** Player ids our pages use: current rosters, every week's players and starters, and this season's draft picks. */
+export function siteIds(
+  rosters: { roster_id: number; players?: string[] | null }[],
+  weeks: Matchup[][],
+  picks: { player_id: string }[],
+): Set<string> {
+  const ids = new Set([
+    ...rosters.flatMap(r => r.players ?? []),
+    ...weeks.flat().flatMap(m => [...(m.players ?? []), ...m.starters]),
+    ...picks.map(p => p.player_id),
+  ]);
+  ids.delete('0'); // Sleeper's empty lineup slot
+  return ids;
+}
+
+/** Only these players, sorted by id. Sleeper's full list stays out of the repo; the site needs just these. */
+export function siteSubset(all: Players, ids: Iterable<string>): Players {
+  return Object.fromEntries([...new Set(ids)].filter(id => all[id]).sort().map(id => [id, all[id]!]));
 }

@@ -2,8 +2,9 @@ name: Daily refresh
 
 # Rebuilds the site on Cloudflare so Sleeper data stays current, and refreshes two saved data files, each at most
 # once per UTC day:
-# - src/data/players.json (Sleeper /players/nfl: names, positions, injury tags). Shares its cache key with
-#   weekly-report.yml, so the two workflows together never call Sleeper's player list twice in a day.
+# - Sleeper's player list (/players/nfl: names, positions, injury tags). The full list stays in the Actions cache
+#   (.cache/players-full.json, never committed), sharing its key with weekly-report.yml so the two together never
+#   call it twice in a day. Only the players our pages use are committed, to src/data/players.json.
 # - src/data/trades.json (trade suggestions from FantasyCalc /values/current), once the FANTASYCALC_ENABLED repo
 #   variable is 'true'. Only the suggestions are committed; FantasyCalc's raw values are never saved to the repo.
 # Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
@@ -40,18 +41,18 @@ jobs:
         id: players-cache
         uses: actions/cache/restore@v4
         with:
-          path: src/data/players.json
+          path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
-      - name: Refresh player list (first run of the day only)
+      # Always runs: fetches only if the cache missed, then writes the site's subset from today's rosters.
+      - name: Update player lists
         id: players
-        if: steps.players-cache.outputs.cache-hit != 'true'
         continue-on-error: true
         run: npm run players
       - name: Cache today's player list
-        if: steps.players.outcome == 'success'
+        if: steps.players-cache.outputs.cache-hit != 'true' && steps.players.outcome == 'success'
         uses: actions/cache/save@v4
         with:
-          path: src/data/players.json
+          path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
 
       # FantasyCalc: at most ONE call per UTC day, even if it fails. Their docs only ask for hourly at most,

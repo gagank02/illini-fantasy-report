@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
-import players from '../src/data/players.json';
-import { allPlay, facts, games, injuryTag, ordinal, trimPlayers, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
+import players from './fixtures/players.json';
+import { allPlay, facts, games, injuryTag, ordinal, siteIds, siteSubset, trimPlayers, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -375,5 +375,25 @@ describe('trimPlayers', () => {
     expect(out['1']!.body).toBe('Hamstring');
     expect(out['2']!.body).toBeUndefined();
     expect(out['3']!.body).toBeUndefined();
+  });
+});
+
+describe('site player subset (committed instead of Sleeper\'s full list)', () => {
+  const all: Players = {
+    a: { name: 'A', pos: 'QB', team: 'X', injury: null },
+    b: { name: 'B', pos: 'RB', team: 'X', injury: 'Out', body: 'Knee' },
+    c: { name: 'C', pos: 'WR', team: 'X', injury: null },
+    z: { name: 'Z', pos: 'TE', team: 'X', injury: null },
+  };
+  test('keeps only the given ids that exist, sorted', () => {
+    expect(siteSubset(all, ['c', 'b', 'missing', 'b'])).toEqual({ b: all.b, c: all.c });
+  });
+  test('ids come from rosters, every week\'s players and starters, and draft picks', () => {
+    const ids = siteIds(
+      [{ roster_id: 1, players: ['a'] }, { roster_id: 2, players: null }],
+      [[{ roster_id: 1, matchup_id: 1, points: 0, starters: ['b', '0'], starters_points: [0, 0], players: ['b', 'c'] }]],
+      [{ player_id: 'z' }],
+    );
+    expect([...ids].sort()).toEqual(['a', 'b', 'c', 'z']);
   });
 });

@@ -6,3 +6,5 @@ dist/
 .astro/
 .DS_Store
 .wrangler/
+# Sleeper's full player list: kept in the Actions cache, never committed.
+.cache/

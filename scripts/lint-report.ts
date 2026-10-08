@@ -2,6 +2,7 @@
 // Exits 1 and lists every writing-style.md violation. Player, team, and manager names are allowed as is.
 import { readFileSync } from 'node:fs';
 import { lintReport } from '../src/lib/lint-report.ts';
+import { scriptPlayers } from '../src/lib/players.ts';
 import { leagueUsers } from '../src/lib/sleeper.ts';
 
 const files = process.argv.slice(2);
@@ -10,7 +11,7 @@ if (!files.length) {
   process.exit(2);
 }
 
-const players = JSON.parse(readFileSync('src/data/players.json', 'utf8')) as Record<string, { name: string }>;
+const players = scriptPlayers();
 const names = Object.values(players).map(p => p.name);
 try {
   for (const u of await leagueUsers()) names.push(u.display_name, u.metadata.team_name ?? '');
