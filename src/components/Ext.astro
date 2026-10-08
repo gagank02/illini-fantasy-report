@@ -1,0 +1,9 @@
+---
+// Link to another site: opens in a new tab. noopener noreferrer stops that page from reaching back into ours.
+interface Props {
+  href: string;
+}
+const { href } = Astro.props;
+---
+
+<a href={href} target="_blank" rel="noopener noreferrer"><slot /><span class="visually-hidden"> (opens in a new tab)</span></a>

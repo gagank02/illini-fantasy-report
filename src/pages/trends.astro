@@ -1,5 +1,6 @@
 ---
 import Injury from '../components/Injury.astro';
+import Ext from '../components/Ext.astro';
 import Sparkline from '../components/Sparkline.astro';
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
@@ -32,10 +33,10 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
   </p>
   <p class="trade-credit">
     {loaded?.sample
-      ? <>Market numbers are made up for local testing. Points from <a href="https://sleeper.com">Sleeper</a>.</>
+      ? <>Market numbers are made up for local testing. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
       : loaded
-        ? <>Market moves from <a href="https://fantasycalc.com">FantasyCalc.com</a>, updated {loaded.fetched}. Points from <a href="https://sleeper.com">Sleeper</a>.</>
-        : <>Points from <a href="https://sleeper.com">Sleeper</a>. Market moves appear after the next daily update.</>}
+        ? <>Market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>, updated {loaded.fetched}. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
+        : <>Points from <Ext href="https://sleeper.com">Sleeper</Ext>. Market moves appear after the next daily update.</>}
   </p>
 
   <div class="trends">

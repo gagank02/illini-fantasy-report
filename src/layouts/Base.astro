@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Ext from '../components/Ext.astro';
 import { tradesAvailable } from '../lib/fantasycalc';
 
 interface Props {
@@ -52,8 +53,8 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     </main>
     <footer class="site-footer">
       <div class="wrap">
-        A fan site for the Illini Fantasy league. League data, injuries, and trending players from <a href="https://sleeper.com">Sleeper</a>.
-        Trade values and market moves from <a href="https://fantasycalc.com">FantasyCalc.com</a>. Not affiliated with or endorsed by the University of
+        A fan site for the Illini Fantasy league. League data, injuries, and trending players from <Ext href="https://sleeper.com">Sleeper</Ext>.
+        Trade values and market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>. Not affiliated with or endorsed by the University of
         Illinois, Sleeper, FantasyCalc, or the NFL.
       </div>
     </footer>

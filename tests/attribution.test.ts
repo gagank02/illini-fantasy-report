@@ -39,3 +39,12 @@ test('reports credit Sleeper inside the article, so PDF and image exports carry 
   const article = read('src/layouts/ReportLayout.astro').match(/<article[\s\S]*<\/article>/)![0];
   expect(article.match(/<p class="credit">[\s\S]*?<\/p>/)![0]).toContain(SLEEPER_LINK);
 });
+
+test('links to other sites open in a new tab safely (via the Ext component), site links stay in the same tab', () => {
+  const files = [...pages('src/pages'), ...pages('src/layouts'), ...pages('src/components')];
+  for (const f of files) expect(read(f), f).not.toMatch(/<a\s[^>]*href=["{`]+https?:/);
+  const ext = read('src/components/Ext.astro');
+  expect(ext).toContain('target="_blank"');
+  expect(ext).toContain('rel="noopener noreferrer"');
+  expect(ext).toContain('opens in a new tab');
+});

@@ -1,5 +1,6 @@
 ---
 import Injury from '../components/Injury.astro';
+import Ext from '../components/Ext.astro';
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
 import { loadTrades } from '../lib/fantasycalc';
@@ -44,8 +45,8 @@ const first = teams[0]?.rosterId;
       </p>
       <p class="trade-credit">
         {loaded!.sample
-          ? <>Sample values for local testing. These are made up. Rosters from <a href="https://sleeper.com">Sleeper</a>.</>
-          : <>Player values from <a href="https://fantasycalc.com">FantasyCalc.com</a>, updated {loaded!.saved.fetched}. Rosters from <a href="https://sleeper.com">Sleeper</a>.</>}
+          ? <>Sample values for local testing. These are made up. Rosters from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
+          : <>Player values from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>, updated {loaded!.saved.fetched}. Rosters from <Ext href="https://sleeper.com">Sleeper</Ext>.</>}
       </p>
 
       <form class="trade-pick" id="trade-pick">

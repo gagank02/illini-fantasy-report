@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Facts from '../components/Facts.astro';
+import Ext from '../components/Ext.astro';
 import Form from '../components/Form.astro';
 import Move from '../components/Move.astro';
 import Sparkline from '../components/Sparkline.astro';
@@ -108,8 +109,8 @@ const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `
       </div>
       <p class="trade-credit">
         {mover
-          ? <>Market moves from <a href="https://fantasycalc.com">FantasyCalc.com</a>{momentum?.sample ? ' (made up for local testing)' : ''}. Points from <a href="https://sleeper.com">Sleeper</a>.</>
-          : <>Scores and trends from <a href="https://sleeper.com">Sleeper</a>.</>}
+          ? <>Market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>{momentum?.sample ? ' (made up for local testing)' : ''}. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
+          : <>Scores and trends from <Ext href="https://sleeper.com">Sleeper</Ext>.</>}
       </p>
 
       <Facts facts={facts(rows, all)} teamNames={rows.map(r => r.team)} />

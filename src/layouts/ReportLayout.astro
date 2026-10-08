@@ -1,5 +1,6 @@
 ---
 import Base from './Base.astro';
+import Ext from '../components/Ext.astro';
 import '../styles/report.css';
 import type { Matchup, User, Roster } from '../lib/sleeper';
 import { teamNames } from '../lib/stats';
@@ -66,7 +67,7 @@ const longDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'nume
         </aside>
       )}
     </div>
-    <p class="credit">League data, injuries, and trending players from <a href="https://sleeper.com">Sleeper</a>. Written with Claude from those facts.</p>
+    <p class="credit">League data, injuries, and trending players from <Ext href="https://sleeper.com">Sleeper</Ext>. Written with Claude from those facts.</p>
   </article>
 </Base>
 
