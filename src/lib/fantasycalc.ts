@@ -1,7 +1,7 @@
 // FantasyCalc trade values. Their terms: https://fantasycalc.com/api-docs
 // - Only documented endpoints. We call GET /values/current and nothing else.
 // - Their docs: cache the result and refresh it at most once per hour. We are stricter: only
-//   scripts/update-values.ts calls the API, at most once per UTC day (even after a failed call), from the
+//   scripts/update-trades.ts calls the API, at most once per UTC day (even after a failed call), from the
 //   daily refresh job. Builds, tests, CI, and previews read the saved file.
 // - They ask for a human email before a public launch (see SPEC.md).
 // - Show "FantasyCalc.com" with a link on every page that shows the data.
