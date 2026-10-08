@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { buildValues } from '../src/lib/fantasycalc';
+import { sampleValues } from '../src/lib/fantasycalc';
 import type { League, Roster } from '../src/lib/sleeper';
-import { lineupSlots, teamScore, topTrades, tradeBoard, tradesBetween, valuedRosters, type Trade, type ValuedPlayer } from '../src/lib/trades';
+import { lineupSlots, saveBoard, stillValid, teamScore, topTrades, tradeBoard, tradesBetween, valuedRosters, type Trade, type ValuedPlayer } from '../src/lib/trades';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const SLOTS = lineupSlots(['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX', 'K', 'DEF', 'BN', 'BN']);
@@ -48,7 +48,7 @@ test('topTrades drops a trade that is a better one plus a throw in', () => {
 
 test('board on the week 4 league with sample values', () => {
   const league = load<League>('league');
-  const values = new Map(Object.entries(buildValues({ FANTASYCALC: 'sample' })!.saved.values));
+  const values = new Map(Object.entries(sampleValues()));
   const teams = valuedRosters(load<Roster[]>('rosters'), values);
   const board = tradeBoard(teams, league.roster_positions);
   expect(board.pairs.size).toBe(66);
@@ -76,4 +76,18 @@ test('gaps in values never break the board: players without values, and a team w
   const board = tradeBoard(teams, ['QB', 'TE', 'FLEX']);
   expect(board.byTeam.get(2)).toEqual([]);
   expect(board.pairs.get('1-2')).toEqual([]);
+});
+
+test('saved trades keep the gap as a share, not the values', () => {
+  const t: Trade = { a: 1, b: 2, aGets: ['x'], bGets: ['y'], aGain: 0.1, bGain: 0.05, aGetsValue: 900, bGetsValue: 1000 };
+  const saved = saveBoard({ pairs: new Map([['1-2', [t]]]), byTeam: new Map([[1, [t]]]) });
+  expect(saved.pairs['1-2']![0]).toEqual({ a: 1, b: 2, aGets: ['x'], bGets: ['y'], aGain: 0.1, bGain: 0.05, valueGap: 0.1 });
+  expect(saved.byTeam['1']).toHaveLength(1);
+});
+
+test('a saved trade is dropped once its players have changed teams', () => {
+  const t = { a: 1, b: 2, aGets: ['x'], bGets: ['y'], aGain: 0.1, bGain: 0.1, valueGap: 0 };
+  expect(stillValid(t, [{ roster_id: 1, players: ['y'] }, { roster_id: 2, players: ['x'] }])).toBe(true);
+  expect(stillValid(t, [{ roster_id: 1, players: ['y'] }, { roster_id: 2, players: [] }])).toBe(false);
+  expect(stillValid(t, [{ roster_id: 1, players: null }, { roster_id: 2, players: ['x'] }])).toBe(false);
 });

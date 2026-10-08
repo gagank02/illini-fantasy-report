@@ -156,3 +156,34 @@ export function valuedRosters(rosters: { roster_id: number; players?: string[] |
     }),
   }));
 }
+
+/** A trade as saved and shown: no player values, only how far apart the two sides were (0.1 = 10%). */
+export type SavedTrade = Omit<Trade, 'aGetsValue' | 'bGetsValue'> & { valueGap: number };
+
+/** JSON friendly board of saved trades. Keys: `${a}-${b}` pairs and roster ids. */
+export interface SavedBoard {
+  pairs: Record<string, SavedTrade[]>;
+  byTeam: Record<string, SavedTrade[]>;
+}
+
+const save = ({ aGetsValue, bGetsValue, ...t }: Trade): SavedTrade => ({
+  ...t,
+  valueGap: Math.round((Math.abs(aGetsValue - bGetsValue) / Math.max(aGetsValue, bGetsValue, 1)) * 1000) / 1000,
+});
+
+/** Drops the player values so the saved file holds nothing of FantasyCalc's but the suggestions. */
+export function saveBoard(board: TradeBoard): SavedBoard {
+  return {
+    pairs: Object.fromEntries([...board.pairs].map(([k, ts]) => [k, ts.map(save)])),
+    byTeam: Object.fromEntries([...board.byTeam].map(([k, ts]) => [String(k), ts.map(save)])),
+  };
+}
+
+/** Trades are saved once a day; drop one whose players have since moved (a's gets must still be on b, and so on). */
+export function stillValid(t: SavedTrade, rosters: { roster_id: number; players?: string[] | null }[]): boolean {
+  const on = (rosterId: number, ids: string[]) => {
+    const players = rosters.find(r => r.roster_id === rosterId)?.players ?? [];
+    return ids.every(id => players.includes(id));
+  };
+  return on(t.b, t.aGets) && on(t.a, t.bGets);
+}

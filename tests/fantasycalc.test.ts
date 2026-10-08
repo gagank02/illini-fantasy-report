@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test, vi } from 'vitest';
-import { buildValues, checkCoverage, keepRostered, mayFetch, queryFor, readSaved, valuesUrl, type SavedValues } from '../src/lib/fantasycalc';
+import { checkCoverage, keepRostered, loadTrades, mayFetch, queryFor, readSaved, SAVED_PATH, sampleValues, serializeTrades, tradesAvailable, valuesUrl, type SavedTrades } from '../src/lib/fantasycalc';
+import { tradeBoard, valuedRosters } from '../src/lib/trades';
+import type { Roster } from '../src/lib/sleeper';
 import type { Players } from '../src/lib/stats';
 import type { League } from '../src/lib/sleeper';
 
@@ -8,7 +10,8 @@ import type { League } from '../src/lib/sleeper';
 vi.stubGlobal('fetch', () => { throw new Error('tests must not call the network'); });
 
 const league = JSON.parse(readFileSync('tests/fixtures/league.json', 'utf8')) as League;
-const saved = (fetched: string): SavedValues => ({ fetched, query: queryFor(league), values: {} });
+const saved = (fetched: string): SavedTrades => ({ fetched, query: queryFor(league), board: { pairs: {}, byTeam: {} } });
+const rosters = JSON.parse(readFileSync('tests/fixtures/rosters.json', 'utf8')) as Roster[];
 
 test('the update script fetches only for the daily job, once per UTC day', () => {
   expect(mayFetch({}, null, '2026-10-08')).toBe(false);
@@ -19,14 +22,29 @@ test('the update script fetches only for the daily job, once per UTC day', () =>
   expect(mayFetch({ FANTASYCALC: 'live', VITEST: 'true' }, null, '2026-10-08')).toBe(false);
 });
 
-test('builds read values from disk; sample values never ship from Cloudflare', () => {
-  const sample = buildValues({ FANTASYCALC: 'sample' });
+test('builds read saved trades from disk; sample trades never ship from Cloudflare', () => {
+  const sample = loadTrades({ FANTASYCALC: 'sample' }, rosters, league.roster_positions);
   expect(sample!.sample).toBe(true);
-  expect(Object.keys(sample!.saved.values).length).toBeGreaterThan(100);
-  // On Cloudflare the sample is ignored: a build gets the saved file's values, or null before the daily job saves one.
-  expect(buildValues({ FANTASYCALC: 'sample', CF_PAGES: '1' })?.sample ?? false).toBe(false);
-  // Passes whether or not the daily job has committed src/data/trade-values.json yet.
+  expect(Object.keys(sample!.saved.board.byTeam)).toHaveLength(12);
+  expect(loadTrades({ FANTASYCALC: 'sample', CF_PAGES: '1' }, rosters, league.roster_positions, 'tests/fixtures/does-not-exist.json')).toBeNull();
+  expect(tradesAvailable({ FANTASYCALC: 'sample' }, 'tests/fixtures/does-not-exist.json')).toBe(true);
+  expect(tradesAvailable({ FANTASYCALC: 'sample', CF_PAGES: '1' }, 'tests/fixtures/does-not-exist.json')).toBe(false);
   expect(readSaved('tests/fixtures/does-not-exist.json')).toBeNull();
+});
+
+test('the committed file holds trade suggestions only, never FantasyCalc values', () => {
+  expect(SAVED_PATH).toBe('src/data/trades.json');
+  const board = tradeBoard(valuedRosters(rosters, new Map(Object.entries(sampleValues()))), league.roster_positions);
+  const text = serializeTrades('2026-10-08', queryFor(league), board);
+  const parsed = JSON.parse(text) as SavedTrades;
+  expect(parsed.fetched).toBe('2026-10-08');
+  expect(Object.keys(parsed.board.byTeam).length).toBe(12);
+  // No raw values anywhere: no value fields, and no number that equals a player's value.
+  expect(text).not.toMatch(/"(value|values|redraftValue|aGetsValue|bGetsValue)"/);
+  const valueSet = new Set(Object.values(sampleValues()).map(v => v.value));
+  const numbers = [...text.matchAll(/-?\d+(\.\d+)?/g)].map(m => Number(m[0]));
+  expect(numbers.filter(n => n > 100 && valueSet.has(n))).toEqual([]);
+  for (const t of Object.values(parsed.board.byTeam).flat()) expect(t.valueGap).toBeGreaterThanOrEqual(0);
 });
 
 test('query matches our league: redraft, 1 QB, 12 teams, PPR from scoring settings', () => {
