@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, vi } from 'vitest';
-import { buildValues, keepRostered, mayFetch, queryFor, valuesUrl, type SavedValues } from '../src/lib/fantasycalc';
+import { buildValues, keepRostered, mayFetch, queryFor, readSaved, valuesUrl, type SavedValues } from '../src/lib/fantasycalc';
 import type { League } from '../src/lib/sleeper';
 
 // These tests must never reach FantasyCalc. Any fetch throws.
@@ -22,9 +22,10 @@ test('builds read values from disk; sample values never ship from Cloudflare', (
   const sample = buildValues({ FANTASYCALC: 'sample' });
   expect(sample!.sample).toBe(true);
   expect(Object.keys(sample!.saved.values).length).toBeGreaterThan(100);
-  // No saved file is committed yet, so a Cloudflare build has no values and the page stays off.
-  expect(buildValues({ FANTASYCALC: 'sample', CF_PAGES: '1' })).toBeNull();
-  expect(buildValues({})).toBeNull();
+  // On Cloudflare the sample is ignored: a build gets the saved file's values, or null before the daily job saves one.
+  expect(buildValues({ FANTASYCALC: 'sample', CF_PAGES: '1' })?.sample ?? false).toBe(false);
+  // Passes whether or not the daily job has committed src/data/trade-values.json yet.
+  expect(readSaved('tests/fixtures/does-not-exist.json')).toBeNull();
 });
 
 test('query matches our league: redraft, 1 QB, 12 teams, PPR from scoring settings', () => {

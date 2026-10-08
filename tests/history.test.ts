@@ -140,6 +140,9 @@ describe('season pages', () => {
     expect(b24.slots).toHaveLength(10);
     expect(b25.rounds).toHaveLength(15);
     for (const round of b25.rounds) for (const cell of round) expect(cell.name && cell.pos).toBeTruthy();
+    // Cells carry the Sleeper player id, so a page can look the player up (injury tags).
+    const first0 = picks25.find(p => p.pick_no === 1)!;
+    expect(b25.rounds[0]![first0.draft_slot - 1]!.playerId).toBe(first0.player_id);
     // Column header is the team that drafted from that slot.
     const first = picks25.find(p => p.pick_no === 1)!;
     expect(b25.slots[first.draft_slot - 1]).toBe(team(seasons[1]!)(first.roster_id));

@@ -56,6 +56,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] T14: History data layer (season chain, managers, champions)
 - [x] T15: `/history` overview page
 - [x] T16: `/history/{season}` with the draft board
+- [x] T17: Injury tags on site pages; daily refresh also updates players.json
 
 ### Checkpoint D: Done
 - [x] Every success criterion in `SPEC.md` passes (Safari and iPhone export checks pending with the human)

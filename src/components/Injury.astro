@@ -1,0 +1,15 @@
+---
+// Small injury tag next to a player: Q, D, OUT, IR... Nothing for healthy players.
+import { injuryTag } from '../lib/stats';
+
+interface Props {
+  status?: string | null;
+}
+const tag = injuryTag(Astro.props.status);
+---
+
+{tag && (
+  <span class={`inj inj-${tag.level}`} title={tag.long}>
+    <span aria-hidden="true">{tag.short}</span><span class="visually-hidden">{tag.long}</span>
+  </span>
+)}

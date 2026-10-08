@@ -1,4 +1,5 @@
 ---
+import Injury from '../components/Injury.astro';
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
 import { buildValues } from '../lib/fantasycalc';
@@ -74,7 +75,7 @@ const first = teams[0]?.rosterId;
                       <h3>{team(id).team} gets</h3>
                       <ul>
                         {gets.map(pid => (
-                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}{info(pid)?.injury ? ` · ${info(pid)!.injury}` : ''}</span></li>
+                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} /></li>
                         ))}
                       </ul>
                       <span class="trade-gain move-up">Lineup {pct(gain)}</span>

@@ -1,4 +1,6 @@
 ---
+import Injury from '../../components/Injury.astro';
+import players from '../../data/players.json';
 import Base from '../../layouts/Base.astro';
 import { buildHistory, draftBoard, draftValue, loadHistory, playoffRounds, type SeasonData } from '../../lib/history';
 import { draftPicks } from '../../lib/sleeper';
@@ -22,6 +24,8 @@ const rounds = season.bracket ? playoffRounds(season.bracket, team) : [];
 const roundName = (i: number) => (i === rounds.length - 1 ? 'Finals' : i === rounds.length - 2 ? 'Semifinals' : `Round ${i + 1}`);
 const placeName = (p: number | null) => (p === 1 ? 'Championship' : p ? `${p}${p === 3 ? 'rd' : 'th'} place game` : '');
 const rec = (r: { w: number; l: number; t: number }) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+// Injury status is today's, so it only means something for the season in progress.
+const injury = (id: string) => (summary.inProgress ? (players as Record<string, { injury: string | null }>)[id]?.injury : null);
 const others = seasons.map(s => s.league.season).filter(y => y !== season.league.season);
 ---
 
@@ -115,7 +119,7 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
               {board.rounds.map((row, i) => (
                 <tr>
                   <th scope="row">{i + 1}<span class="dp-dir" aria-label={board.directions[i] === 'ltr' ? 'picks go left to right' : 'picks go right to left'}>{board.directions[i] === 'ltr' ? '→' : '←'}</span></th>
-                  {row.map(c => <td class={`pos-${c.pos}`} title={`Pick ${c.pickNo}`}><span class="dp-name">{c.name}</span><span class="dp-pos">{c.pos} {c.nflTeam}</span><span class="dp-pick">{c.label}</span></td>)}
+                  {row.map(c => <td class={`pos-${c.pos}`} title={`Pick ${c.pickNo}`}><span class="dp-name">{c.name}</span><span class="dp-pos">{c.pos} {c.nflTeam}<Injury status={injury(c.playerId)} /></span><span class="dp-pick">{c.label}</span></td>)}
                 </tr>
               ))}
             </tbody>
@@ -126,7 +130,7 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
             <details>
               <summary>{t}<span class="sub">Draft slot {s + 1}</span></summary>
               <ul>
-                {board.rounds.map((row, i) => <li class={`pos-${row[s]!.pos}`}><span><span class="dp-pick-m">{row[s]!.label}</span> {row[s]!.name}</span><strong>{row[s]!.pos}</strong></li>)}
+                {board.rounds.map((row, i) => <li class={`pos-${row[s]!.pos}`}><span><span class="dp-pick-m">{row[s]!.label}</span> {row[s]!.name}<Injury status={injury(row[s]!.playerId)} /></span><strong>{row[s]!.pos}</strong></li>)}
               </ul>
             </details>
           ))}

@@ -419,6 +419,21 @@ The in progress 2026 season shows its draft but leaves out the bracket.
 
 **Estimated scope:** M
 
+## Task 17: Injury tags on site pages
+
+**Description:** Small injury tags (Q, D, OUT, IR, PUP, SUS, DNR) next to players on the trade finder and the in-progress season's draft board. The daily refresh also refreshes and commits `players.json` once a day, sharing the weekly report's cache key so Sleeper's player list is still called at most once a day. The daily job also saves a "called today" marker so FantasyCalc can't be called twice even after a failure.
+
+**Acceptance criteria:**
+- [x] `injuryTag()` maps real Sleeper statuses, and every status in the saved list is tagged or deliberately skipped (NA)
+- [x] Tags are AA contrast (`--warn` white on amber 5.02), quiet, and absent on finished seasons
+- [x] Daily and weekly workflows share one player cache key, and actionlint passes
+- [x] Fixed a test that would have failed once `trade-values.json` was committed (it blocked CI and the weekly report job)
+
+**Verification:**
+- [x] `npm test` 153 pass, check clean, no overflow at 320/360/1024, Lighthouse 100 on /trades and /history/2026
+
+**Dependencies:** T16, PR #3 (trade finder)
+
 ## Checkpoint D: Done
 - [x] Every success criterion in `SPEC.md` is checked (all but two Safari and iPhone export checks, which are left for the human)
 - [x] Lighthouse mobile scores are 95 or higher for performance and accessibility on every page (100 on all 8 audited)

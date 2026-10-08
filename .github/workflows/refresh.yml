@@ -1,7 +1,10 @@
 name: Daily refresh
 
-# Rebuilds the site on Cloudflare so Sleeper data stays current.
-# Also the only place that calls FantasyCalc: once a day, once the FANTASYCALC_ENABLED repo variable is 'true'.
+# Rebuilds the site on Cloudflare so Sleeper data stays current, and refreshes two saved data files, each at most
+# once per UTC day:
+# - src/data/players.json (Sleeper /players/nfl: names, positions, injury tags). Shares its cache key with
+#   weekly-report.yml, so the two workflows together never call Sleeper's player list twice in a day.
+# - src/data/trade-values.json (FantasyCalc /values/current), once the FANTASYCALC_ENABLED repo variable is 'true'.
 # Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 on:
   schedule:
@@ -21,22 +24,46 @@ jobs:
       SLEEPER_LEAGUE_ID: '1386106937921253376'
     steps:
       - uses: actions/checkout@v4
-        if: vars.FANTASYCALC_ENABLED == 'true'
       - uses: actions/setup-node@v4
-        if: vars.FANTASYCALC_ENABLED == 'true'
         with:
           node-version: 24
           cache: npm
-      - if: vars.FANTASYCALC_ENABLED == 'true'
-        run: npm ci
-
-      # One /values/current call at most per UTC day. The script skips if the file already holds today's values.
-      # Today's file is also cached right after the call, so a rerun skips even if the commit below failed.
-      # If FantasyCalc is down, the site still rebuilds with yesterday's values.
+      - run: npm ci
       - name: Today's date (UTC)
         id: day
-        if: vars.FANTASYCALC_ENABLED == 'true'
         run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+
+      # Sleeper player list. Same key as weekly-report.yml. Cached right after a good fetch, so a rerun skips.
+      # If Sleeper is down, the site still rebuilds with yesterday's list.
+      - name: Restore today's player list
+        id: players-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: src/data/players.json
+          key: sleeper-players-${{ steps.day.outputs.date }}
+      - name: Refresh player list (first run of the day only)
+        id: players
+        if: steps.players-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        run: npm run players
+      - name: Cache today's player list
+        if: steps.players.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: src/data/players.json
+          key: sleeper-players-${{ steps.day.outputs.date }}
+
+      # FantasyCalc: at most ONE call per UTC day, even if it fails. Their docs only ask for hourly at most,
+      # we are stricter on purpose. Three guards: the "called today" marker below (saved pass or fail), today's
+      # cached values, and the script itself, which skips if the saved file already holds today's values.
+      # If FantasyCalc is down, the site still rebuilds with yesterday's values.
+      - name: Already called FantasyCalc today?
+        id: fc-called
+        if: vars.FANTASYCALC_ENABLED == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: .fantasycalc-called
+          key: fantasycalc-called-${{ steps.day.outputs.date }}
       - name: Restore today's trade values
         id: values-cache
         if: vars.FANTASYCALC_ENABLED == 'true'
@@ -46,11 +73,20 @@ jobs:
           key: fantasycalc-values-${{ steps.day.outputs.date }}
       - name: Update trade values
         id: values
-        if: vars.FANTASYCALC_ENABLED == 'true' && steps.values-cache.outputs.cache-hit != 'true'
+        if: vars.FANTASYCALC_ENABLED == 'true' && steps.fc-called.outputs.cache-hit != 'true' && steps.values-cache.outputs.cache-hit != 'true'
         continue-on-error: true
         env:
           FANTASYCALC: live
         run: npm run values
+      - name: Remember we called FantasyCalc today, pass or fail
+        if: steps.values.outcome == 'success' || steps.values.outcome == 'failure'
+        run: touch .fantasycalc-called
+      - name: Save the called-today marker
+        if: steps.values.outcome == 'success' || steps.values.outcome == 'failure'
+        uses: actions/cache/save@v4
+        with:
+          path: .fantasycalc-called
+          key: fantasycalc-called-${{ steps.day.outputs.date }}
       - name: Cache today's trade values
         if: steps.values.outcome == 'success'
         uses: actions/cache/save@v4
@@ -59,18 +95,18 @@ jobs:
           key: fantasycalc-values-${{ steps.day.outputs.date }}
 
       # A push to main makes Cloudflare rebuild on its own, so the deploy hook is only needed without one.
-      - name: Commit new values
+      - name: Commit new data
         id: commit
-        if: vars.FANTASYCALC_ENABLED == 'true'
         run: |
-          if git diff --quiet --exit-code -- src/data/trade-values.json && [ -z "$(git ls-files --others -- src/data/trade-values.json)" ]; then
+          git add -A src/data
+          if git diff --cached --quiet; then
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/data/trade-values.json
-          git commit -m "Trade values for $(date -u +%F)"
+          git commit -m "Daily data for $(date -u +%F)"
+          git pull --rebase -q origin main
           git push
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 

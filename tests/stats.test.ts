@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
 import players from '../src/data/players.json';
-import { allPlay, facts, games, ordinal, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
+import { allPlay, facts, games, injuryTag, ordinal, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -333,5 +333,24 @@ describe('scheduleLuck', () => {
 
   test('sorted luckiest first', () => {
     for (let i = 1; i < luck.length; i++) expect(luck[i - 1]!.luck).toBeGreaterThanOrEqual(luck[i]!.luck);
+  });
+});
+
+describe('injuryTag', () => {
+  test('short tags and levels for real Sleeper statuses', () => {
+    expect(injuryTag('Questionable')).toEqual({ short: 'Q', long: 'Questionable', level: 'warn' });
+    expect(injuryTag('Doubtful')).toEqual({ short: 'D', long: 'Doubtful', level: 'warn' });
+    expect(injuryTag('Out')).toEqual({ short: 'OUT', long: 'Out', level: 'out' });
+    expect(injuryTag('IR')).toEqual({ short: 'IR', long: 'Injured reserve', level: 'out' });
+    expect(injuryTag('PUP')).toEqual({ short: 'PUP', long: 'Physically unable to perform', level: 'out' });
+    expect(injuryTag('Sus')).toEqual({ short: 'SUS', long: 'Suspended', level: 'out' });
+    expect(injuryTag('DNR')).toEqual({ short: 'DNR', long: 'Did not report', level: 'warn' });
+  });
+  test('no tag for healthy, missing, or noise statuses', () => {
+    for (const s of [null, undefined, '', 'NA', 'Healthy', 'whatever']) expect(injuryTag(s)).toBeNull();
+  });
+  test('every status in the saved player list is either tagged or deliberately skipped', () => {
+    const seen = new Set(Object.values(players as Players).map(p => p.injury).filter(Boolean) as string[]);
+    for (const s of seen) expect(injuryTag(s) !== null || s === 'NA').toBe(true);
   });
 });

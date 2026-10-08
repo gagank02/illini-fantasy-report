@@ -212,6 +212,19 @@ export type Position = (typeof POSITIONS)[number];
 /** Trimmed Sleeper player list from src/data/players.json (scripts/update-players.ts). */
 export type Players = Record<string, { name: string; pos: string; team: string | null; injury: string | null }>;
 
+const INJURY: Record<string, { short: string; long: string; level: 'warn' | 'out' }> = {
+  Questionable: { short: 'Q', long: 'Questionable', level: 'warn' },
+  Doubtful: { short: 'D', long: 'Doubtful', level: 'warn' },
+  Out: { short: 'OUT', long: 'Out', level: 'out' },
+  IR: { short: 'IR', long: 'Injured reserve', level: 'out' },
+  PUP: { short: 'PUP', long: 'Physically unable to perform', level: 'out' },
+  Sus: { short: 'SUS', long: 'Suspended', level: 'out' },
+  DNR: { short: 'DNR', long: 'Did not report', level: 'warn' },
+};
+
+/** Tag for a Sleeper injury_status, or null when there is nothing to show. "NA" (not active) is deliberately skipped. */
+export const injuryTag = (status: string | null | undefined) => (status ? INJURY[status] ?? null : null);
+
 export interface PositionPoints {
   rosterId: number;
   points: Record<Position, number>;

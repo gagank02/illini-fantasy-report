@@ -37,7 +37,7 @@ for (const [fg, bg] of [['fg', 'bg'], ['accent-text', 'bg'], ['muted', 'bg'], ['
   });
 }
 
-for (const name of ['win', 'loss', 'tie']) {
+for (const name of ['win', 'loss', 'tie', 'warn']) {
   test(`white text on --${name} badge meets WCAG AA`, () => {
     const hex = css.match(new RegExp(`--${name}:\\s*(#[0-9a-f]{6})`, 'i'))?.[1];
     expect(hex, `--${name} token`).toBeDefined();

@@ -156,7 +156,7 @@ export function draftBoard(picks: DraftPick[], team: (rosterId: number) => strin
       const p = picks.find(x => x.round === r + 1 && x.draft_slot === s + 1);
       // label: round.pick within the round, like 3.11.
       const inRound = p ? ((p.pick_no - 1) % slotCount) + 1 : 0;
-      return { pickNo: p?.pick_no ?? 0, label: p ? `${p.round}.${String(inRound).padStart(2, '0')}` : '', name: p ? pickName(p) : '', pos: p?.metadata.position ?? '', nflTeam: p?.metadata.team ?? '' };
+      return { pickNo: p?.pick_no ?? 0, playerId: p?.player_id ?? '', label: p ? `${p.round}.${String(inRound).padStart(2, '0')}` : '', name: p ? pickName(p) : '', pos: p?.metadata.position ?? '', nflTeam: p?.metadata.team ?? '' };
     }),
   );
   // Direction from the data, not assumed: a snake reverses each round, other formats may not.

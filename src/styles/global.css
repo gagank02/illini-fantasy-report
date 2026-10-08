@@ -13,6 +13,7 @@
   --win: #1a7f37;
   --loss: #c62828;
   --tie: #5f6b7a;
+  --warn: #b45309;
   /* Newsprint for reports. */
   --paper: light-dark(#f3eee2, #1d1b18);
   --ink: light-dark(#1d1b17, #ebe5d6);
@@ -102,6 +103,10 @@ th.left { width: 100%; }
 .f-L { background: var(--loss); }
 .f-T { background: var(--tie); }
 .sub .form { margin-top: 0.3rem; }
+/* Injury tags: same quiet badge shape as the form guide. Amber = questionable, red = out for now. */
+.inj { display: inline-block; margin-left: 0.35rem; padding: 0 0.3rem; border-radius: 3px; font: 700 0.62rem/1.35 var(--sans); letter-spacing: 0.02em; color: #fff; vertical-align: 0.1em; white-space: nowrap; }
+.inj-warn { background: var(--warn); }
+.inj-out { background: var(--loss); }
 
 /* Keep last: must override .sub's display. */
 /* Columns marked .wide fold into .narrow sub lines on phones so tables fit without scrolling. */
