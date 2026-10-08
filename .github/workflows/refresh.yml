@@ -25,8 +25,8 @@ jobs:
     env:
       SLEEPER_LEAGUE_ID: '1386106937921253376'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -39,7 +39,7 @@ jobs:
       # If Sleeper is down, the site still rebuilds with yesterday's list.
       - name: Restore today's player list
         id: players-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
@@ -50,7 +50,7 @@ jobs:
         run: npm run players
       - name: Cache today's player list
         if: steps.players-cache.outputs.cache-hit != 'true' && steps.players.outcome == 'success'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
@@ -62,14 +62,14 @@ jobs:
       - name: Already called FantasyCalc today?
         id: fc-called
         if: vars.FANTASYCALC_ENABLED == 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .fantasycalc-called
           key: fantasycalc-called-${{ steps.day.outputs.date }}
       - name: Restore today's trade suggestions
         id: values-cache
         if: vars.FANTASYCALC_ENABLED == 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: src/data/trades.json
           key: fantasycalc-trades-${{ steps.day.outputs.date }}
@@ -85,13 +85,13 @@ jobs:
         run: touch .fantasycalc-called
       - name: Save the called-today marker
         if: steps.values.outcome == 'success' || steps.values.outcome == 'failure'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .fantasycalc-called
           key: fantasycalc-called-${{ steps.day.outputs.date }}
       - name: Cache today's trade suggestions
         if: steps.values.outcome == 'success'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: src/data/trades.json
           key: fantasycalc-trades-${{ steps.day.outputs.date }}
