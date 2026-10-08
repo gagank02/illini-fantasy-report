@@ -10,7 +10,10 @@ export interface League {
   draft_id: string;
   status: string;
   roster_positions: string[];
-  settings: { playoff_week_start: number; playoff_teams: number; last_scored_leg?: number };
+  /** type 2 is dynasty. */
+  settings: { playoff_week_start: number; playoff_teams: number; last_scored_leg?: number; type?: number };
+  /** rec is points per reception. */
+  scoring_settings?: { rec?: number };
 }
 
 export interface User {
@@ -134,6 +137,10 @@ export function trending(kind: 'add' | 'drop'): Promise<{ player_id: string; cou
 
 export function leagueUsers(leagueId = currentLeagueId()): Promise<User[]> {
   return get<User[]>(`/league/${leagueId}/users`);
+}
+
+export function leagueRosters(leagueId = currentLeagueId()): Promise<Roster[]> {
+  return get<Roster[]>(`/league/${leagueId}/rosters`);
 }
 
 export async function loadSeason(leagueId = currentLeagueId()): Promise<Season> {

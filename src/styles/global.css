@@ -222,6 +222,22 @@ table.draft td { position: relative; padding-bottom: 1.15rem; }
 .pos-TE { background: color-mix(in srgb, #f76b15 18%, var(--surface)); }
 .pos-K, .pos-DEF { background: color-mix(in srgb, #8e8c99 18%, var(--surface)); }
 
+/* Trade finder. FantasyCalc's terms want their credit clearly visible next to the values. */
+.trade-credit { font-weight: 600; }
+.trade-pick { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin: 1rem 0 1.25rem; }
+.trade-pick label { display: grid; gap: 0.25rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.trade-pick select { font: inherit; font-size: 1rem; text-transform: none; letter-spacing: 0; color: var(--fg); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 0.4rem 0.6rem; min-width: 14rem; max-width: 100%; }
+.trade-panel h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
+.trades { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+.trade { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--orange); border-radius: 6px; padding: 0.8rem 0.9rem; }
+.trade-side h3 { margin: 0 0 0.35rem; font: 600 0.95rem var(--sans); }
+.trade-side ul { list-style: none; margin: 0 0 0.35rem; padding: 0; }
+.trade-side li { padding: 0.15rem 0; font-weight: 600; }
+.trade-side li .sub { display: inline; margin-left: 0.4rem; }
+.trade-gain { font-size: 0.85rem; font-weight: 700; }
+.trade-value { grid-column: 1 / -1; display: block; }
+@media (max-width: 30rem) { .trade { grid-template-columns: 1fr; } }
+
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }

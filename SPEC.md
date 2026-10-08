@@ -242,8 +242,9 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 - Power rankings: 50/30/20 weights.
 - The punishment loser is the last place team in the regular season standings, not the loser of a bracket.
 - History starts at 2024. There are no seasons before Sleeper.
-- The trade calculator is cut and not planned.
+- Trade finder (`/trades`): suggests trades that improve both teams' starting lineups, using FantasyCalc redraft values (2026-10-07). FantasyCalc's terms: only documented endpoints (we call `GET /values/current` only), cache and ideally fetch once a day, a visible FantasyCalc.com credit and link next to the data, non-commercial use, and no republishing their full value list. They ask for an email from a human before a public launch.
+- Only `scripts/update-values.ts` calls FantasyCalc, from the daily refresh job, at most once per UTC day, and only when the `FANTASYCALC_ENABLED` repo variable is `true`. It commits our rostered players' values to `src/data/trade-values.json`. Builds, tests, CI, and previews read that file and never call FantasyCalc. `FANTASYCALC=sample` uses made up values for local work and is ignored on Cloudflare.
 
 ## Open Questions
 
-1. **Stretch features:** Player values need a source. FantasyCalc has a free public API. Decide when we get there.
+1. **Stretch features:** Player values come from FantasyCalc for the trade finder. The stock chart could reuse them.

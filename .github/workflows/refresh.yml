@@ -1,19 +1,81 @@
 name: Daily refresh
 
 # Rebuilds the site on Cloudflare so Sleeper data stays current.
+# Also the only place that calls FantasyCalc: once a day, once the FANTASYCALC_ENABLED repo variable is 'true'.
 # Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 on:
   schedule:
     - cron: '17 10 * * *'
   workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: write
+
+concurrency: daily-refresh
 
 jobs:
-  deploy-hook:
+  refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SLEEPER_LEAGUE_ID: '1386106937921253376'
     steps:
+      - uses: actions/checkout@v4
+        if: vars.FANTASYCALC_ENABLED == 'true'
+      - uses: actions/setup-node@v4
+        if: vars.FANTASYCALC_ENABLED == 'true'
+        with:
+          node-version: 24
+          cache: npm
+      - if: vars.FANTASYCALC_ENABLED == 'true'
+        run: npm ci
+
+      # One /values/current call at most per UTC day. The script skips if the file already holds today's values.
+      # Today's file is also cached right after the call, so a rerun skips even if the commit below failed.
+      # If FantasyCalc is down, the site still rebuilds with yesterday's values.
+      - name: Today's date (UTC)
+        id: day
+        if: vars.FANTASYCALC_ENABLED == 'true'
+        run: echo "date=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - name: Restore today's trade values
+        id: values-cache
+        if: vars.FANTASYCALC_ENABLED == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: src/data/trade-values.json
+          key: fantasycalc-values-${{ steps.day.outputs.date }}
+      - name: Update trade values
+        id: values
+        if: vars.FANTASYCALC_ENABLED == 'true' && steps.values-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        env:
+          FANTASYCALC: live
+        run: npm run values
+      - name: Cache today's trade values
+        if: steps.values.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: src/data/trade-values.json
+          key: fantasycalc-values-${{ steps.day.outputs.date }}
+
+      # A push to main makes Cloudflare rebuild on its own, so the deploy hook is only needed without one.
+      - name: Commit new values
+        id: commit
+        if: vars.FANTASYCALC_ENABLED == 'true'
+        run: |
+          if git diff --quiet --exit-code -- src/data/trade-values.json && [ -z "$(git ls-files --others -- src/data/trade-values.json)" ]; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/trade-values.json
+          git commit -m "Trade values for $(date -u +%F)"
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
       - name: Trigger Cloudflare Pages build
+        if: steps.commit.outputs.pushed != 'true'
         env:
           HOOK: ${{ secrets.CF_DEPLOY_HOOK_URL }}
         run: |
