@@ -28,8 +28,7 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
 <Base title="Trends">
   <h1>Trends</h1>
   <p class="muted">
-    How every rostered player is trending. <strong>Points</strong> is each player's scoring in this league, week by week, with {lastSeason} on the left of the divider and {league.season} on the right. <strong>Market</strong> is how much their trade value moved
-    over the last 30 days.
+    How every rostered player is doing this season. <strong>Last 2</strong> (<strong>Last 3</strong> from week 6) compares a player's most recent weeks with his weeks before them, so ▲ means heating up. <strong>Market</strong> is how much his trade value moved over the last 30 days. The {lastSeason} column is last season in this league, for comparison.
   </p>
   <p class="trade-credit">
     {loaded?.sample
@@ -55,9 +54,10 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
         <thead>
           <tr>
             <th scope="col" class="left">Player</th>
-            <th scope="col">Points by week</th>
+            <th scope="col">{league.season} by week</th>
             <th scope="col">{league.season} avg</th>
             {loaded && <th scope="col" class="wide">Market, 30 days</th>}
+            <th scope="col" class="wide">{lastSeason}</th>
           </tr>
         </thead>
         <tbody>
@@ -66,30 +66,41 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
               <th scope="row" class="left">
                 {P[r.id]!.name}<Injury status={P[r.id]!.injury} body={P[r.id]!.body} />
                 <span class="sub">{r.pos} {P[r.id]!.team ?? 'FA'} · {fantasyTeam(r.id)}</span>
-                {loaded && r.momentum !== null && (
-                  <span class="sub narrow"><span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>Market {r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span></span>
+                {(r.form !== null || (loaded && r.momentum !== null)) && (
+                  <span class="sub narrow">
+                    {r.form !== null && <span class={`move ${r.form >= 0 ? 'move-up' : 'move-down'}`}>Last {r.recentWeeks} {r.form >= 0 ? '▲' : '▼'}{Math.abs(r.form).toFixed(1)}</span>}
+                    {r.form !== null && loaded && r.momentum !== null && ' · '}
+                    {loaded && r.momentum !== null && <span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>Market {r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span>}
+                  </span>
                 )}
               </th>
               <td>
                 <Sparkline
-                  series={[...r.s25, null, ...r.s26]}
-                  divider={r.s25.length}
-                  label={`${P[r.id]!.name} points by week, ${league.season} average ${r.avg26?.toFixed(1) ?? 'none yet'}`}
-                  tooltip={`${lastSeason}: ${fmt(r.s25)}\n${league.season}: ${fmt(r.s26)}`}
+                  series={r.s26}
+                  label={`${P[r.id]!.name} ${league.season} points by week, average ${r.avg26?.toFixed(1) ?? 'none yet'}`}
+                  tooltip={`${league.season}: ${fmt(r.s26)}`}
                 />
               </td>
               <td>
                 {r.avg26?.toFixed(1) ?? '–'}
-                {r.diff !== null && <span class={`sub move ${r.diff >= 0 ? 'move-up' : 'move-down'}`}>{r.diff >= 0 ? '▲' : '▼'}{Math.abs(r.diff).toFixed(1)}</span>}
+                {r.form !== null && <span class={`sub wide move ${r.form >= 0 ? 'move-up' : 'move-down'}`}>Last {r.recentWeeks} {r.form >= 0 ? '▲' : '▼'}{Math.abs(r.form).toFixed(1)}</span>}
               </td>
               {loaded && (
                 <td class="wide">{r.momentum === null ? '–' : <span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>{r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span>}</td>
               )}
+              <td class="wide last-season">
+                {r.avg25 === null ? <span class="muted">Not in league</span> : (
+                  <>
+                    <Sparkline series={r.s25} width={80} height={24} label={`${P[r.id]!.name} ${lastSeason} points by week, average ${r.avg25.toFixed(1)}`} tooltip={`${lastSeason}: ${fmt(r.s25)}`} />
+                    <span class="sub">{r.avg25.toFixed(1)} avg</span>
+                  </>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   </div>
-  <p class="muted legend">▲/▼ under the average is the change from {lastSeason}. Hover a line for every week's points. Kickers and defenses aren't included.</p>
+  <p class="muted legend">Last 2 and Last 3 need at least four weeks this season. Hover a line for every week's points. Gaps are weeks a player wasn't on a roster here. Kickers and defenses aren't included.</p>
 </Base>

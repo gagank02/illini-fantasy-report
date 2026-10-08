@@ -59,17 +59,35 @@ test('the committed momentum file holds percentages only, never values', () => {
   expect(text).not.toMatch(/"(value|values|redraftValue|trend30Day)"/);
 });
 
-test('home card picks: biggest gains vs last season, and the biggest market riser, among regulars only', () => {
-  const r = (id: string, avg26: number | null, diff: number | null, momentum: number | null): TrendRow => ({ id, pos: 'WR', s25: [1, 1], s26: [1, 1], avg26, diff, momentum });
-  const rows = [r('bench', 3, 9, 7.5), r('a', 20, 5, 0.1), r('b', 15, 8, -0.2), r('c', 12, 2, 0.3), r('rookie', 18, null, 0.05)];
+test('this season form: recent weeks vs the weeks before them (last 2 until week 6, then last 3); null before 4 weeks', () => {
+  const rows = trendRows([{ roster_id: 1, players: ['a', 'b'] }], { a: { name: 'A', pos: 'WR', team: 'X', injury: null }, b: { name: 'B', pos: 'RB', team: 'X', injury: null } },
+    [[{ roster_id: 1, matchup_id: 1, points: 0, starters: [], starters_points: [], players_points: { a: 10, b: 5 } }],
+     [{ roster_id: 1, matchup_id: 1, points: 0, starters: [], starters_points: [], players_points: { a: 10 } }],
+     [{ roster_id: 1, matchup_id: 1, points: 0, starters: [], starters_points: [], players_points: { a: 20 } }],
+     [{ roster_id: 1, matchup_id: 1, points: 0, starters: [], starters_points: [], players_points: { a: 30, b: 9 } }]],
+    [], {});
+  const a = rows.find(r => r.id === 'a')!;
+  expect(a.avg26).toBe(17.5);
+  expect(a.recentWeeks).toBe(2);
+  expect(a.recent).toBe(25); // weeks 3-4
+  expect(a.form).toBe(15); // vs weeks 1-2 (10)
+  expect(a.avg25).toBeNull();
+  expect(rows.find(r => r.id === 'b')!.form).toBeNull(); // only 2 weeks this season
+  // Davante Adams, real 2026 weeks: a bad week 1 must not make a cooling player look hot.
+  const davante = trendRows([{ roster_id: 1, players: ['d'] }], { d: { name: 'D', pos: 'WR', team: 'X', injury: null } },
+    [5.6, 39.5, 20.7, 7.2].map(v => [{ roster_id: 1, matchup_id: 1, points: 0, starters: [], starters_points: [], players_points: { d: v } }]), [], {})[0]!;
+  expect(davante.form).toBeCloseTo(-8.6, 1);
+  // From week 6 the window is 3 weeks.
+  const six = trendRows([{ roster_id: 1, players: ['s'] }], { s: { name: 'S', pos: 'WR', team: 'X', injury: null } },
+    [1, 1, 1, 4, 4, 4].map(v => [{ roster_id: 1, matchup_id: 1, points: 0, starters: [], starters_points: [], players_points: { s: v } }]), [], {})[0]!;
+  expect([six.recentWeeks, six.form]).toEqual([3, 3]);
+});
+
+test('home card picks: heating up THIS season among regulars, and the biggest market riser', () => {
+  const r = (id: string, avg26: number, form: number | null, momentum: number | null): TrendRow =>
+    ({ id, pos: 'WR', s25: [], s26: [], avg25: null, avg26, recent: null, recentWeeks: 2, form, diff: null, momentum });
+  const rows = [r('bench', 3, 9, 7.5), r('a', 20, 5, 0.1), r('b', 15, 8, -0.2), r('c', 12, 2, 0.3), r('early', 18, null, 0.05)];
   expect(heatingUp(rows).map(x => x.id)).toEqual(['b', 'a', 'c']);
   expect(marketMover(rows)!.id).toBe('c');
   expect(marketMover(rows.map(x => ({ ...x, momentum: null })))).toBeNull();
-});
-
-test('heating up needs at least half of each season\'s weeks, so a few backup games don\'t count', () => {
-  const full = (n: number, v: number) => Array.from({ length: n }, () => v);
-  const sparse: TrendRow = { id: 'sparse', pos: 'QB', s25: [5, ...full(13, null as unknown as number)], s26: [25, 25, 25, 25], avg26: 25, diff: 20, momentum: null };
-  const steady: TrendRow = { id: 'steady', pos: 'WR', s25: full(14, 10), s26: [14, 14, 14, 14], avg26: 14, diff: 4, momentum: null };
-  expect(heatingUp([sparse, steady]).map(x => x.id)).toEqual(['steady']);
 });

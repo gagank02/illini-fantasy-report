@@ -255,6 +255,8 @@ table.draft td { position: relative; padding-bottom: 1.15rem; }
 .trends:has(#pos-WR:checked) tr[data-pos]:not([data-pos="WR"]),
 .trends:has(#pos-TE:checked) tr[data-pos]:not([data-pos="TE"]) { display: none; }
 .trend-table thead th { white-space: normal; }
+.last-season .spark { display: inline-block; vertical-align: middle; }
+.last-season .sub { display: inline; margin-left: 0.4rem; }
 .spark { display: block; margin-left: auto; overflow: visible; }
 .spark-line { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .spark-dot { fill: var(--accent-text); stroke: var(--surface); stroke-width: 2; }

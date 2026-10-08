@@ -32,9 +32,17 @@ export interface TrendRow {
   pos: string;
   s25: (number | null)[];
   s26: (number | null)[];
+  /** Last season's average per rostered week, null if he wasn't in this league. */
+  avg25: number | null;
   /** Average points per rostered week this season, null before any. */
   avg26: number | null;
-  /** avg26 minus last season's average, null if he wasn't in this league last season. */
+  /** Average of his most recent rostered weeks this season (see recentWeeks), null before 4 weeks. */
+  recent: number | null;
+  /** How many weeks `recent` covers: 2 until he has 6 weeks, then 3. */
+  recentWeeks: number;
+  /** This season's form: recent minus his average in the weeks before them. Positive = heating up. */
+  form: number | null;
+  /** avg26 minus avg25, null if either is missing. */
   diff: number | null;
   /** FantasyCalc 30 day momentum (0.12 = +12%), null if unknown. */
   momentum: number | null;
@@ -55,7 +63,18 @@ export function trendRows(
       const s25 = weeklyPoints(weeks25, id);
       const s26 = weeklyPoints(weeks26, id);
       const [a25, a26] = [mean(s25), mean(s26)];
-      return { id, pos: players[id]!.pos, s25, s26, avg26: a26, diff: a25 !== null && a26 !== null ? a26 - a25 : null, momentum: momentum[id] ?? null };
+      // Recent weeks vs the weeks BEFORE them, so one bad early week can't make a cooling player look hot.
+      const played = s26.filter((x): x is number => x !== null);
+      const recentWeeks = played.length >= 6 ? 3 : 2;
+      const enough = played.length >= 4;
+      const recent = enough ? mean(played.slice(-recentWeeks)) : null;
+      const before = enough ? mean(played.slice(0, -recentWeeks)) : null;
+      return {
+        id, pos: players[id]!.pos, s25, s26, avg25: a25, avg26: a26, recent, recentWeeks,
+        form: recent !== null && before !== null ? recent - before : null,
+        diff: a25 !== null && a26 !== null ? a26 - a25 : null,
+        momentum: momentum[id] ?? null,
+      };
     })
     .sort((a, b) => (b.avg26 ?? -1) - (a.avg26 ?? -1));
 }
@@ -96,14 +115,9 @@ export function sampleMomentum(ids: string[]): Record<string, number> {
 /** Players averaging at least this many points count as regulars for home page picks (keeps deep bench noise out). */
 export const REGULAR_AVG = 8;
 
-/** Biggest scoring gains vs last season among regulars, for the home page. */
+/** Heating up THIS season: recent weeks most above the weeks before them, among regulars. */
 export function heatingUp(rows: TrendRow[], n = 3): TrendRow[] {
-  // At least half of each season's weeks on a roster here, so a few backup games don't make a "trend".
-  const enough = (xs: (number | null)[]) => xs.length > 0 && xs.filter(x => x !== null).length * 2 >= xs.length;
-  return rows
-    .filter(r => r.diff !== null && (r.avg26 ?? 0) >= REGULAR_AVG && enough(r.s25) && enough(r.s26))
-    .sort((a, b) => b.diff! - a.diff!)
-    .slice(0, n);
+  return rows.filter(r => r.form !== null && (r.avg26 ?? 0) >= REGULAR_AVG).sort((a, b) => b.form! - a.form!).slice(0, n);
 }
 
 /** Biggest 30 day market riser among regulars, or null before momentum exists. */

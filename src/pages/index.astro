@@ -89,16 +89,20 @@ const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `
 
         <a class="preview" href="/trends">
           <h2>Trends</h2>
-          <span class="fact-title">Heating up vs. {last?.league.season ?? 'last season'}</span>
-          <ol role="list">
-            {hot.map(r => (
-              <li class="pv-trend">
-                <span>{P[r.id]!.name}</span>
-                <Sparkline series={[...r.s25, null, ...r.s26]} divider={r.s25.length} width={64} height={22} label={`${P[r.id]!.name} points by week`} tooltip={`${league.season} average ${r.avg26!.toFixed(1)}, up ${r.diff!.toFixed(1)}`} />
-                <span class="pv-num move move-up">▲{r.diff!.toFixed(1)}</span>
-              </li>
-            ))}
-          </ol>
+          <span class="fact-title">Heating up this season</span>
+          {hot.length ? (
+            <ol role="list">
+              {hot.map(r => (
+                <li class="pv-trend">
+                  <span>{P[r.id]!.name}</span>
+                  <Sparkline series={r.s26} width={64} height={22} label={`${P[r.id]!.name} ${league.season} points by week`} tooltip={`Last ${r.recentWeeks} weeks ${r.recent!.toFixed(1)} a game, ${r.form! >= 0 ? 'up' : 'down'} ${Math.abs(r.form!).toFixed(1)} on the weeks before`} />
+                  <span class={`pv-num move ${r.form! >= 0 ? 'move-up' : 'move-down'}`}>{r.form! >= 0 ? '▲' : '▼'}{Math.abs(r.form!).toFixed(1)}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p class="pv-note">Check back after week 4.</p>
+          )}
           {mover && (
             <p class="pv-note">
               Market mover: <strong>{P[mover.id]!.name}</strong>, {mover.momentum! >= 0 ? 'up' : 'down'} {Math.abs(Math.round(mover.momentum! * 100))}% in 30 days.
