@@ -10,8 +10,9 @@ and starts it if it didn't.
 | `refresh.yml`       | daily 10:17       | daily 10:47        |
 | `weekly-report.yml` | Tuesday 15:23     | Tuesday 15:53      |
 
-A second run the same day is harmless. Both workflows already call Sleeper's `/players/nfl` and
-FantasyCalc at most once per UTC day, so a backup run reuses the cached copies.
+Each day gets exactly one real run. If GitHub's run started, the Worker does nothing. If the Worker
+started one and GitHub's scheduled run shows up late anyway, that run's first job (`guard`) sees the
+earlier run and stops before calling Sleeper, FantasyCalc, or Claude.
 
 ## One time setup
 

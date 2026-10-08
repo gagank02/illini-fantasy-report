@@ -51,6 +51,16 @@ test('wrangler.jsonc crons match JOBS, and each check runs after the GitHub cron
   }
 });
 
+test('a late GitHub scheduled run skips itself when the backup already started one', async () => {
+  const { readFileSync } = await import('node:fs');
+  for (const job of JOBS) {
+    const wf = readFileSync(`.github/workflows/${job.workflow}`, 'utf8');
+    const hour = String(job.sinceHourUtc).padStart(2, '0');
+    expect(wf, job.workflow).toContain(`--workflow ${job.workflow} --created ">=$(date -u +%F)T${hour}:00:00Z"`);
+    expect(wf, job.workflow).toMatch(/needs: guard\n\s+if: needs\.guard\.outputs\.skip != 'true'/);
+  }
+});
+
 test('the scheduled handler picks the job by cron', async () => {
   mockGitHub(1);
   const log = vi.spyOn(console, 'log').mockImplementation(() => {});
