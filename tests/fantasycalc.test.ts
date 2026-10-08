@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { expect, test, vi } from 'vitest';
-import { buildValues, keepRostered, mayFetch, queryFor, readSaved, valuesUrl, type SavedValues } from '../src/lib/fantasycalc';
+import { describe, expect, test, vi } from 'vitest';
+import { buildValues, checkCoverage, keepRostered, mayFetch, queryFor, readSaved, valuesUrl, type SavedValues } from '../src/lib/fantasycalc';
+import type { Players } from '../src/lib/stats';
 import type { League } from '../src/lib/sleeper';
 
 // These tests must never reach FantasyCalc. Any fetch throws.
@@ -43,4 +44,33 @@ test('only rostered players are kept, with redraft values for redraft leagues', 
     { player: { id: 3, name: 'C', position: 'TE', sleeperId: null }, value: 500, redraftValue: 500 },
   ], new Set(['10']), false);
   expect(kept).toEqual({ '10': { pos: 'WR', value: 800 } });
+});
+
+test('values that are not positive finite numbers are dropped', () => {
+  const kept = keepRostered([
+    { player: { id: 1, name: 'A', position: 'WR', sleeperId: '10' }, value: Number.NaN, redraftValue: Number.NaN },
+    { player: { id: 2, name: 'B', position: 'RB', sleeperId: '11' }, value: 0, redraftValue: 0 },
+    { player: { id: 3, name: 'C', position: 'QB', sleeperId: '12' }, value: 5, redraftValue: 5 },
+  ], new Set(['10', '11', '12']), false);
+  expect(Object.keys(kept)).toEqual(['12']);
+});
+
+describe('checkCoverage (runs before a fresh value list is saved)', () => {
+  const players: Players = {
+    q: { name: 'Q One', pos: 'QB', team: 'A', injury: null },
+    r: { name: 'R One', pos: 'RB', team: 'A', injury: null },
+    w: { name: 'W One', pos: 'WR', team: 'A', injury: null },
+    t: { name: 'T One', pos: 'TE', team: 'A', injury: null },
+    k: { name: 'Kicker', pos: 'K', team: 'A', injury: null },
+  };
+  const rostered = ['q', 'r', 'w', 't', 'k'];
+
+  test('counts only QB, RB, WR, TE; names the missing ones and position mismatches', () => {
+    const c = checkCoverage({ q: { pos: 'QB', value: 1 }, r: { pos: 'WR', value: 1 }, w: { pos: 'WR', value: 1 } }, rostered, players);
+    expect(c).toMatchObject({ skill: 4, valued: 3, missing: ['T One'], posMismatch: ['R One (FantasyCalc WR, Sleeper RB)'], ok: true });
+  });
+  test('an empty or mostly empty list is not ok, so yesterday\'s file stays', () => {
+    expect(checkCoverage({}, rostered, players).ok).toBe(false);
+    expect(checkCoverage({ q: { pos: 'QB', value: 1 } }, rostered, players).ok).toBe(false);
+  });
 });

@@ -9,6 +9,7 @@
 //   players on our league's rosters.
 import { existsSync, readFileSync } from 'node:fs';
 import type { League } from './sleeper.ts';
+import type { Players } from './stats.ts';
 
 const BASE = 'https://api.fantasycalc.com';
 export const SAVED_PATH = 'src/data/trade-values.json';
@@ -63,6 +64,23 @@ export function keepRostered(values: FcValue[], rostered: Set<string>, isDynasty
     if (id && rostered.has(id) && value > 0) out[id] = { pos: v.player.position, value };
   }
   return Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+/** Below this share of rostered QB/RB/WR/TE with a value, a fresh list is treated as broken and not saved. */
+export const MIN_COVERAGE = 0.5;
+
+/**
+ * How well a fresh value list covers our rostered QB/RB/WR/TE (Sleeper is the source of truth for position).
+ * Run before saving: if it isn't ok, the script throws and yesterday's file stays.
+ */
+export function checkCoverage(values: SavedValues['values'], rostered: string[], players: Players) {
+  const skill = rostered.filter(id => ['QB', 'RB', 'WR', 'TE'].includes(players[id]?.pos ?? ''));
+  const missing = skill.filter(id => !values[id]);
+  const posMismatch = Object.entries(values)
+    .filter(([id, v]) => players[id] && players[id].pos !== v.pos)
+    .map(([id, v]) => `${players[id]!.name} (FantasyCalc ${v.pos}, Sleeper ${players[id]!.pos})`);
+  const valued = skill.length - missing.length;
+  return { skill: skill.length, valued, missing: missing.map(id => players[id]?.name ?? id), posMismatch, ok: skill.length > 0 && valued / skill.length >= MIN_COVERAGE };
 }
 
 type Env = Record<string, string | undefined>;

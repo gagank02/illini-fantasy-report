@@ -66,3 +66,14 @@ test('board on the week 4 league with sample values', () => {
     for (const t of trades) expect(trades.filter(u => u.b === t.b).length).toBeLessThanOrEqual(2);
   }
 });
+
+test('gaps in values never break the board: players without values, and a team with none', () => {
+  const teams = valuedRosters(
+    [{ roster_id: 1, players: ['a', 'b', 'nope'] }, { roster_id: 2, players: null }, { roster_id: 3, players: ['c'] }],
+    new Map([['a', { pos: 'QB', value: 100 }], ['b', { pos: 'TE', value: 90 }], ['c', { pos: 'TE', value: 95 }]]),
+  );
+  expect(teams.map(t => t.players.length)).toEqual([2, 0, 1]);
+  const board = tradeBoard(teams, ['QB', 'TE', 'FLEX']);
+  expect(board.byTeam.get(2)).toEqual([]);
+  expect(board.pairs.get('1-2')).toEqual([]);
+});
