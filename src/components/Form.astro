@@ -1,5 +1,5 @@
 ---
-// Soccer style form guide: last N results as W/L/T badges, oldest to newest.
+// Soccer style form guide: last N results as W/L/T badges, oldest to newest. The newest is outlined.
 interface Props {
   record: string;
   n?: number;
@@ -10,7 +10,7 @@ const words = { W: 'win', L: 'loss', T: 'tie' } as Record<string, string>;
 ---
 
 {recent.length > 0 && (
-  <span class="form" role="img" aria-label={`Last ${recent.length}, oldest to newest: ${recent.map(c => words[c]).join(', ')}`}>
-    {recent.map(c => <span class={`f f-${c}`} aria-hidden="true">{c}</span>)}
+  <span class="form" role="img" aria-label={`Last ${recent.length}, oldest to newest: ${recent.map(c => words[c]).join(', ')}. Latest: ${words[recent.at(-1)!]}`}>
+    {recent.map((c, i) => <span class:list={['f', `f-${c}`, { 'f-latest': i === recent.length - 1 }]} aria-hidden="true">{c}</span>)}
   </span>
 )}

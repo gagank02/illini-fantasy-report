@@ -102,6 +102,8 @@ th.left { width: 100%; }
 .f-W { background: var(--win); }
 .f-L { background: var(--loss); }
 .f-T { background: var(--tie); }
+/* Latest result: outlined in the text color (reads in both themes), with room so it doesn't touch its neighbor. */
+.f-latest { outline: 2px solid var(--fg); outline-offset: 1px; margin-left: 2px; }
 .sub .form { margin-top: 0.3rem; }
 /* Injury tags: same quiet badge shape as the form guide. Amber = questionable, red = out for now. */
 .inj { display: inline-block; margin-left: 0.35rem; padding: 0 0.3rem; border-radius: 3px; font: 700 0.62rem/1.35 var(--sans); letter-spacing: 0.02em; color: #fff; vertical-align: 0.1em; white-space: nowrap; }
