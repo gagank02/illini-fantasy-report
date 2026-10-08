@@ -17,6 +17,7 @@ const links = [
   { href: '/power-rankings', label: 'Power Rankings' },
   { href: '/what-if', label: 'What If' },
   { href: '/history', label: 'History' },
+  { href: '/trends', label: 'Trends' },
   // Hidden until the daily job has saved trade suggestions.
   ...(tradesAvailable() ? [{ href: '/trades', label: 'Trades' }] : []),
 ];
@@ -50,7 +51,11 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
       <slot />
     </main>
     <footer class="site-footer">
-      <div class="wrap">A fan site for the Illini Fantasy league. League data from Sleeper. Not affiliated with or endorsed by the University of Illinois, Sleeper, FantasyCalc, or the NFL.</div>
+      <div class="wrap">
+        A fan site for the Illini Fantasy league. League data, injuries, and trending players from <a href="https://sleeper.com">Sleeper</a>.
+        Trade values and market moves from <a href="https://fantasycalc.com">FantasyCalc.com</a>. Not affiliated with or endorsed by the University of
+        Illinois, Sleeper, FantasyCalc, or the NFL.
+      </div>
     </footer>
     <script>
       const root = document.documentElement;

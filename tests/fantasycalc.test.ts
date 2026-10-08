@@ -20,6 +20,10 @@ test('the update script fetches only for the daily job, once per UTC day', () =>
   // A rerun on the same day adds no call.
   expect(mayFetch({ FANTASYCALC: 'live' }, saved('2026-10-08'), '2026-10-08')).toBe(false);
   expect(mayFetch({ FANTASYCALC: 'live', VITEST: 'true' }, null, '2026-10-08')).toBe(false);
+  // A manual forced run may call again the same day (FantasyCalc allows hourly), but never outside live mode or tests.
+  expect(mayFetch({ FANTASYCALC: 'live', FANTASYCALC_FORCE: 'true' }, saved('2026-10-08'), '2026-10-08')).toBe(true);
+  expect(mayFetch({ FANTASYCALC_FORCE: 'true' }, saved('2026-10-07'), '2026-10-08')).toBe(false);
+  expect(mayFetch({ FANTASYCALC: 'live', FANTASYCALC_FORCE: 'true', VITEST: 'true' }, null, '2026-10-08')).toBe(false);
 });
 
 test('builds read saved trades from disk; sample trades never ship from Cloudflare', () => {

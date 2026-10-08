@@ -11,6 +11,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import type { League } from './sleeper.ts';
 import type { Players } from './stats.ts';
 import { saveBoard, tradeBoard, valuedRosters, type SavedBoard, type TradeBoard } from './trades.ts';
+import { MOMENTUM_PATH, sampleMomentum } from './trends.ts';
 
 const BASE = 'https://api.fantasycalc.com';
 export const SAVED_PATH = 'src/data/trades.json';
@@ -20,6 +21,8 @@ export interface FcValue {
   player: { id: number; name: string; position: string; maybeTeam?: string | null; sleeperId?: string | null };
   value: number;
   redraftValue: number;
+  /** 30 day change in value (same field as value). */
+  trend30Day?: number;
 }
 
 export interface ValuesQuery {
@@ -91,10 +94,12 @@ type Env = Record<string, string | undefined>;
 
 /**
  * Whether the update script may call FantasyCalc now: only when the daily job asks (FANTASYCALC=live),
- * never in tests, and not if today's values are already saved, so reruns add no calls.
+ * never in tests, and not if today's values are already saved, so reruns add no calls (unless a person forces it).
  */
 export function mayFetch(env: Env, saved: SavedTrades | null, today: string): boolean {
   if (env.FANTASYCALC !== 'live' || env.VITEST) return false;
+  // Manual "force" runs only (Daily refresh, Run workflow). FantasyCalc allows hourly; use sparingly.
+  if (env.FANTASYCALC_FORCE === 'true') return true;
   return saved?.fetched !== today;
 }
 
@@ -114,6 +119,17 @@ export function serializeTrades(fetched: string, query: ValuesQuery, board: Trad
 export function sampleValues(): Values {
   const all = JSON.parse(readFileSync(SAMPLE_PATH, 'utf8')) as FcValue[];
   return keepRostered(all, new Set(all.flatMap(v => (v.player.sleeperId ? [v.player.sleeperId] : []))), false);
+}
+
+/**
+ * Momentum for this build (Trends page), read from disk. Never fetches. null until the daily job saves it.
+ * FANTASYCALC=sample makes up momentum for local work; Cloudflare builds ignore it.
+ */
+export function loadMomentum(env: Env = process.env, ids: string[] = [], path = MOMENTUM_PATH): { sample: boolean; fetched: string; momentum: Record<string, number> } | null {
+  if (useSample(env)) return { sample: true, fetched: 'sample', momentum: sampleMomentum(ids) };
+  if (!existsSync(path)) return null;
+  const saved = JSON.parse(readFileSync(path, 'utf8')) as { fetched: string; momentum: Record<string, number> };
+  return { sample: false, ...saved };
 }
 
 const useSample = (env: Env) => env.FANTASYCALC === 'sample' && env.CF_PAGES !== '1';

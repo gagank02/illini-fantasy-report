@@ -245,6 +245,18 @@ table.draft td { position: relative; padding-bottom: 1.15rem; }
 .trade-value { grid-column: 1 / -1; display: block; }
 @media (max-width: 30rem) { .trade { grid-template-columns: 1fr; } }
 
+/* Trends: one table, position filter by radio + :has(), no JS. */
+.trends:has(#pos-QB:checked) tr[data-pos]:not([data-pos="QB"]),
+.trends:has(#pos-RB:checked) tr[data-pos]:not([data-pos="RB"]),
+.trends:has(#pos-WR:checked) tr[data-pos]:not([data-pos="WR"]),
+.trends:has(#pos-TE:checked) tr[data-pos]:not([data-pos="TE"]) { display: none; }
+.trend-table thead th { white-space: normal; }
+.spark { display: block; margin-left: auto; overflow: visible; }
+.spark-line { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.spark-dot { fill: var(--accent-text); stroke: var(--surface); stroke-width: 2; }
+.spark-divider { stroke: var(--rule); stroke-width: 1; }
+@media (max-width: 30rem) { .spark { width: 84px; height: 30px; } }
+
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }

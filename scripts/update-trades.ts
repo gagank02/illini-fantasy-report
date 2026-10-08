@@ -7,6 +7,7 @@ import { checkCoverage, keepRostered, mayFetch, queryFor, readSaved, SAVED_PATH,
 import { scriptPlayers } from '../src/lib/players.ts';
 import { currentLeagueId, leagueById, leagueRosters } from '../src/lib/sleeper.ts';
 import { tradeBoard, valuedRosters } from '../src/lib/trades.ts';
+import { momentumPct, MOMENTUM_PATH, serializeMomentum } from '../src/lib/trends.ts';
 
 // In GitHub Actions, ::notice:: lines also show on the run's public summary page (logs need a login).
 const note = (msg: string) => console.log(process.env.GITHUB_ACTIONS ? `::notice::${msg}` : msg);
@@ -33,6 +34,17 @@ note(`Coverage: ${c.valued} of ${c.skill} rostered QB/RB/WR/TE have a FantasyCal
 if (c.missing.length) note(`No value (left out of trades): ${c.missing.join(', ')}`);
 if (c.posMismatch.length) note(`Position differs: ${c.posMismatch.join(', ')}`);
 if (!c.ok) throw new Error('Too few rostered players have a value, so this list looks broken. Keeping yesterday\'s trades.');
+
+// Momentum for the Trends page, from the same response: our percentage, never their value.
+const skill = new Set(rostered.filter(id => ['QB', 'RB', 'WR', 'TE'].includes(players[id]?.pos ?? '')));
+const momentum: Record<string, number> = {};
+for (const v of body as FcValue[]) {
+  const id = v.player?.sleeperId;
+  const m = id && skill.has(id) ? momentumPct(v) : null;
+  if (id && m !== null) momentum[id] = m;
+}
+writeFileSync(MOMENTUM_PATH, serializeMomentum(today, momentum));
+note(`Momentum: ${Object.keys(momentum).length} of ${skill.size} rostered QB/RB/WR/TE have a 30 day trend.`);
 
 const board = tradeBoard(valuedRosters(rosters, new Map(Object.entries(values))), league.roster_positions);
 writeFileSync(SAVED_PATH, serializeTrades(today, query, board));

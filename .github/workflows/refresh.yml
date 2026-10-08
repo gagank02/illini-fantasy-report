@@ -12,6 +12,11 @@ on:
   schedule:
     - cron: '17 10 * * *'
   workflow_dispatch:
+    inputs:
+      force_fantasycalc:
+        description: 'Call FantasyCalc again even if it was already called today (they allow at most once per hour). Use sparingly.'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -75,22 +80,23 @@ jobs:
           key: fantasycalc-trades-${{ steps.day.outputs.date }}
       - name: Update trade suggestions
         id: values
-        if: vars.FANTASYCALC_ENABLED == 'true' && steps.fc-called.outputs.cache-hit != 'true' && steps.values-cache.outputs.cache-hit != 'true'
+        if: vars.FANTASYCALC_ENABLED == 'true' && (inputs.force_fantasycalc || (steps.fc-called.outputs.cache-hit != 'true' && steps.values-cache.outputs.cache-hit != 'true'))
         continue-on-error: true
         env:
           FANTASYCALC: live
+          FANTASYCALC_FORCE: ${{ inputs.force_fantasycalc && 'true' || '' }}
         run: npm run trades
       - name: Remember we called FantasyCalc today, pass or fail
         if: steps.values.outcome == 'success' || steps.values.outcome == 'failure'
         run: touch .fantasycalc-called
       - name: Save the called-today marker
-        if: steps.values.outcome == 'success' || steps.values.outcome == 'failure'
+        if: (steps.values.outcome == 'success' || steps.values.outcome == 'failure') && steps.fc-called.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: .fantasycalc-called
           key: fantasycalc-called-${{ steps.day.outputs.date }}
       - name: Cache today's trade suggestions
-        if: steps.values.outcome == 'success'
+        if: steps.values.outcome == 'success' && steps.values-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
         with:
           path: src/data/trades.json

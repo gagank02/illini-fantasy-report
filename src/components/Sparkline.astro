@@ -1,0 +1,23 @@
+---
+// Inline SVG sparkline, no JavaScript. A 2px muted line, today's point as an accent dot,
+// an optional divider (e.g. between seasons), and a native tooltip with the numbers.
+import { sparkline } from '../lib/trends';
+
+interface Props {
+  series: (number | null)[];
+  label: string;
+  tooltip: string;
+  divider?: number;
+  width?: number;
+  height?: number;
+}
+const { series, label, tooltip, divider, width = 140, height = 36 } = Astro.props;
+const g = sparkline(series, width, height);
+---
+
+<svg class="spark" viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label={label}>
+  <title>{tooltip}</title>
+  {divider !== undefined && <line x1={g.x(divider)} x2={g.x(divider)} y1="2" y2={height - 2} class="spark-divider" />}
+  <path d={g.d} class="spark-line" />
+  {g.last && <circle cx={g.last.x} cy={g.last.y} r="4" class="spark-dot" />}
+</svg>

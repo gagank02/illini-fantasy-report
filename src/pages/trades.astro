@@ -44,8 +44,8 @@ const first = teams[0]?.rosterId;
       </p>
       <p class="trade-credit">
         {loaded!.sample
-          ? 'Sample values for local testing. These are made up.'
-          : <>Player values from <a href="https://fantasycalc.com">FantasyCalc.com</a>, updated {loaded!.saved.fetched}. Rosters from Sleeper.</>}
+          ? <>Sample values for local testing. These are made up. Rosters from <a href="https://sleeper.com">Sleeper</a>.</>
+          : <>Player values from <a href="https://fantasycalc.com">FantasyCalc.com</a>, updated {loaded!.saved.fetched}. Rosters from <a href="https://sleeper.com">Sleeper</a>.</>}
       </p>
 
       <form class="trade-pick" id="trade-pick">

@@ -1,0 +1,94 @@
+---
+import Injury from '../components/Injury.astro';
+import Sparkline from '../components/Sparkline.astro';
+import Base from '../layouts/Base.astro';
+import players from '../data/players.json';
+import { loadMomentum } from '../lib/fantasycalc';
+import { loadSeason } from '../lib/sleeper';
+import { standings, games, type Players } from '../lib/stats';
+import { trendRows } from '../lib/trends';
+
+const P = players as Players;
+const { league, users, rosters, weeks } = await loadSeason();
+const last = league.previous_league_id ? await loadSeason(league.previous_league_id) : null;
+const lastSeason = last ? Number(last.league.season) : Number(league.season) - 1;
+const ids = rosters.flatMap(r => r.players ?? []);
+const loaded = loadMomentum(process.env, ids);
+const rows = trendRows(rosters, P, weeks, last?.weeks ?? [], loaded?.momentum ?? {});
+
+const teamName = new Map(standings(rosters, users, games(weeks)).map(r => [r.rosterId, r.team]));
+const owner = new Map(rosters.flatMap(r => (r.players ?? []).map(id => [id, r.roster_id] as const)));
+const fantasyTeam = (id: string) => teamName.get(owner.get(id)!) ?? '';
+const pct = (v: number) => `${v > 0 ? '+' : ''}${Math.round(v * 100)}%`;
+const fmt = (xs: (number | null)[]) => xs.map(v => (v === null ? '–' : v.toFixed(1))).join(', ');
+const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
+---
+
+<Base title="Trends">
+  <h1>Trends</h1>
+  <p class="muted">
+    How every rostered player is trending. <strong>Points</strong> is each player's scoring in this league, week by week, with {lastSeason} on the left of the divider and {league.season} on the right. <strong>Market</strong> is how much their trade value moved
+    over the last 30 days.
+  </p>
+  <p class="trade-credit">
+    {loaded?.sample
+      ? <>Market numbers are made up for local testing. Points from <a href="https://sleeper.com">Sleeper</a>.</>
+      : loaded
+        ? <>Market moves from <a href="https://fantasycalc.com">FantasyCalc.com</a>, updated {loaded.fetched}. Points from <a href="https://sleeper.com">Sleeper</a>.</>
+        : <>Points from <a href="https://sleeper.com">Sleeper</a>. Market moves appear after the next daily update.</>}
+  </p>
+
+  <div class="trends">
+    <fieldset class="tab-list">
+      <legend class="visually-hidden">Position</legend>
+      {positions.map((p, i) => (
+        <>
+          <input type="radio" name="trend-pos" id={`pos-${p}`} class="visually-hidden" checked={i === 0} />
+          <label for={`pos-${p}`}>{p}</label>
+        </>
+      ))}
+    </fieldset>
+
+    <div class="table-scroll">
+      <table class="trend-table">
+        <thead>
+          <tr>
+            <th scope="col" class="left">Player</th>
+            <th scope="col">Points by week</th>
+            <th scope="col">{league.season} avg</th>
+            {loaded && <th scope="col" class="wide">Market, 30 days</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(r => (
+            <tr data-pos={r.pos}>
+              <th scope="row" class="left">
+                {P[r.id]!.name}<Injury status={P[r.id]!.injury} body={P[r.id]!.body} />
+                <span class="sub">{r.pos} {P[r.id]!.team ?? 'FA'} · {fantasyTeam(r.id)}</span>
+                {loaded && r.momentum !== null && (
+                  <span class="sub narrow"><span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>Market {r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span></span>
+                )}
+              </th>
+              <td>
+                <Sparkline
+                  series={[...r.s25, null, ...r.s26]}
+                  divider={r.s25.length}
+                  label={`${P[r.id]!.name} points by week, ${league.season} average ${r.avg26?.toFixed(1) ?? 'none yet'}`}
+                  tooltip={`${lastSeason}: ${fmt(r.s25)}\n${league.season}: ${fmt(r.s26)}`}
+                />
+              </td>
+              <td>
+                {r.avg26?.toFixed(1) ?? '–'}
+                {r.diff !== null && <span class={`sub move ${r.diff >= 0 ? 'move-up' : 'move-down'}`}>{r.diff >= 0 ? '▲' : '▼'}{Math.abs(r.diff).toFixed(1)}</span>}
+              </td>
+              {loaded && (
+                <td class="wide">{r.momentum === null ? '–' : <span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>{r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span>}</td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="muted legend">▲/▼ under the average is the change from {lastSeason}. Hover a line for every week's points. Kickers and defenses aren't included.</p>
+</Base>
