@@ -210,9 +210,31 @@ export const POSITIONS = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'] as const;
 export type Position = (typeof POSITIONS)[number];
 
 /** Trimmed Sleeper player list from src/data/players.json (scripts/update-players.ts). */
-export type Players = Record<string, { name: string; pos: string; team: string | null; injury: string | null }>;
+/** body: injury body part (e.g. "Ankle"), only for injured players and only when Sleeper sends one. */
+export type Players = Record<string, { name: string; pos: string; team: string | null; injury: string | null; body?: string }>;
+
+const FANTASY_POSITIONS = new Set(['QB', 'RB', 'WR', 'TE', 'K', 'DEF']);
+
+/** Sleeper's /players/nfl map trimmed to what the site and reports use. */
+export function trimPlayers(all: Record<string, Record<string, unknown>>): Players {
+  const out: Players = {};
+  for (const id of Object.keys(all).sort()) {
+    const p = all[id] as { full_name?: string; first_name?: string; last_name?: string; position?: string; team?: string | null; injury_status?: string | null; injury_body_part?: string | null };
+    if (!p.position || !FANTASY_POSITIONS.has(p.position)) continue;
+    const injury = p.injury_status || null;
+    out[id] = {
+      name: p.full_name ?? `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim(),
+      pos: p.position,
+      team: p.team ?? null,
+      injury,
+      ...(injury && p.injury_body_part ? { body: p.injury_body_part } : {}),
+    };
+  }
+  return out;
+}
 
 const INJURY: Record<string, { short: string; long: string; level: 'warn' | 'out' }> = {
+  Probable: { short: 'P', long: 'Probable', level: 'warn' },
   Questionable: { short: 'Q', long: 'Questionable', level: 'warn' },
   Doubtful: { short: 'D', long: 'Doubtful', level: 'warn' },
   Out: { short: 'OUT', long: 'Out', level: 'out' },

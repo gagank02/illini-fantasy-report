@@ -119,7 +119,7 @@ export function assembleFacts(input: FactsInput) {
 
   const injuries = thisWeek.flatMap(m =>
     m.starters.filter(id => players[id]?.injury).map(id => ({
-      player: players[id]!.name, pos: players[id]!.pos, status: players[id]!.injury!, ...who(m.roster_id),
+      player: players[id]!.name, pos: players[id]!.pos, status: players[id]!.injury!, bodyPart: players[id]!.body ?? null, ...who(m.roster_id),
     })),
   );
 

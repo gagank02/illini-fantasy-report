@@ -120,6 +120,13 @@ describe('assembleFacts (week 4 fixtures)', () => {
     }
   });
 
+  test('injuries carry the body part when the player list has one', () => {
+    const hurt = weeks[3]!.flatMap(m => m.starters).find(id => P[id]?.injury)!;
+    const f = assembleFacts({ ...input(4), players: { ...P, [hurt]: { ...P[hurt]!, body: 'Ankle' } } });
+    expect(f.injuries.find(i => i.player === P[hurt]!.name)!.bodyPart).toBe('Ankle');
+    expect(facts.injuries.every(i => i.bodyPart === (P[[...Object.entries(P)].find(([, p]) => p.name === i.player)![0]]!.body ?? null))).toBe(true);
+  });
+
   test('next week has every team exactly once', () => {
     expect(facts.nextWeek).toHaveLength(6);
     const teams = facts.nextWeek.flatMap(g => [g.home.team, g.away.team]);

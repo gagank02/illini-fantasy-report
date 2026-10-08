@@ -75,7 +75,7 @@ const first = teams[0]?.rosterId;
                       <h3>{team(id).team} gets</h3>
                       <ul>
                         {gets.map(pid => (
-                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} /></li>
+                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} body={info(pid)?.body} /></li>
                         ))}
                       </ul>
                       <span class="trade-gain move-up">Lineup {pct(gain)}</span>

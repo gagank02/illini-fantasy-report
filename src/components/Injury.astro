@@ -1,15 +1,19 @@
 ---
-// Small injury tag next to a player: Q, D, OUT, IR... Nothing for healthy players.
+// Small injury tag next to a player: Q, D, OUT, IR... plus the body part when Sleeper gives one.
+// Nothing for healthy players.
 import { injuryTag } from '../lib/stats';
 
 interface Props {
   status?: string | null;
+  body?: string | null;
 }
 const tag = injuryTag(Astro.props.status);
+const body = tag ? Astro.props.body : null;
+const long = tag ? (body ? `${tag.long}, ${body.toLowerCase()}` : tag.long) : '';
 ---
 
 {tag && (
-  <span class={`inj inj-${tag.level}`} title={tag.long}>
-    <span aria-hidden="true">{tag.short}</span><span class="visually-hidden">{tag.long}</span>
+  <span class="inj-wrap" title={long}>
+    <span class={`inj inj-${tag.level}`} aria-hidden="true">{tag.short}</span>{body && <span class="inj-body" aria-hidden="true">{body}</span>}<span class="visually-hidden">{long}</span>
   </span>
 )}

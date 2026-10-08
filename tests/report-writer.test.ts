@@ -54,6 +54,7 @@ describe('REPORT_RULES guard rails (each came from a real bad draft)', () => {
     ['fantasy news comes only from injuries and Sleeper trending data', /Fantasy news\. Use only injuries and trending/],
     ['only suggest pickups that are free in our league', /rosteredBy is null/],
     ['describe transactions in the order they happened', /oldest first/],
+    ['body part only when the facts give one', /bodyPart when it is given/],
   ])('%s', (_, re) => {
     expect(REPORT_RULES).toMatch(re);
   });

@@ -107,6 +107,8 @@ th.left { width: 100%; }
 .inj { display: inline-block; margin-left: 0.35rem; padding: 0 0.3rem; border-radius: 3px; font: 700 0.62rem/1.35 var(--sans); letter-spacing: 0.02em; color: #fff; vertical-align: 0.1em; white-space: nowrap; }
 .inj-warn { background: var(--warn); }
 .inj-out { background: var(--loss); }
+/* inline-block: in a narrow cell the body part drops to its own line instead of being clipped. */
+.inj-body { display: inline-block; margin-left: 0.25rem; font: 600 0.68rem var(--sans); color: var(--muted); }
 
 /* Keep last: must override .sub's display. */
 /* Columns marked .wide fold into .narrow sub lines on phones so tables fit without scrolling. */

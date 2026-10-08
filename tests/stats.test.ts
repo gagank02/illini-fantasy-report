@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { regularSeasonWeeks, type League, type Matchup, type Roster, type User } from '../src/lib/sleeper';
 import players from '../src/data/players.json';
-import { allPlay, facts, games, injuryTag, ordinal, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
+import { allPlay, facts, games, injuryTag, ordinal, trimPlayers, scheduleLuck, positionPoints, positionRankings, POSITIONS, powerRankings, rankBy, recordWithSchedule, standings, streak, whatIfMatrix, type Players } from '../src/lib/stats';
 
 const load = <T>(name: string): T => JSON.parse(readFileSync(`tests/fixtures/${name}.json`, 'utf8'));
 const league = load<League>('league');
@@ -346,11 +346,34 @@ describe('injuryTag', () => {
     expect(injuryTag('Sus')).toEqual({ short: 'SUS', long: 'Suspended', level: 'out' });
     expect(injuryTag('DNR')).toEqual({ short: 'DNR', long: 'Did not report', level: 'warn' });
   });
+  test('Probable (in Sleeper\'s docs) gets a tag too', () => {
+    expect(injuryTag('Probable')).toEqual({ short: 'P', long: 'Probable', level: 'warn' });
+  });
   test('no tag for healthy, missing, or noise statuses', () => {
     for (const s of [null, undefined, '', 'NA', 'Healthy', 'whatever']) expect(injuryTag(s)).toBeNull();
   });
   test('every status in the saved player list is either tagged or deliberately skipped', () => {
     const seen = new Set(Object.values(players as Players).map(p => p.injury).filter(Boolean) as string[]);
     for (const s of seen) expect(injuryTag(s) !== null || s === 'NA').toBe(true);
+  });
+});
+
+describe('trimPlayers', () => {
+  const raw = {
+    '1': { full_name: 'Hurt Guy', position: 'WR', team: 'CHI', injury_status: 'Out', injury_body_part: 'Hamstring' },
+    '2': { full_name: 'Healthy Guy', position: 'RB', team: 'DET', injury_status: null, injury_body_part: 'Ankle' },
+    '3': { first_name: 'No', last_name: 'Part', position: 'TE', team: null, injury_status: 'Questionable' },
+    '4': { full_name: 'Lineman', position: 'OL', team: 'GB' },
+  };
+  const out = trimPlayers(raw);
+
+  test('keeps fantasy positions only, with name, team, and injury', () => {
+    expect(Object.keys(out)).toEqual(['1', '2', '3']);
+    expect(out['3']).toEqual({ name: 'No Part', pos: 'TE', team: null, injury: 'Questionable' });
+  });
+  test('body part only for injured players, and only when Sleeper sends it', () => {
+    expect(out['1']!.body).toBe('Hamstring');
+    expect(out['2']!.body).toBeUndefined();
+    expect(out['3']!.body).toBeUndefined();
   });
 });

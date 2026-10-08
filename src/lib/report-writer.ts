@@ -43,7 +43,7 @@ Player of the week and Bust of the week. One player each, with the number.
 Bench blunders. Use benchBlunders, coachOfTheWeek, and worstCoach. Lead with anyone whose bench would have won a loss.
 Stock up and stock down. Use powerMovers. Explain the move with numbers from the facts.
 Transactions. Highlight the interesting moves, not every one. Call out droppedAndScored if present. Transactions are listed oldest first, with when. Describe any sequence of moves in that order, and never reorder them.
-Injury report. List injured starters and whose team they hurt.
+Injury report. List injured starters and whose team they hurt. Name the injury from bodyPart when it is given, and never guess one when it is null.
 Fantasy news. Use only injuries and trending from the facts. Trending lists the players most added and dropped across all Sleeper leagues. rosteredBy says which team in our league has each player. Only suggest picking up a player whose rosteredBy is null. Point out trending pickups that could help a team in this league, and trending drops on our rosters.
 You have no news sources. Never mention NFL games, trades, signings, suspensions, coaching news, or any event that is not in the facts, even if you remember it.
 Next week. One line per matchup with a pick, based only on records, last3, and powerRank. Call it a pick, not a projection.
