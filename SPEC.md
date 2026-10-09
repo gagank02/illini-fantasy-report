@@ -257,7 +257,7 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 - [x] Champion run: the schedule has one row per week from 1 through the final, regular season rows match `buildHistory`'s W/L for the champion, and the final row's opponent is the bracket's `p === 1` loser (tested).
 - [x] Champion run: every player shown has a real name, not `Player {id}`, on the live build.
 - [x] Champion run: no added JS, no horizontal scroll at 360px, Lighthouse a11y stays 100. *2026-10-08: 100/100/100 on /history/2025/champion, no overflow at 320 and 360 with every week open*
-- [ ] Sleeper disk cache: a completed league's responses are written once and then served from disk, and an in progress league's are never written (tested with a stubbed `fetch`). A second CI run logs 0 live calls for 2024 and 2025. *Tested, and two local builds went from 43 live calls to 7. The CI half is confirmed on the first PR*
+- [x] Sleeper disk cache: a completed league's responses are written once and then served from disk, and an in progress league's are never written (tested with a stubbed `fetch`). A second CI run logs 0 live calls for 2024 and 2025. *Tested. On PR #5, the second CI run logged `sleeper: 7 live, 42 cached`, down from 49 live on the first run*
 
 ## Decisions
 

@@ -522,7 +522,7 @@ The in progress 2026 season shows its draft but leaves out the bracket.
 **Estimated scope:** M
 
 ## Checkpoint E: Champion run
-- [x] Every Champion run and Sleeper disk cache criterion in `SPEC.md` is checked (the CI cache run is confirmed on the first PR)
+- [x] Every Champion run and Sleeper disk cache criterion in `SPEC.md` is checked (the CI cache was confirmed on PR #5: 49 live calls, then 7 live and 42 cached)
 - [ ] Review with the human before merging
 
 ## Checkpoint D: Done
