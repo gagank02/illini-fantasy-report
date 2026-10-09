@@ -2,7 +2,8 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
-import { buildNflData, fillWeeks, loadNflverse, luck, nflverseUrls, parseCsv, serializeNflData, type NflPlayer } from '../src/lib/nflverse';
+import { readFileSync } from 'node:fs';
+import { buildNflData, fillWeeks, loadNflverse, luck, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, serializeSiteNfl, siteNfl, type NflPlayer } from '../src/lib/nflverse';
 import { trendRows } from '../src/lib/trends';
 import type { Matchup } from '../src/lib/sleeper';
 import type { Players } from '../src/lib/stats';
@@ -21,7 +22,7 @@ test('downloads only plain CSV from nflverse and ffverse GitHub releases', () =>
   }
 });
 
-test('joins on gsis id, keeps only wanted Sleeper ids, regular season weeks, byes as null', () => {
+test('joins on gsis id for players with a Sleeper id, regular season weeks, byes as null', () => {
   const ids = csv([['sleeper_id', 'gsis_id'], ['100', 'G1'], ['100', 'G1'], ['200', 'G2'], ['', 'G3']]);
   const stats = csv([
     ['player_id', 'season_type', 'week', 'fantasy_points_ppr'],
@@ -37,24 +38,45 @@ test('joins on gsis id, keeps only wanted Sleeper ids, regular season weeks, bye
     ['G1', '3', '0', '10'],
     ['G1', '19', '30', '1'],
   ]);
-  const d = buildNflData('2026-10-09', 2026, ['100'], { ids, stats, expected });
-  expect(Object.keys(d.players)).toEqual(['100']);
+  const d = buildNflData('2026-10-09', 2026, { ids, stats, expected });
+  expect(Object.keys(d.players).sort()).toEqual(['100', '200']);
   expect(d.players['100']).toEqual({ pts: [12.3, null, 0], games: 2, act: 6, exp: 15 });
 });
 
-test('the saved file round trips, and last season\'s file is ignored', () => {
+test('the committed file holds only what pages show: gap weeks for rostered players, and tags', () => {
+  const full = {
+    fetched: '2026-10-09',
+    season: 2026,
+    players: {
+      '100': player({ pts: [5, 6, 20, 22, 30], games: 4, act: 13, exp: 8 }), // rostered, missed weeks 1-2 here, tagged
+      '200': player({ pts: [9, 9, 9, 9], games: 4, act: 9, exp: 9 }), // rostered all season, untagged
+      '300': player({ pts: [40, 40, 40, 40], games: 4, act: 40, exp: 10 }), // not rostered
+    },
+  };
+  const league: Record<string, (number | null)[]> = { '100': [null, null, 20, 22], '200': [9, 9, 9, 9] };
+  const site = siteNfl(full, ['200', '100', '100'], id => league[id]!);
+  expect(site).toEqual({
+    fetched: '2026-10-09',
+    season: 2026,
+    fill: { '100': [5, 6, null, null] }, // week 5 isn't scored in our league yet, so it isn't saved
+    tags: { '100': { kind: 'sell', act: 13, exp: 8, games: 4 } },
+  });
+  const text = serializeSiteNfl(site);
+  expect(Object.keys(JSON.parse(text))).toEqual(['fetched', 'season', 'fill', 'tags']);
+  expect(text).not.toMatch(/"pts"|"300"|"200"/);
+
   const dir = mkdtempSync(join(tmpdir(), 'nflverse-'));
   const path = join(dir, 'nflverse.json');
-  const d = { fetched: '2026-10-09', season: 2026, players: { '200': player({ pts: [1, null] }), '100': player({ games: 3, act: 5, exp: 10 }) } };
-  writeFileSync(path, serializeNflData(d));
-  expect(loadNflverse(2026, path)).toEqual(d);
+  writeFileSync(path, text);
+  expect(loadNflverse(2026, path)).toEqual(site);
   expect(loadNflverse(2027, path)).toBeNull();
   expect(loadNflverse(2026, join(dir, 'missing.json'))).toBeNull();
 });
 
-test('fills only weeks without league points, so our league\'s own numbers always win', () => {
-  expect(fillWeeks([10, null, null, 4], player({ pts: [99, 7, null, 99] }))).toEqual([10, 7, null, 4]);
-  expect(fillWeeks([null, 3], undefined)).toEqual([null, 3]);
+test('the full download stays out of git: it lives in .cache, which is git ignored', () => {
+  expect(NFL_FULL_PATH.startsWith('.cache/')).toBe(true);
+  expect(readFileSync('.gitignore', 'utf8')).toMatch(/^\.cache\/$/m);
+  expect(NFLVERSE_PATH).toBe('src/data/nflverse.json');
 });
 
 test('buy low and sell high need a real gap, enough games, and a player who matters', () => {
@@ -70,7 +92,7 @@ test('trend rows use nflverse for weeks off our rosters, and carry the tag', () 
   const P: Players = { '100': { name: 'A', pos: 'WR', team: 'CHI', injury: null } } as Players;
   const wk = (pts: Record<string, number>): Matchup[] => [{ roster_id: 1, matchup_id: 1, points: 0, starters: [], players: Object.keys(pts), players_points: pts } as unknown as Matchup];
   const weeks = [wk({}), wk({}), wk({ '100': 20 }), wk({ '100': 22 })];
-  const nfl = { '100': player({ pts: [5, 6, 99, 99], games: 4, act: 13, exp: 8 }) };
+  const nfl = { fill: { '100': [5, 6, null, null] }, tags: { '100': { kind: 'sell' as const, act: 13, exp: 8, games: 4 } } };
   const [row] = trendRows([{ roster_id: 1, players: ['100'] }], P, weeks, [], {}, nfl);
   expect(row!.s26).toEqual([5, 6, 20, 22]);
   expect(row!.avg26).toBeCloseTo(13.25, 5);

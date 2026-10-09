@@ -27,7 +27,7 @@ const P = players as Players;
 const last = league.previous_league_id ? await loadSeason(league.previous_league_id) : null;
 const momentum = loadMomentum(process.env, rosters.flatMap(r => r.players ?? []));
 const nfl = loadNflverse(Number(league.season));
-const trendList = trendRows(rosters, P, weeks, last?.weeks ?? [], momentum?.momentum ?? {}, nfl?.players);
+const trendList = trendRows(rosters, P, weeks, last?.weeks ?? [], momentum?.momentum ?? {}, nfl ?? undefined);
 const hot = heatingUp(trendList);
 const mover = marketMover(trendList);
 const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`; };

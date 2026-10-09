@@ -2,7 +2,7 @@
 // 30 day momentum.
 // Momentum is a percentage we compute in the daily job; FantasyCalc's values are never saved.
 import type { FcValue } from './fantasycalc.ts';
-import { fillWeeks, luck, type Luck, type NflPlayer } from './nflverse.ts';
+import { fillWeeks, type Luck, type SiteNfl } from './nflverse.ts';
 import type { Matchup } from './sleeper.ts';
 import type { Players } from './stats.ts';
 
@@ -60,14 +60,14 @@ export function trendRows(
   weeks26: Matchup[][],
   weeks25: Matchup[][],
   momentum: Record<string, number>,
-  nfl: Record<string, NflPlayer> = {},
+  nfl: Pick<SiteNfl, 'fill' | 'tags'> = { fill: {}, tags: {} },
 ): TrendRow[] {
   return rosters
     .flatMap(r => r.players ?? [])
     .filter(id => SKILL.includes(players[id]?.pos ?? ''))
     .map(id => {
       const s25 = weeklyPoints(weeks25, id);
-      const s26 = fillWeeks(weeklyPoints(weeks26, id), nfl[id]);
+      const s26 = fillWeeks(weeklyPoints(weeks26, id), nfl.fill[id]);
       const [a25, a26] = [mean(s25), mean(s26)];
       // Recent weeks vs the weeks BEFORE them, so one bad early week can't make a cooling player look hot.
       const played = s26.filter((x): x is number => x !== null);
@@ -80,7 +80,7 @@ export function trendRows(
         form: recent !== null && before !== null ? recent - before : null,
         diff: a25 !== null && a26 !== null ? a26 - a25 : null,
         momentum: momentum[id] ?? null,
-        luck: luck(nfl[id]),
+        luck: nfl.tags[id] ?? null,
       };
     })
     .sort((a, b) => (b.avg26 ?? -1) - (a.avg26 ?? -1));

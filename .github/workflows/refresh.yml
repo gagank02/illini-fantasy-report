@@ -7,7 +7,9 @@ name: Daily refresh
 #   call it twice in a day. Only the players our pages use are committed, to src/data/players.json.
 # - src/data/trades.json (trade suggestions from FantasyCalc /values/current), once the FANTASYCALC_ENABLED repo
 #   variable is 'true'. Only the suggestions are committed; FantasyCalc's raw values are never saved to the repo.
-# - src/data/nflverse.json (weekly PPR points and expected points for rostered players, from nflverse).
+# - src/data/nflverse.json (from nflverse). The full download stays in the Actions cache (.cache/nflverse-full.json,
+#   never committed). Only what our pages show is committed: weeks that fill gaps in rostered players' lines, and the
+#   Buy low / Sell high tags.
 # Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 on:
   schedule:
@@ -90,11 +92,25 @@ jobs:
           key: sleeper-players-${{ steps.day.outputs.date }}
 
       # nflverse (CC-BY 4.0): this season's weekly PPR points and expected points, a few MB of CSV from GitHub releases.
-      # Commits only a small summary for rostered players to src/data/nflverse.json. If a download fails, or the files
-      # look broken, yesterday's file stays.
+      # Same pattern as the player list: the full summary stays in the Actions cache (.cache/nflverse-full.json, never
+      # committed), downloaded at most once a UTC day. Only what our pages show is committed, to src/data/nflverse.json.
+      # If a download fails, or the files look broken, yesterday's file stays.
+      - name: Restore today's nflverse data
+        id: nflverse-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .cache/nflverse-full.json
+          key: nflverse-full-${{ steps.day.outputs.date }}
       - name: Update nflverse data
+        id: nflverse
         continue-on-error: true
         run: npm run nflverse
+      - name: Cache today's nflverse data
+        if: steps.nflverse-cache.outputs.cache-hit != 'true' && steps.nflverse.outcome == 'success'
+        uses: actions/cache/save@v6
+        with:
+          path: .cache/nflverse-full.json
+          key: nflverse-full-${{ steps.day.outputs.date }}
 
       # FantasyCalc: at most ONE call per UTC day, even if it fails. Their docs only ask for hourly at most,
       # we are stricter on purpose. Three guards: the "called today" marker below (saved pass or fail), today's

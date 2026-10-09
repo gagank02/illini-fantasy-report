@@ -5,7 +5,7 @@ import Ext from '../components/Ext.astro';
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
 import { loadTrades } from '../lib/fantasycalc';
-import { luck, loadNflverse } from '../lib/nflverse';
+import { loadNflverse } from '../lib/nflverse';
 import { loadSeason } from '../lib/sleeper';
 import { games, standings, type Players } from '../lib/stats';
 import { stillValid, type SavedTrade } from '../lib/trades';
@@ -81,7 +81,7 @@ const first = teams[0]?.rosterId;
                       <h3>{team(id).team} gets</h3>
                       <ul>
                         {gets.map(pid => (
-                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} body={info(pid)?.body} /><Luck luck={luck(nfl?.players[pid])} /></li>
+                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} body={info(pid)?.body} /><Luck luck={nfl?.tags[pid] ?? null} /></li>
                         ))}
                       </ul>
                       <span class="trade-gain move-up">Lineup {pct(gain)}</span>

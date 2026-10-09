@@ -18,7 +18,7 @@ const lastSeason = last ? Number(last.league.season) : Number(league.season) - 1
 const ids = rosters.flatMap(r => r.players ?? []);
 const loaded = loadMomentum(process.env, ids);
 const nfl = loadNflverse(Number(league.season));
-const rows = trendRows(rosters, P, weeks, last?.weeks ?? [], loaded?.momentum ?? {}, nfl?.players);
+const rows = trendRows(rosters, P, weeks, last?.weeks ?? [], loaded?.momentum ?? {}, nfl ?? undefined);
 
 const teamName = new Map(standings(rosters, users, games(weeks)).map(r => [r.rosterId, r.team]));
 const owner = new Map(rosters.flatMap(r => (r.players ?? []).map(id => [id, r.roster_id] as const)));
