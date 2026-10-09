@@ -180,6 +180,21 @@ describe('season pages', () => {
     expect(new Set(v.hits.map(x => x.pos)).size).toBeGreaterThan(1);
   });
 
+  test('bracket lines: each game is level with the game that fed it, so the drawing never misleads', () => {
+    for (const s of [seasons[1]!, seasons[2]!]) {
+      const { rounds } = playoffRounds(s.bracket!, team(s), s.playoffWeeks);
+      const winner = (m: (typeof rounds)[0]['matches'][0]) => m.teams.find(t => t.won)!.name;
+      const names = (m: (typeof rounds)[0]['matches'][0]) => m.teams.map(t => t.name);
+      for (let i = 0; i + 1 < rounds.length; i++) {
+        const [here, next] = [rounds[i]!.matches, rounds[i + 1]!.matches];
+        // Same count: drawn straight across. Half as many: drawn as pairs joining into one game.
+        const feeds = (k: number) => (next.length === here.length ? next[k]! : next[Math.floor(k / 2)]!);
+        expect([here.length, here.length / 2]).toContain(next.length);
+        here.forEach((m, k) => expect(names(feeds(k))).toContain(winner(m)));
+      }
+    }
+  });
+
   test('seeds are regular season ranks, and they match the bracket: 3v6 and 4v5, then 1 and 2 after byes', () => {
     for (const s of [seasons[1]!, seasons[2]!]) {
       const rank = new Map(standings(s.rosters, s.users, games(s.weeks)).map(r => [r.rosterId, r.rank]));
@@ -226,6 +241,16 @@ describe('championRun', () => {
       expect(run.roster.starters.map(x => x.slot)).toEqual(['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX', 'K', 'DEF']);
       expect(run.roster.starters.reduce((sum, x) => sum + x.points, 0)).toBeCloseTo(run.roster.points, 2);
       expect(run.roster.bench.every(b => !run.roster.starters.some(x => x.playerId === b.playerId))).toBe(true);
+    });
+
+    test(`${year}: every playoff opponent is the other team in that round's bracket game`, () => {
+      for (const r of run.schedule.filter(x => x.playoff)) {
+        const round = r.week - s.weeks.length;
+        const game = s.bracket!.find(m => m.r === round && (m.t1 === run.rosterId || m.t2 === run.rosterId));
+        if (!game) { expect(r.theirs).toBeNull(); continue; } // a bye
+        expect(r.theirs!.rosterId).toBe(game.t1 === run.rosterId ? game.t2 : game.t1);
+        expect(r.result).toBe(game.w === run.rosterId ? 'W' : 'L');
+      }
     });
 
     test(`${year}: regular season rows match the champion's record in buildHistory`, () => {
