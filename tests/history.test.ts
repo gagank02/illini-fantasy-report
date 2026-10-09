@@ -180,6 +180,17 @@ describe('season pages', () => {
     expect(new Set(v.hits.map(x => x.pos)).size).toBeGreaterThan(1);
   });
 
+  test('seeds are regular season ranks, and they match the bracket: 3v6 and 4v5, then 1 and 2 after byes', () => {
+    for (const s of [seasons[1]!, seasons[2]!]) {
+      const rank = new Map(standings(s.rosters, s.users, games(s.weeks)).map(r => [r.rosterId, r.rank]));
+      const { rounds, placements } = playoffRounds(s.bracket!, team(s), s.playoffWeeks, id => rank.get(id));
+      const seeds = (i: number) => rounds[i]!.matches.map(m => m.teams.map(t => t.seed));
+      expect(seeds(0).map(m => [...m].sort())).toEqual([[4, 5], [3, 6]]);
+      expect(seeds(1).map(m => m[0])).toEqual([1, 2]);
+      expect(placements.flatMap(m => m.teams.map(t => t.seed)).every(n => n! >= 1 && n! <= 6)).toBe(true);
+    }
+  });
+
   test('bracket: the path to the title by round, placement games apart, scores from the playoff weeks', () => {
     const s = seasons[1]!;
     const { rounds, placements } = playoffRounds(s.bracket!, team(s), s.playoffWeeks);

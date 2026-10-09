@@ -221,6 +221,7 @@ section + section { margin-top: 2rem; }
 .b-team { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; padding: 0.15rem 0; }
 .b-team + .b-team { border-top: 1px solid var(--rule); }
 .b-name { min-width: 0; }
+.b-seed { display: inline-block; min-width: 1.1em; margin-right: 0.3rem; font-size: 0.75em; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 .b-pts { flex: none; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.9rem; }
 .b-team.win { font-weight: 700; }
 .b-team.win .b-pts { color: inherit; }
@@ -235,6 +236,7 @@ section + section { margin-top: 2rem; }
   .b-pts { font-size: 0.75rem; }
   .b-team.win .b-name::before { content: none; }
   .b-team.win { box-shadow: inset 3px 0 var(--orange); padding-left: 0.3rem; }
+  .b-seed { min-width: 0; margin-right: 0.25rem; }
 }
 /* 320px: long usernames still wrap, but the round names fit. */
 @media (max-width: 21rem) { .bracket { --gap: 0.7rem; } .b-round h3 { font-size: 0.74rem; } .b-match { padding-inline: 0.3rem; } }

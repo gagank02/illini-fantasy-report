@@ -4,7 +4,7 @@ import players from '../../data/players.json';
 import Base from '../../layouts/Base.astro';
 import { buildHistory, draftBoard, draftValue, loadHistory, playoffRounds, type SeasonData } from '../../lib/history';
 import { draftPicks } from '../../lib/sleeper';
-import { teamNames, type Players } from '../../lib/stats';
+import { games, standings, teamNames, type Players } from '../../lib/stats';
 
 export async function getStaticPaths() {
   const seasons = await loadHistory();
@@ -20,7 +20,8 @@ const team = (rosterId: number) => {
 const picks = await draftPicks(season.league.draft_id);
 const board = picks.length ? draftBoard(picks, team) : null;
 const value = picks.length ? draftValue(picks, season.weeks) : null;
-const bracket = season.bracket ? playoffRounds(season.bracket, team, season.playoffWeeks) : null;
+const rank = new Map(standings(season.rosters, season.users, games(season.weeks)).map(r => [r.rosterId, r.rank]));
+const bracket = season.bracket ? playoffRounds(season.bracket, team, season.playoffWeeks, id => rank.get(id)) : null;
 // Games that feed one next round game are drawn as a pair, joined by a bracket line.
 const groups = (i: number) => {
   const ms = bracket!.rounds[i]!.matches;
@@ -88,7 +89,7 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
                   {g.map(m => (
                     <div class="b-slot">
                       <div class="b-match">
-                        {m.teams.map(t => <div class:list={['b-team', { win: t.won }]}><span class="b-name">{t.name}{t.won && <span class="visually-hidden"> (won)</span>}</span><span class="b-pts">{pts(t.points)}</span></div>)}
+                        {m.teams.map(t => <div class:list={['b-team', { win: t.won }]}><span class="b-name">{t.seed && <span class="b-seed"><span class="visually-hidden">Seed </span>{t.seed}</span>}{t.name}{t.won && <span class="visually-hidden"> (won)</span>}</span><span class="b-pts">{pts(t.points)}</span></div>)}
                       </div>
                     </div>
                   ))}
@@ -103,7 +104,7 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
           {bracket.placements.map(m => (
             <div class="b-match">
               <span class="fact-title">{placeName(m.place!)}</span>
-              {m.teams.map(t => <div class:list={['b-team', { win: t.won }]}><span class="b-name">{t.name}{t.won && <span class="visually-hidden"> (won)</span>}</span><span class="b-pts">{pts(t.points)}</span></div>)}
+              {m.teams.map(t => <div class:list={['b-team', { win: t.won }]}><span class="b-name">{t.seed && <span class="b-seed"><span class="visually-hidden">Seed </span>{t.seed}</span>}{t.name}{t.won && <span class="visually-hidden"> (won)</span>}</span><span class="b-pts">{pts(t.points)}</span></div>)}
             </div>
           ))}
         </div>

@@ -207,8 +207,9 @@ export const roundLabel = (r: number, rounds: number) =>
  * Winners bracket for display. `rounds` is the path to the title (games with no place, plus the final), in round
  * order, so each round lines up with the games that fed it. `placements` are the 3rd, 5th... place games.
  * Scores come from the playoff weeks, one week per round; null when that week isn't loaded.
+ * `seed` gives a roster's seed (its regular season rank, which is how Sleeper seeds the bracket).
  */
-export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) => string, playoffWeeks: Matchup[][] = []) {
+export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) => string, playoffWeeks: Matchup[][] = [], seed: (rosterId: number) => number | undefined = () => undefined) {
   const count = Math.max(...bracket.map(m => m.r));
   const match = (m: BracketMatch) => ({
     place: m.p ?? null,
@@ -216,6 +217,7 @@ export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) 
       name: typeof id === 'number' ? team(id) : 'TBD',
       points: playoffWeeks[m.r - 1]?.find(x => x.roster_id === id)?.points ?? null,
       won: typeof id === 'number' && id === m.w,
+      seed: typeof id === 'number' ? seed(id) ?? null : null,
     })),
   });
   const byM = (a: BracketMatch, b: BracketMatch) => a.m - b.m;

@@ -86,7 +86,7 @@ The site is small, so all four modules live in this one spec and don't get separ
   - **Records book:** The highest and lowest weekly score ever, the biggest blowout, the best and worst season records, and the longest win and losing streaks.
   - **Head to head grid:** Every manager's all time record against every other manager.
 - The `/history/{season}` page has these sections.
-  - The final standings and the playoff bracket. The bracket draws the path to the title as connected columns (Quarterfinals, Semifinals, Final), each game level with the game that fed it, with both scores from the playoff weeks. The 3rd and 5th place games sit under it as cards. It fits phones down to 320px without sideways scroll.
+  - The final standings and the playoff bracket. The bracket draws the path to the title as connected columns (Quarterfinals, Semifinals, Final), each game level with the game that fed it, with both scores from the playoff weeks and each team's seed. Seeds are the regular season ranks, which is how Sleeper seeds the bracket (tested against both seasons' brackets). The 3rd and 5th place games sit under it as cards. It fits phones down to 320px without sideways scroll.
   - **Full draft board:** A round by round grid from `/draft/{id}/picks`, with each pick's player, position, and team.
   - **Draft hits and busts:** Each pick's season points compared with its draft slot, to show the best and worst picks.
 - Stats don't change for completed seasons, so their data is fetched at build time like everything else. That's about 20 Sleeper calls per past season.
