@@ -1,0 +1,16 @@
+---
+// Small "Buy low" or "Sell high" tag next to a player, from nflverse expected points. Nothing for most players.
+import type { Luck } from '../lib/nflverse';
+
+interface Props {
+  luck: Luck | null;
+}
+const { luck } = Astro.props;
+const long = luck
+  ? `${luck.kind === 'buy' ? 'Buy low' : 'Sell high'}: ${luck.act.toFixed(1)} points a game, but his targets and carries usually score ${luck.exp.toFixed(1)} (${luck.games} games)`
+  : '';
+---
+
+{luck && (
+  <span class={`luck luck-${luck.kind}`} title={long}><span aria-hidden="true">{luck.kind === 'buy' ? 'Buy low' : 'Sell high'}</span><span class="visually-hidden">{long}</span></span>
+)}

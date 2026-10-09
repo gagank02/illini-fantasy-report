@@ -7,6 +7,7 @@ import Move from '../components/Move.astro';
 import Sparkline from '../components/Sparkline.astro';
 import players from '../data/players.json';
 import { loadMomentum } from '../lib/fantasycalc';
+import { loadNflverse } from '../lib/nflverse';
 import Base from '../layouts/Base.astro';
 import { loadSeason } from '../lib/sleeper';
 import { facts, games, powerRankings, scheduleLuck, standings, whatIfMatrix, type Players } from '../lib/stats';
@@ -21,11 +22,12 @@ const riser = power.filter(p => (p.move ?? 0) > 0).sort((a, b) => b.move! - a.mo
 const luck = scheduleLuck(whatIfMatrix(rows, all));
 const [luckiest, unluckiest] = [luck[0], luck.at(-1)];
 const latest = (await getCollection('reports')).sort((a, b) => b.data.season - a.data.season || b.data.week - a.data.week)[0];
-// Trends card: real points vs last season, plus FantasyCalc momentum once the daily job has saved it.
+// Trends card: real points (other weeks from nflverse once saved), plus FantasyCalc momentum once the daily job has saved it.
 const P = players as Players;
 const last = league.previous_league_id ? await loadSeason(league.previous_league_id) : null;
 const momentum = loadMomentum(process.env, rosters.flatMap(r => r.players ?? []));
-const trendList = trendRows(rosters, P, weeks, last?.weeks ?? [], momentum?.momentum ?? {});
+const nfl = loadNflverse(Number(league.season));
+const trendList = trendRows(rosters, P, weeks, last?.weeks ?? [], momentum?.momentum ?? {}, nfl ?? undefined);
 const hot = heatingUp(trendList);
 const mover = marketMover(trendList);
 const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`; };
@@ -115,6 +117,7 @@ const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `
         {mover
           ? <>Market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>{momentum?.sample ? ' (made up for local testing)' : ''}. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
           : <>Scores and trends from <Ext href="https://sleeper.com">Sleeper</Ext>.</>}
+        {nfl && <span> Other weeks from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>).</span>}
       </p>
 
       <Facts facts={facts(rows, all)} teamNames={rows.map(r => r.team)} />

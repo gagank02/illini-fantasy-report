@@ -1,6 +1,8 @@
-// Trends page: real weekly points from our league (Sleeper) plus FantasyCalc's 30 day momentum.
+// Trends page: real weekly points from our league (Sleeper), the other weeks filled from nflverse, plus FantasyCalc's
+// 30 day momentum.
 // Momentum is a percentage we compute in the daily job; FantasyCalc's values are never saved.
 import type { FcValue } from './fantasycalc.ts';
+import { fillWeeks, type Luck, type SiteNfl } from './nflverse.ts';
 import type { Matchup } from './sleeper.ts';
 import type { Players } from './stats.ts';
 
@@ -34,7 +36,7 @@ export interface TrendRow {
   s26: (number | null)[];
   /** Last season's average per rostered week, null if he wasn't in this league. */
   avg25: number | null;
-  /** Average points per rostered week this season, null before any. */
+  /** Average points per week played this season, null before any. */
   avg26: number | null;
   /** Average of his most recent rostered weeks this season (see recentWeeks), null before 4 weeks. */
   recent: number | null;
@@ -46,22 +48,26 @@ export interface TrendRow {
   diff: number | null;
   /** FantasyCalc 30 day momentum (0.12 = +12%), null if unknown. */
   momentum: number | null;
+  /** Buy low or sell high from nflverse expected points, null if neither or no data. */
+  luck: Luck | null;
 }
 
-/** Every rostered QB/RB/WR/TE, best 2026 average first. */
+/** Every rostered QB/RB/WR/TE, best 2026 average first. With nflverse data, this season's weeks before he was on a
+ * roster here are filled in, so his line, average and form cover his whole season. */
 export function trendRows(
   rosters: { roster_id: number; players?: string[] | null }[],
   players: Players,
   weeks26: Matchup[][],
   weeks25: Matchup[][],
   momentum: Record<string, number>,
+  nfl: Pick<SiteNfl, 'fill' | 'tags'> = { fill: {}, tags: {} },
 ): TrendRow[] {
   return rosters
     .flatMap(r => r.players ?? [])
     .filter(id => SKILL.includes(players[id]?.pos ?? ''))
     .map(id => {
       const s25 = weeklyPoints(weeks25, id);
-      const s26 = weeklyPoints(weeks26, id);
+      const s26 = fillWeeks(weeklyPoints(weeks26, id), nfl.fill[id]);
       const [a25, a26] = [mean(s25), mean(s26)];
       // Recent weeks vs the weeks BEFORE them, so one bad early week can't make a cooling player look hot.
       const played = s26.filter((x): x is number => x !== null);
@@ -74,6 +80,7 @@ export function trendRows(
         form: recent !== null && before !== null ? recent - before : null,
         diff: a25 !== null && a26 !== null ? a26 - a25 : null,
         momentum: momentum[id] ?? null,
+        luck: nfl.tags[id] ?? null,
       };
     })
     .sort((a, b) => (b.avg26 ?? -1) - (a.avg26 ?? -1));

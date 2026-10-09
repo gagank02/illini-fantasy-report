@@ -85,7 +85,7 @@ test('this season form: recent weeks vs the weeks before them (last 2 until week
 
 test('home card picks: heating up THIS season among regulars, and the biggest market riser', () => {
   const r = (id: string, avg26: number, form: number | null, momentum: number | null): TrendRow =>
-    ({ id, pos: 'WR', s25: [], s26: [], avg25: null, avg26, recent: null, recentWeeks: 2, form, diff: null, momentum });
+    ({ id, pos: 'WR', s25: [], s26: [], avg25: null, avg26, recent: null, recentWeeks: 2, form, diff: null, momentum, luck: null });
   const rows = [r('bench', 3, 9, 7.5), r('a', 20, 5, 0.1), r('b', 15, 8, -0.2), r('c', 12, 2, 0.3), r('early', 18, null, 0.05)];
   expect(heatingUp(rows).map(x => x.id)).toEqual(['b', 'a', 'c']);
   expect(marketMover(rows)!.id).toBe('c');
