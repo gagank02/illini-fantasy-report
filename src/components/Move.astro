@@ -1,5 +1,5 @@
 ---
-// Rank change since last week: ▲ gained, ▼ dropped, – no change or no previous week.
+// Rank change since last week: ▲ gained, ▼ dropped, - no change or no previous week.
 interface Props {
   move: number | null;
 }
@@ -7,7 +7,7 @@ const { move } = Astro.props;
 ---
 
 {move === null || move === 0 ? (
-  <span class="sub move">–<span class="visually-hidden">no change</span></span>
+  <span class="sub move">-<span class="visually-hidden">no change</span></span>
 ) : (
   <span class={`sub move ${move > 0 ? 'move-up' : 'move-down'}`}>
     {move > 0 ? '▲' : '▼'}{Math.abs(move)}
