@@ -1,0 +1,59 @@
+---
+// The Trends page's expandable player panel, from nflverse: points vs expected and usage by week,
+// season totals, schedule, and a short bio. Shown under a player's row when his name is tapped.
+import Sparkline from './Sparkline.astro';
+import { USE_LABEL, type Card, type TeamSchedule } from '../lib/nflverse';
+
+interface Props {
+  name: string;
+  pos: string;
+  points: (number | null)[];
+  card: Card;
+  schedule: TeamSchedule | null;
+}
+const { name, pos, points, card, schedule } = Astro.props;
+const fmt = (xs: (number | null)[]) => xs.map((v, i) => `W${i + 1} ${v ?? '-'}`).join(', ');
+const useLabel = USE_LABEL[pos] ?? 'Usage';
+const avg = (xs: (number | null)[]) => {
+  const v = xs.filter((x): x is number => x !== null);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+};
+const [ptsAvg, expAvg, useAvg] = [avg(points), avg(card.exp), avg(card.use)];
+const t = card.tot;
+const n = (v: number | undefined, one: string, many = `${one}s`) => `${(v ?? 0).toLocaleString('en-US')} ${v === 1 ? one : many}`;
+const season = pos === 'QB'
+  ? [`${t.cmp}/${t.att} passing`, n(t.passYd, 'yard'), n(t.passTd, 'TD'), n(t.int, 'INT'), `${n(t.car, 'carry', 'carries')} for ${n(t.rushYd, 'yard')}`, n(t.rushTd, 'rushing TD')]
+  : pos === 'RB'
+    ? [`${n(t.car, 'carry', 'carries')} for ${n(t.rushYd, 'yard')}`, n(t.rushTd, 'rushing TD'), `${t.rec} of ${n(t.tgt, 'target')} for ${n(t.recYd, 'yard')}`, n(t.recTd, 'receiving TD')]
+    : [`${t.rec} of ${n(t.tgt, 'target')}`, n(t.recYd, 'yard'), n(t.recTd, 'TD')];
+const ordinal = (k: number) => `${k}${k % 10 === 1 && k !== 11 ? 'st' : k % 10 === 2 && k !== 12 ? 'nd' : k % 10 === 3 && k !== 13 ? 'rd' : 'th'}`;
+const b = card.bio;
+const bio = [
+  b.age !== null && `Age ${b.age}`,
+  b.exp !== null && (b.exp === 0 ? 'Rookie' : `${ordinal(b.exp + 1)} NFL season`),
+  b.year !== null && (b.pick !== null ? `Pick ${b.pick} in ${b.year}` : `Undrafted, ${b.year}`),
+  b.college,
+].filter(Boolean).join(' · ');
+---
+
+<div class="panel">
+  <div class="panel-charts">
+    <figure>
+      <figcaption>Points <span class="panel-key">vs <span class="panel-dash" aria-hidden="true"></span> expected</span>{ptsAvg !== null && expAvg !== null && <span class="panel-avg">{ptsAvg.toFixed(1)} vs {expAvg.toFixed(1)} a game</span>}</figcaption>
+      <Sparkline series={points} compare={card.exp} width={200} height={48} label={`${name} points and expected points by week`} tooltip={`Points: ${fmt(points)}. Expected: ${fmt(card.exp)}`} />
+    </figure>
+    <figure>
+      <figcaption>{useLabel}{useAvg !== null && <span class="panel-avg">{useAvg.toFixed(1)} a game</span>}</figcaption>
+      <Sparkline series={card.use} width={200} height={48} label={`${name} ${useLabel.toLowerCase()} by week`} tooltip={fmt(card.use)} />
+    </figure>
+  </div>
+  <dl class="panel-facts">
+    <div><dt>Season</dt><dd>{season.join(', ')}</dd></div>
+    {schedule && (schedule.bye !== null || schedule.next.length > 0) && (
+      <div><dt>Schedule</dt><dd>
+        {[...schedule.next.map(g => `Week ${g.w} ${g.away ? '@' : 'vs'} ${g.opp}`), schedule.bye !== null && `bye week ${schedule.bye}`].filter(Boolean).join(' · ')}
+      </dd></div>
+    )}
+    {bio && <div><dt>Bio</dt><dd>{bio}</dd></div>}
+  </dl>
+</div>

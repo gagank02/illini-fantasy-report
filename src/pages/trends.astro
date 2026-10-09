@@ -1,6 +1,7 @@
 ---
 import Injury from '../components/Injury.astro';
 import Luck from '../components/Luck.astro';
+import PlayerPanel from '../components/PlayerPanel.astro';
 import Ext from '../components/Ext.astro';
 import Sparkline from '../components/Sparkline.astro';
 import Base from '../layouts/Base.astro';
@@ -26,13 +27,14 @@ const fantasyTeam = (id: string) => teamName.get(owner.get(id)!) ?? '';
 const pct = (v: number) => `${v > 0 ? '+' : ''}${Math.round(v * 100)}%`;
 const fmt = (xs: (number | null)[]) => xs.map(v => (v === null ? '-' : v.toFixed(1))).join(', ');
 const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
+const columns = loaded ? 5 : 4;
 ---
 
 <Base title="Trends">
   <h1>Trends</h1>
   <p class="muted">
     How every rostered player is doing this season. <strong>Last 2</strong> (<strong>Last 3</strong> from week 6) compares a player's most recent weeks with his weeks before them, so ▲ means heating up. <strong>Market</strong> is how much his trade value moved over the last 30 days. The {lastSeason} column is last season in this league, for comparison.
-    {nfl && <>{' '}<strong>Buy low</strong> and <strong>Sell high</strong> mark players scoring well below or above what their targets and carries usually produce.</>}
+    {nfl && <>{' '}<strong>Buy low</strong> and <strong>Sell high</strong> mark players scoring well below or above what their targets and carries usually produce. Tap a player's name for more.</>}
   </p>
   <p class="trade-credit">
     {loaded?.sample
@@ -67,9 +69,12 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
         </thead>
         <tbody>
           {rows.map(r => (
+            <>
             <tr data-pos={r.pos}>
               <th scope="row" class="left">
-                {P[r.id]!.name}<Injury status={P[r.id]!.injury} body={P[r.id]!.body} /><Luck luck={r.luck} />
+                {nfl?.cards?.[r.id]
+                  ? <button type="button" class="player-toggle" aria-expanded="false" aria-controls={`panel-${r.id}`}>{P[r.id]!.name}</button>
+                  : P[r.id]!.name}<Injury status={P[r.id]!.injury} body={P[r.id]!.body} /><Luck luck={r.luck} />
                 <span class="sub">{r.pos} {P[r.id]!.team ?? 'FA'} · {fantasyTeam(r.id)}</span>
                 {(r.form !== null || (loaded && r.momentum !== null)) && (
                   <span class="sub narrow">
@@ -102,6 +107,14 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
                 )}
               </td>
             </tr>
+            {nfl?.cards?.[r.id] && (
+              <tr class="panel-row" data-pos={r.pos} id={`panel-${r.id}`} hidden>
+                <td colspan={columns}>
+                  <PlayerPanel name={P[r.id]!.name} pos={r.pos} points={r.s26} card={nfl.cards[r.id]!} schedule={nfl.teams?.[P[r.id]!.team ?? ''] ?? null} />
+                </td>
+              </tr>
+            )}
+            </>
           ))}
         </tbody>
       </table>
@@ -109,3 +122,14 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
   </div>
   <p class="muted legend">Last 2 and Last 3 need at least four weeks this season. Hover a line for every week's points. {nfl ? 'Byes and missed games count as 0 in weeks a player was on a roster here, and show as gaps in the other weeks.' : "Gaps are weeks a player wasn't on a roster here."} Kickers and defenses aren't included.</p>
 </Base>
+
+<script>
+  // Player panels: the name toggles the row under it.
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('.player-toggle')) {
+    btn.addEventListener('click', () => {
+      const open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(open));
+      document.getElementById(btn.getAttribute('aria-controls')!)!.hidden = !open;
+    });
+  }
+</script>

@@ -352,6 +352,7 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 .spark { display: block; margin-left: auto; overflow: visible; }
 .spark-line { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .spark-dot { fill: var(--accent-text); stroke: var(--surface); stroke-width: 2; }
+.spark-compare { stroke-dasharray: 4 3; stroke-width: 1.5; opacity: 0.8; }
 .spark-divider { stroke: var(--rule); stroke-width: 1; }
 @media (max-width: 30rem) { .spark { width: 84px; height: 30px; } }
 
@@ -368,3 +369,23 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
 @media (min-width: 48rem) { .list-only { display: none; } }
+
+/* Trends player panel: the name is a button that opens a row under the player. */
+.player-toggle { all: unset; cursor: pointer; font: inherit; color: inherit; border-bottom: 1px dashed var(--muted); }
+.player-toggle:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.player-toggle::after { content: ' ▸'; font-size: 0.75em; color: var(--muted); }
+.player-toggle[aria-expanded='true']::after { content: ' ▾'; }
+.panel-row > td { text-align: left; background: var(--surface); padding-top: 0.25rem; }
+.panel { display: grid; gap: 0.75rem; }
+.panel-charts { display: flex; flex-wrap: wrap; gap: 1rem 2rem; }
+.panel-charts figure { margin: 0; }
+.panel-charts figcaption { font-size: 0.75rem; font-weight: 600; color: var(--muted); margin-bottom: 0.2rem; }
+.panel-charts .spark { margin-left: 0; width: 200px; height: 48px; }
+.panel-key { font-weight: 400; }
+.panel-avg { display: block; font-weight: 600; font-size: 0.85rem; color: var(--fg); }
+.panel-dash { display: inline-block; width: 1.1rem; border-top: 1.5px dashed var(--muted); vertical-align: middle; }
+.panel-facts { margin: 0; display: grid; gap: 0.3rem; font-size: 0.85rem; white-space: normal; }
+.panel-facts div { display: flex; gap: 0.6rem; }
+.panel-facts dt { font-weight: 600; min-width: 4.5rem; color: var(--muted); }
+.panel-facts dd { margin: 0; }
+@media (max-width: 30rem) { .panel-charts .spark { width: 150px; height: 40px; } }

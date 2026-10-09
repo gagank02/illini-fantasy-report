@@ -17,7 +17,7 @@ test('parses CSV with quoted commas, escaped quotes, CRLF and a trailing newline
 
 test('downloads only plain CSV from nflverse and ffverse GitHub releases', () => {
   for (const url of Object.values(nflverseUrls(2026))) {
-    expect(url).toMatch(/^https:\/\/github\.com\/(nflverse\/nflverse-data|ffverse\/ffopportunity)\/releases\/download\/.+_2026\.csv$/);
+    expect(url).toMatch(/^https:\/\/github\.com\/(nflverse\/nflverse-data|ffverse\/ffopportunity)\/releases\/download\/.+(_2026|\/games)\.csv$/);
   }
 });
 
@@ -39,7 +39,7 @@ test('joins on gsis id for players with a Sleeper id, regular season weeks, byes
   ]);
   const d = buildNflData('2026-10-09', 2026, { ids, stats, expected });
   expect(Object.keys(d.players).sort()).toEqual(['100', '200']);
-  expect(d.players['100']).toEqual({ pts: [12.3, null, 0], games: 2, act: 6, exp: 15 });
+  expect(d.players['100']).toMatchObject({ pts: [12.3, null, 0], games: 2, act: 6, exp: 15 });
 });
 
 test('the committed file holds only what pages show: gap weeks for rostered players, and tags', () => {
@@ -100,4 +100,46 @@ test('trend rows use nflverse for weeks off our rosters, and carry the tag', () 
   const [without] = trendRows([{ roster_id: 1, players: ['100'] }], P, weeks, [], {});
   expect(without!.s26).toEqual([null, null, 20, 22]);
   expect(without!.luck).toBeNull();
+});
+
+test('player panels: usage by position, weeks he missed stay gaps, totals for his position, bio, team schedule', () => {
+  const ids = csv([
+    ['sleeper_id', 'gsis_id', 'birth_date', 'years_exp', 'college', 'draft_number', 'entry_year'],
+    ['100', 'G1', '2002-02-14', '3', 'Ohio State', '20', '2023'],
+    ['200', 'G2', '1999-12-01', '0', '', '', '2026'],
+  ]);
+  const stats = csv([
+    ['player_id', 'season_type', 'week', 'fantasy_points_ppr', 'targets', 'receptions', 'receiving_yards', 'receiving_tds', 'carries', 'rushing_yards', 'rushing_tds', 'attempts'],
+    ['G1', 'REG', '1', '20', '11', '8', '122', '1', '0', '0', '0', '0'],
+    ['G1', 'REG', '3', '10', '6', '4', '60', '0', '1', '5', '0', '0'],
+    ['G2', 'REG', '1', '12', '2', '2', '10', '0', '15', '70', '1', '0'],
+  ]);
+  const expected = csv([['player_id', 'week', 'total_fantasy_points', 'total_fantasy_points_exp'], ['G1', '1', '20', '15']]);
+  const games = csv([
+    ['season', 'game_type', 'week', 'away_team', 'home_team'],
+    ['2026', 'REG', '1', 'NE', 'SEA'], ['2026', 'REG', '3', 'SEA', 'LA'], ['2026', 'REG', '4', 'DAL', 'SEA'],
+    ['2026', 'REG', '5', 'SEA', 'SF'], ['2026', 'REG', '6', 'ARI', 'SEA'], ['2026', 'REG', '7', 'SEA', 'KC'],
+    ['2025', 'REG', '2', 'SEA', 'NE'],
+  ]);
+  const full = buildNflData('2026-10-09', 2026, { ids, stats, expected, games });
+  const info = (id: string) => (id === '100' ? { pos: 'WR', team: 'SEA' } : { pos: 'RB', team: 'NYJ' });
+  const site = siteNfl(full, ['100', '200'], () => [null, null, null, null], info);
+  expect(site.cards!['100']).toEqual({
+    use: [11, null, 6, null],
+    exp: [15, null, null, null],
+    tot: { tgt: 17, rec: 12, recYd: 182, recTd: 1 },
+    bio: { age: 24, exp: 3, college: 'Ohio State', pick: 20, year: 2023 },
+  });
+  expect(site.cards!['200']!.use).toEqual([17, null, null, null]); // touches: 15 carries + 2 catches
+  expect(site.cards!['200']!.bio).toEqual({ age: 26, exp: 0, college: null, pick: null, year: 2026 });
+  // Bye is week 2. Our league has scored 4 weeks, so the next games start at week 5. LA is the Rams: LAR in Sleeper.
+  expect(site.teams).toEqual({
+    NYJ: { bye: null, next: [] },
+    SEA: { bye: 2, next: [{ w: 5, opp: 'SF', away: true }, { w: 6, opp: 'ARI', away: false }, { w: 7, opp: 'KC', away: true }] },
+  });
+  expect(full.games).toContainEqual([3, 'SEA', 'LAR']);
+  const text = serializeSiteNfl(site);
+  expect(Object.keys(JSON.parse(text))).toEqual(['fetched', 'season', 'fill', 'tags', 'cards', 'teams']);
+  expect(JSON.parse(text)).toEqual(site);
+  expect(text).not.toMatch(/"(pts|birth|gsis|pfr)"/); // no raw rows, ids or birth dates in the committed file
 });

@@ -1,6 +1,7 @@
 ---
 // Inline SVG sparkline, no JavaScript. A 2px muted line, today's point as an accent dot,
-// an optional divider (e.g. between seasons), and a native tooltip with the numbers.
+// an optional divider (e.g. between seasons), an optional dashed comparison line on the same scale,
+// and a native tooltip with the numbers.
 import { sparkline } from '../lib/trends';
 
 interface Props {
@@ -8,16 +9,20 @@ interface Props {
   label: string;
   tooltip: string;
   divider?: number;
+  compare?: (number | null)[];
   width?: number;
   height?: number;
 }
-const { series, label, tooltip, divider, width = 140, height = 36 } = Astro.props;
-const g = sparkline(series, width, height);
+const { series, label, tooltip, divider, compare, width = 140, height = 36 } = Astro.props;
+const top = Math.max(1, ...[...series, ...(compare ?? [])].filter((x): x is number => x !== null));
+const g = sparkline(series, width, height, { max: top });
+const c = compare ? sparkline(compare, width, height, { max: top }) : null;
 ---
 
 <svg class="spark" viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label={label}>
   <title>{tooltip}</title>
   {divider !== undefined && <line x1={g.x(divider)} x2={g.x(divider)} y1="2" y2={height - 2} class="spark-divider" />}
+  {c && <path d={c.d} class="spark-line spark-compare" />}
   <path d={g.d} class="spark-line" />
   {g.last && <circle cx={g.last.x} cy={g.last.y} r="4" class="spark-dot" />}
 </svg>
