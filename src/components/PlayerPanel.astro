@@ -1,5 +1,5 @@
 ---
-// The Trends page's expandable player panel, from nflverse: points vs expected, snap share and usage by week,
+// The Trends page's expandable player panel, from nflverse: points vs expected and usage by week,
 // season totals, schedule, and a short bio. Shown under a player's row when his name is tapped.
 import Sparkline from './Sparkline.astro';
 import { USE_LABEL, type Card, type TeamSchedule } from '../lib/nflverse';
@@ -12,13 +12,13 @@ interface Props {
   schedule: TeamSchedule | null;
 }
 const { name, pos, points, card, schedule } = Astro.props;
-const fmt = (xs: (number | null)[], unit = '') => xs.map((v, i) => `W${i + 1} ${v === null ? '-' : `${v}${unit}`}`).join(', ');
+const fmt = (xs: (number | null)[]) => xs.map((v, i) => `W${i + 1} ${v ?? '-'}`).join(', ');
 const useLabel = USE_LABEL[pos] ?? 'Usage';
 const avg = (xs: (number | null)[]) => {
   const v = xs.filter((x): x is number => x !== null);
   return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
 };
-const [ptsAvg, expAvg, snapAvg, useAvg] = [avg(points), avg(card.exp), avg(card.snap), avg(card.use)];
+const [ptsAvg, expAvg, useAvg] = [avg(points), avg(card.exp), avg(card.use)];
 const t = card.tot;
 const n = (v: number | undefined, one: string, many = `${one}s`) => `${(v ?? 0).toLocaleString('en-US')} ${v === 1 ? one : many}`;
 const season = pos === 'QB'
@@ -41,10 +41,6 @@ const bio = [
     <figure>
       <figcaption>Points <span class="panel-key">vs <span class="panel-dash" aria-hidden="true"></span> expected</span>{ptsAvg !== null && expAvg !== null && <span class="panel-avg">{ptsAvg.toFixed(1)} vs {expAvg.toFixed(1)} a game</span>}</figcaption>
       <Sparkline series={points} compare={card.exp} width={200} height={48} label={`${name} points and expected points by week`} tooltip={`Points: ${fmt(points)}. Expected: ${fmt(card.exp)}`} />
-    </figure>
-    <figure>
-      <figcaption>Snap share{snapAvg !== null && <span class="panel-avg">{Math.round(snapAvg)}% a game</span>}</figcaption>
-      <Sparkline series={card.snap} max={100} width={200} height={48} label={`${name} offensive snap share by week`} tooltip={fmt(card.snap, '%')} />
     </figure>
     <figure>
       <figcaption>{useLabel}{useAvg !== null && <span class="panel-avg">{useAvg.toFixed(1)} a game</span>}</figcaption>

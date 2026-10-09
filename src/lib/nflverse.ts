@@ -16,7 +16,6 @@ export function nflverseUrls(season: number) {
     ids: `${RELEASES}/weekly_rosters/roster_weekly_${season}.csv`,
     stats: `${RELEASES}/stats_player/stats_player_week_${season}.csv`,
     expected: `https://github.com/ffverse/ffopportunity/releases/download/latest-data/ep_weekly_${season}.csv`,
-    snaps: `${RELEASES}/snap_counts/snap_counts_${season}.csv`,
     games: `${RELEASES}/schedules/games.csv`,
   };
 }
@@ -63,8 +62,7 @@ export interface NflPlayer {
   games: number;
   act: number;
   exp: number;
-  /** For the player panel, by week like pts: offensive snap %, targets, carries, catches, pass attempts, expected points. */
-  snap?: (number | null)[];
+  /** For the player panel, by week like pts: targets, carries, catches, pass attempts, expected points. */
   tgt?: (number | null)[];
   car?: (number | null)[];
   rec?: (number | null)[];
@@ -106,18 +104,15 @@ export function buildNflData(
     ids: Record<string, string>[];
     stats: Record<string, string>[];
     expected: Record<string, string>[];
-    snaps?: Record<string, string>[];
     games?: Record<string, string>[];
   },
 ): NflData {
   const gsisToSleeper = new Map<string, string>();
-  const pfrToSleeper = new Map<string, string>();
   const bios = new Map<string, NonNullable<NflPlayer['bio']>>();
   const num = (x: string | undefined) => (x ? Number(x) : null);
   for (const r of files.ids) {
     if (!r.sleeper_id || !r.gsis_id) continue;
     gsisToSleeper.set(r.gsis_id, r.sleeper_id);
-    if (r.pfr_id) pfrToSleeper.set(r.pfr_id, r.sleeper_id);
     bios.set(r.sleeper_id, { birth: r.birth_date || null, exp: num(r.years_exp), college: r.college || null, pick: num(r.draft_number), year: num(r.entry_year) });
   }
 
@@ -138,13 +133,6 @@ export function buildNflData(
     t.car += n('carries'); t.rushYd += n('rushing_yards'); t.rushTd += n('rushing_tds');
     t.att += n('attempts'); t.cmp += n('completions'); t.passYd += n('passing_yards'); t.passTd += n('passing_tds'); t.int += n('passing_interceptions');
   }
-  for (const r of files.snaps ?? []) {
-    const id = pfrToSleeper.get(r.pfr_player_id ?? '');
-    const p = id ? players[id] : undefined;
-    const w = Number(r.week);
-    if (!p || r.game_type !== 'REG' || !(w >= 1 && w <= REG_WEEKS)) continue;
-    (p.snap ??= [])[w - 1] = Math.round((Number(r.offense_pct) || 0) * 100);
-  }
   for (const r of files.expected) {
     const p = get(r.player_id);
     const w = Number(r.week);
@@ -157,7 +145,7 @@ export function buildNflData(
   const dense = (xs: (number | null)[] | undefined) => (xs ? Array.from(xs, x => x ?? null) : undefined);
   for (const [id, p] of Object.entries(players)) {
     p.pts = dense(p.pts)!;
-    for (const k of ['snap', 'tgt', 'car', 'rec', 'att', 'expW'] as const) if (p[k]) p[k] = dense(p[k]);
+    for (const k of ['tgt', 'car', 'rec', 'att', 'expW'] as const) if (p[k]) p[k] = dense(p[k]);
     p.act = p.games ? round1(p.act / p.games) : 0;
     p.exp = p.games ? round1(p.exp / p.games) : 0;
     if (bios.has(id)) p.bio = bios.get(id);
@@ -190,8 +178,7 @@ export interface SiteNfl {
 }
 
 export interface Card {
-  /** By week, up to the weeks our league has scored: offensive snap %, the usage stat for his position, expected points. */
-  snap: (number | null)[];
+  /** By week, up to the weeks our league has scored: the usage stat for his position, expected points. */
   use: (number | null)[];
   exp: (number | null)[];
   /** Season totals that matter for his position. */
@@ -231,7 +218,6 @@ function card(p: NflPlayer, pos: string, weeks: number, fetched: string): Card {
   const played = (xs: (number | null)[]) => xs.map((x, i) => (p.pts[i] == null ? null : x));
   const b = p.bio;
   return {
-    snap: played(cut(p.snap)),
     use: played(use),
     exp: played(cut(p.expW)),
     tot: Object.fromEntries((TOTALS[pos] ?? []).map(k => [k, p.tot?.[k] ?? 0])),

@@ -10,12 +10,11 @@ interface Props {
   tooltip: string;
   divider?: number;
   compare?: (number | null)[];
-  max?: number;
   width?: number;
   height?: number;
 }
-const { series, label, tooltip, divider, compare, max, width = 140, height = 36 } = Astro.props;
-const top = Math.max(max ?? 1, ...[...series, ...(compare ?? [])].filter((x): x is number => x !== null));
+const { series, label, tooltip, divider, compare, width = 140, height = 36 } = Astro.props;
+const top = Math.max(1, ...[...series, ...(compare ?? [])].filter((x): x is number => x !== null));
 const g = sparkline(series, width, height, { max: top });
 const c = compare ? sparkline(compare, width, height, { max: top }) : null;
 ---

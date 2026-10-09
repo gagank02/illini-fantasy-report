@@ -26,8 +26,14 @@ if (full?.fetched === today) {
     if (!res.ok) throw new Error(`${url} returned ${res.status}. Keeping yesterday's file.`);
     return parseCsv(await res.text());
   };
-  const [ids, stats, expected, snaps, games] = await Promise.all([urls.ids, urls.stats, urls.expected, urls.snaps, urls.games].map(download));
-  full = buildNflData(today, season, { ids: ids!, stats: stats!, expected: expected!, snaps, games });
+  // The schedule only feeds the Trends panel, so if it fails the points and tags still update.
+  const [ids, stats, expected, games] = await Promise.all([
+    download(urls.ids),
+    download(urls.stats),
+    download(urls.expected),
+    download(urls.games).catch((e: Error) => (note(`${e.message.split('.')[0]}. Panels skip the schedule today.`), undefined)),
+  ]);
+  full = buildNflData(today, season, { ids, stats, expected, games });
   mkdirSync(dirname(NFL_FULL_PATH), { recursive: true });
   writeFileSync(NFL_FULL_PATH, JSON.stringify(full));
   note(`Downloaded nflverse: ${Object.keys(full.players).length} players with a Sleeper id and ${season} games.`);

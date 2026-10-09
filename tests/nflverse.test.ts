@@ -104,9 +104,9 @@ test('trend rows use nflverse for weeks off our rosters, and carry the tag', () 
 
 test('player panels: usage by position, weeks he missed stay gaps, totals for his position, bio, team schedule', () => {
   const ids = csv([
-    ['sleeper_id', 'gsis_id', 'pfr_id', 'birth_date', 'years_exp', 'college', 'draft_number', 'entry_year'],
-    ['100', 'G1', 'P1', '2002-02-14', '3', 'Ohio State', '20', '2023'],
-    ['200', 'G2', 'P2', '1999-12-01', '0', '', '', '2026'],
+    ['sleeper_id', 'gsis_id', 'birth_date', 'years_exp', 'college', 'draft_number', 'entry_year'],
+    ['100', 'G1', '2002-02-14', '3', 'Ohio State', '20', '2023'],
+    ['200', 'G2', '1999-12-01', '0', '', '', '2026'],
   ]);
   const stats = csv([
     ['player_id', 'season_type', 'week', 'fantasy_points_ppr', 'targets', 'receptions', 'receiving_yards', 'receiving_tds', 'carries', 'rushing_yards', 'rushing_tds', 'attempts'],
@@ -115,18 +115,16 @@ test('player panels: usage by position, weeks he missed stay gaps, totals for hi
     ['G2', 'REG', '1', '12', '2', '2', '10', '0', '15', '70', '1', '0'],
   ]);
   const expected = csv([['player_id', 'week', 'total_fantasy_points', 'total_fantasy_points_exp'], ['G1', '1', '20', '15']]);
-  const snaps = csv([['pfr_player_id', 'game_type', 'week', 'offense_pct'], ['P1', 'REG', '1', '0.9'], ['P1', 'REG', '3', '0.755']]);
   const games = csv([
     ['season', 'game_type', 'week', 'away_team', 'home_team'],
     ['2026', 'REG', '1', 'NE', 'SEA'], ['2026', 'REG', '3', 'SEA', 'LA'], ['2026', 'REG', '4', 'DAL', 'SEA'],
     ['2026', 'REG', '5', 'SEA', 'SF'], ['2026', 'REG', '6', 'ARI', 'SEA'], ['2026', 'REG', '7', 'SEA', 'KC'],
     ['2025', 'REG', '2', 'SEA', 'NE'],
   ]);
-  const full = buildNflData('2026-10-09', 2026, { ids, stats, expected, snaps, games });
+  const full = buildNflData('2026-10-09', 2026, { ids, stats, expected, games });
   const info = (id: string) => (id === '100' ? { pos: 'WR', team: 'SEA' } : { pos: 'RB', team: 'NYJ' });
   const site = siteNfl(full, ['100', '200'], () => [null, null, null, null], info);
   expect(site.cards!['100']).toEqual({
-    snap: [90, null, 76, null],
     use: [11, null, 6, null],
     exp: [15, null, null, null],
     tot: { tgt: 17, rec: 12, recYd: 182, recTd: 1 },
