@@ -41,6 +41,9 @@ test('every page showing nflverse data credits and links it next to the data', (
   for (const f of nflPages) {
     const credit = read(f).match(/<p class="trade-credit">[\s\S]*?<\/p>/)?.[0] ?? '';
     expect(credit, f).toContain('href="https://github.com/nflverse"');
+    expect(credit, f).toContain('href="https://creativecommons.org/licenses/by/4.0/"');
+    // ffopportunity's expected points are CC BY-SA 4.0: any page using them names that license too.
+    if (credit.includes('ffopportunity')) expect(credit, f).toContain('href="https://creativecommons.org/licenses/by-sa/4.0/"');
   }
 });
 
