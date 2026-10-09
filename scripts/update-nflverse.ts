@@ -1,7 +1,7 @@
 // nflverse, same pattern as Sleeper's player list: the full summary lives in git ignored .cache/nflverse-full.json
 // (kept in the workflow's private Actions cache, never committed), downloaded only if it isn't from today, so reruns
 // never download again. The repo gets only what our pages show, in src/data/nflverse.json: the weeks that fill gaps
-// in rostered players' lines, and the Buy low / Sell high tags. Only the daily refresh job runs this. Builds never fetch.
+// in rostered players' lines, the Buy low / Sell high tags, and the Trends player panels. Only the daily refresh job runs this. Builds never fetch.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { buildNflData, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, readFull, serializeSiteNfl, siteNfl } from '../src/lib/nflverse.ts';
@@ -26,8 +26,8 @@ if (full?.fetched === today) {
     if (!res.ok) throw new Error(`${url} returned ${res.status}. Keeping yesterday's file.`);
     return parseCsv(await res.text());
   };
-  const [ids, stats, expected] = await Promise.all([download(urls.ids), download(urls.stats), download(urls.expected)]);
-  full = buildNflData(today, season, { ids, stats, expected });
+  const [ids, stats, expected, snaps, games] = await Promise.all([urls.ids, urls.stats, urls.expected, urls.snaps, urls.games].map(download));
+  full = buildNflData(today, season, { ids: ids!, stats: stats!, expected: expected!, snaps, games });
   mkdirSync(dirname(NFL_FULL_PATH), { recursive: true });
   writeFileSync(NFL_FULL_PATH, JSON.stringify(full));
   note(`Downloaded nflverse: ${Object.keys(full.players).length} players with a Sleeper id and ${season} games.`);
@@ -41,6 +41,6 @@ note(`nflverse: ${skill.length - missing.length} of ${skill.length} rostered QB/
 if (missing.length) note(`No nflverse games yet: ${missing.map(id => players[id]?.name ?? id).join(', ')}`);
 if (missing.length > skill.length / 2) throw new Error('Too few rostered players matched nflverse, so the files look broken. Keeping yesterday\'s file.');
 
-const site = siteNfl(full, skill, id => weeklyPoints(weeks, id));
+const site = siteNfl(full, skill, id => weeklyPoints(weeks, id), id => ({ pos: players[id]!.pos, team: players[id]!.team ?? null }));
 writeFileSync(NFLVERSE_PATH, serializeSiteNfl(site));
-console.log(`Wrote ${Object.keys(site.fill).length} filled lines and ${Object.keys(site.tags).length} tags to ${NFLVERSE_PATH}.`);
+console.log(`Wrote ${Object.keys(site.fill).length} filled lines, ${Object.keys(site.tags).length} tags and ${Object.keys(site.cards ?? {}).length} player panels to ${NFLVERSE_PATH}.`);

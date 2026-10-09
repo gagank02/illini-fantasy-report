@@ -8,8 +8,8 @@ name: Daily refresh
 # - src/data/trades.json (trade suggestions from FantasyCalc /values/current), once the FANTASYCALC_ENABLED repo
 #   variable is 'true'. Only the suggestions are committed; FantasyCalc's raw values are never saved to the repo.
 # - src/data/nflverse.json (from nflverse). The full download stays in the Actions cache (.cache/nflverse-full.json,
-#   never committed). Only what our pages show is committed: weeks that fill gaps in rostered players' lines, and the
-#   Buy low / Sell high tags.
+#   never committed). Only what our pages show is committed: weeks that fill gaps in rostered players' lines, the
+#   Buy low / Sell high tags, and the Trends player panels.
 # Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 on:
   schedule:

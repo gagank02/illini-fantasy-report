@@ -86,11 +86,12 @@ export function trendRows(
     .sort((a, b) => (b.avg26 ?? -1) - (a.avg26 ?? -1));
 }
 
-/** SVG sparkline geometry. zero: include and mark a 0 baseline (for % series). null breaks the line. */
-export function sparkline(series: (number | null)[], w: number, h: number, { pad = 4, zero = false } = {}) {
+/** SVG sparkline geometry. zero: include and mark a 0 baseline (for % series). max: top of the scale, at least.
+ * null breaks the line. */
+export function sparkline(series: (number | null)[], w: number, h: number, { pad = 4, zero = false, max = 1 } = {}) {
   const vals = series.filter((x): x is number => x !== null);
   const lo = zero ? Math.min(0, ...vals) : 0;
-  const hi = Math.max(zero ? 0 : 1, ...vals);
+  const hi = Math.max(zero ? 0 : max, ...vals);
   const x = (i: number) => (series.length === 1 ? w - pad : pad + (i * (w - 2 * pad)) / (series.length - 1));
   const y = (v: number) => pad + (h - 2 * pad) * (1 - (v - lo) / (hi - lo || 1));
   let d = '';
