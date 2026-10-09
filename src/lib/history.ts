@@ -199,19 +199,34 @@ export function draftValue(picks: DraftPick[], weeks: { players_points?: Record<
   };
 }
 
-/** Winners bracket grouped by round, with team names. place: 1 = final, 3 = third place game, and so on. */
-export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) => string) {
-  const name = (id: number | null | undefined) => (typeof id === 'number' ? team(id) : 'TBD');
-  const rounds = [...new Set(bracket.map(m => m.r))].sort((a, b) => a - b);
-  return rounds.map(round => ({
-    round,
-    matches: bracket.filter(m => m.r === round).sort((a, b) => (a.p ?? 99) - (b.p ?? 99) || a.m - b.m).map(m => ({
-      place: m.p ?? null,
-      teams: [name(m.t1), name(m.t2)],
-      winner: m.w ? team(m.w) : null,
-      loser: m.l ? team(m.l) : null,
+/** Name of playoff round `r` out of `rounds`, counted back from the final. */
+export const roundLabel = (r: number, rounds: number) =>
+  (r === rounds ? 'Final' : r === rounds - 1 ? 'Semifinals' : r === rounds - 2 ? 'Quarterfinals' : `Playoff round ${r}`);
+
+/**
+ * Winners bracket for display. `rounds` is the path to the title (games with no place, plus the final), in round
+ * order, so each round lines up with the games that fed it. `placements` are the 3rd, 5th... place games.
+ * Scores come from the playoff weeks, one week per round; null when that week isn't loaded.
+ */
+export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) => string, playoffWeeks: Matchup[][] = []) {
+  const count = Math.max(...bracket.map(m => m.r));
+  const match = (m: BracketMatch) => ({
+    place: m.p ?? null,
+    teams: [m.t1, m.t2].map(id => ({
+      name: typeof id === 'number' ? team(id) : 'TBD',
+      points: playoffWeeks[m.r - 1]?.find(x => x.roster_id === id)?.points ?? null,
+      won: typeof id === 'number' && id === m.w,
     })),
-  }));
+  });
+  const byM = (a: BracketMatch, b: BracketMatch) => a.m - b.m;
+  return {
+    rounds: Array.from({ length: count }, (_, i) => ({
+      round: i + 1,
+      label: roundLabel(i + 1, count),
+      matches: bracket.filter(m => m.r === i + 1 && (m.p ?? 1) === 1).sort(byM).map(match),
+    })),
+    placements: bracket.filter(m => (m.p ?? 1) > 1).sort((a, b) => a.p! - b.p!).map(match),
+  };
 }
 
 export interface Lineup {
@@ -247,7 +262,6 @@ export function championRun(season: SeasonData) {
   if (!final?.w) return null;
   const champ = final.w;
   const rounds = Math.max(...season.bracket!.map(m => m.r));
-  const roundName = (r: number) => (r === rounds ? 'Final' : r === rounds - 1 ? 'Semifinals' : r === rounds - 2 ? 'Quarterfinals' : `Playoff round ${r}`);
   const all = [...season.weeks.map(w => ({ w, playoff: 0 })), ...season.playoffWeeks.map((w, i) => ({ w, playoff: i + 1 }))];
 
   const schedule = all.flatMap(({ w, playoff }, i) => {
@@ -256,7 +270,7 @@ export function championRun(season: SeasonData) {
     const opp = mine.matchup_id === null ? undefined : w.find(m => m.matchup_id === mine.matchup_id && m.roster_id !== champ);
     return [{
       week: i + 1,
-      label: playoff ? roundName(playoff) : `Week ${i + 1}`,
+      label: playoff ? roundLabel(playoff, rounds) : `Week ${i + 1}`,
       playoff: playoff > 0,
       mine: lineup(mine, season.league.roster_positions),
       theirs: opp ? lineup(opp, season.league.roster_positions) : null,

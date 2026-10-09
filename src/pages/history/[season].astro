@@ -20,9 +20,15 @@ const team = (rosterId: number) => {
 const picks = await draftPicks(season.league.draft_id);
 const board = picks.length ? draftBoard(picks, team) : null;
 const value = picks.length ? draftValue(picks, season.weeks) : null;
-const rounds = season.bracket ? playoffRounds(season.bracket, team) : [];
-const roundName = (i: number) => (i === rounds.length - 1 ? 'Finals' : i === rounds.length - 2 ? 'Semifinals' : `Round ${i + 1}`);
-const placeName = (p: number | null) => (p === 1 ? 'Championship' : p ? `${p}${p === 3 ? 'rd' : 'th'} place game` : '');
+const bracket = season.bracket ? playoffRounds(season.bracket, team, season.playoffWeeks) : null;
+// Games that feed one next round game are drawn as a pair, joined by a bracket line.
+const groups = (i: number) => {
+  const ms = bracket!.rounds[i]!.matches;
+  const size = (bracket!.rounds[i + 1]?.matches.length ?? 0) * 2 === ms.length ? 2 : 1;
+  return Array.from({ length: Math.ceil(ms.length / size) }, (_, g) => ms.slice(g * size, g * size + size));
+};
+const placeName = (p: number) => `${p}${p === 3 ? 'rd' : 'th'} place`;
+const pts = (n: number | null) => (n === null ? '' : n.toFixed(2));
 const rec = (r: { w: number; l: number; t: number }) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
 // Injury status is today's, so it only means something for the season in progress.
 const injury = (id: string) => (summary.inProgress ? (players as Players)[id] : undefined);
@@ -69,22 +75,39 @@ const others = seasons.map(s => s.league.season).filter(y => y !== season.league
     </div>
   </section>
 
-  {rounds.length > 0 && (
+  {bracket && (
     <section aria-labelledby="po-h">
       <h2 id="po-h">Playoffs</h2>
       <div class="bracket">
-        {rounds.map((r, i) => (
-          <div class="bracket-round">
-            <h3>{roundName(i)}</h3>
-            {r.matches.map(m => (
-              <div class="bracket-match">
-                {m.place && <span class="fact-title">{placeName(m.place)}</span>}
-                {m.teams.map(t => <div class:list={['bm-team', { win: t === m.winner }]}>{t}{t === m.winner && <span class="visually-hidden"> (won)</span>}</div>)}
-              </div>
-            ))}
+        {bracket.rounds.map((r, i) => (
+          <div class="b-round">
+            <h3>{r.label}</h3>
+            <div class="b-col">
+              {groups(i).map(g => (
+                <div class:list={['b-group', { 'b-pair': g.length === 2 }]}>
+                  {g.map(m => (
+                    <div class="b-slot">
+                      <div class="b-match">
+                        {m.teams.map(t => <div class:list={['b-team', { win: t.won }]}><span class="b-name">{t.name}{t.won && <span class="visually-hidden"> (won)</span>}</span><span class="b-pts">{pts(t.points)}</span></div>)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
+      {bracket.placements.length > 0 && (
+        <div class="b-placements">
+          {bracket.placements.map(m => (
+            <div class="b-match">
+              <span class="fact-title">{placeName(m.place!)}</span>
+              {m.teams.map(t => <div class:list={['b-team', { win: t.won }]}><span class="b-name">{t.name}{t.won && <span class="visually-hidden"> (won)</span>}</span><span class="b-pts">{pts(t.points)}</span></div>)}
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   )}
 

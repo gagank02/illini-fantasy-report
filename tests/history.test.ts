@@ -180,11 +180,18 @@ describe('season pages', () => {
     expect(new Set(v.hits.map(x => x.pos)).size).toBeGreaterThan(1);
   });
 
-  test('playoff rounds in order, final marked with the champion', () => {
-    const rounds = playoffRounds(seasons[1]!.bracket!, team(seasons[1]!));
-    expect(rounds.map(r => r.round)).toEqual([1, 2, 3]);
-    const final = rounds.at(-1)!.matches.find(m => m.place === 1)!;
-    expect(final.winner).toBe(team(seasons[1]!)(6));
+  test('bracket: the path to the title by round, placement games apart, scores from the playoff weeks', () => {
+    const s = seasons[1]!;
+    const { rounds, placements } = playoffRounds(s.bracket!, team(s), s.playoffWeeks);
+    expect(rounds.map(r => [r.label, r.matches.length])).toEqual([['Quarterfinals', 2], ['Semifinals', 2], ['Final', 1]]);
+    const final = rounds[2]!.matches[0]!;
+    expect(final.place).toBe(1);
+    expect(final.teams.filter(t => t.won).map(t => t.name)).toEqual([team(s)(6)]);
+    expect(final.teams.map(t => t.points)).toEqual([152.92, 96.34]);
+    expect(placements.map(m => m.place)).toEqual([3, 5]);
+    expect(rounds.flatMap(r => r.matches).every(m => m.teams.filter(t => t.won).length === 1)).toBe(true);
+    // Without playoff weeks the bracket still draws, just without scores.
+    expect(playoffRounds(s.bracket!, team(s)).rounds[2]!.matches[0]!.teams.map(t => t.points)).toEqual([null, null]);
   });
 });
 
