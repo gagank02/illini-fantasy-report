@@ -1,6 +1,6 @@
 // League history across seasons. Managers are tracked by Sleeper user_id because roster ids reset each season.
-import { calls, currentLeagueId, leagueById, loadSeason, winnersBracket, type League, type Season } from './sleeper.ts';
-import { games, result, standings, teamNames, type Record3 } from './stats.ts';
+import { calls, currentLeagueId, leagueById, loadSeason, weekMatchups, winnersBracket, type League, type Matchup, type Season } from './sleeper.ts';
+import { games, result, standings, teamNames, type Players, type Record3 } from './stats.ts';
 
 export interface BracketMatch {
   r: number;
@@ -15,6 +15,8 @@ export interface BracketMatch {
 /** A season plus its winners bracket (null while the season is in progress). */
 export interface SeasonData extends Season {
   bracket: BracketMatch[] | null;
+  /** Playoff weeks in order, completed seasons only. Kept out of `weeks` so every record stays regular season. */
+  playoffWeeks: Matchup[][];
 }
 
 /** Follows previous_league_id back, newest first. Stops on a repeated id or after `max` seasons. */
@@ -34,10 +36,14 @@ let logged = false;
 
 export async function loadHistory(startId = currentLeagueId()): Promise<SeasonData[]> {
   const leagues = await walkChain(startId, leagueById);
-  const seasons = await Promise.all(leagues.map(async l => ({
-    ...(await loadSeason(l.league_id)),
-    bracket: l.status === 'complete' ? await winnersBracket(l.league_id) : null,
-  })));
+  const seasons = await Promise.all(leagues.map(async l => {
+    const bracket = l.status === 'complete' ? await winnersBracket(l.league_id) : null;
+    // One week per bracket round. ponytail: two week rounds (playoff_round_type) aren't handled; this league uses one.
+    const start = l.settings.playoff_week_start;
+    const last = Math.min(l.settings.last_scored_leg ?? 0, start + Math.max(0, ...(bracket ?? []).map(m => m.r)) - 1);
+    const playoffWeeks = bracket ? await Promise.all(Array.from({ length: Math.max(0, last - start + 1) }, (_, i) => weekMatchups(start + i, l.league_id))) : [];
+    return { ...(await loadSeason(l.league_id)), bracket, playoffWeeks };
+  }));
   // Once per build: shows whether completed seasons came from the disk cache.
   if (!logged) console.log(`sleeper: ${calls.live} live, ${calls.cached} cached`);
   logged = true;
@@ -206,4 +212,63 @@ export function playoffRounds(bracket: BracketMatch[], team: (rosterId: number) 
       loser: m.l ? team(m.l) : null,
     })),
   }));
+}
+
+export interface Lineup {
+  rosterId: number;
+  points: number;
+  /** In roster_positions order. playerId '0' is an empty slot. */
+  starters: { slot: string; playerId: string; points: number }[];
+  /** Highest scoring first. */
+  bench: { playerId: string; points: number }[];
+  benchPoints: number;
+}
+
+export function lineup(m: Matchup, rosterPositions: string[]): Lineup {
+  const slots = rosterPositions.filter(p => p !== 'BN' && p !== 'IR' && p !== 'TAXI');
+  const bench = (m.players ?? []).filter(id => !m.starters.includes(id))
+    .map(id => ({ playerId: id, points: m.players_points?.[id] ?? 0 }))
+    .sort((a, b) => b.points - a.points);
+  return {
+    rosterId: m.roster_id,
+    points: m.points,
+    starters: m.starters.map((id, i) => ({ slot: slots[i] ?? '', playerId: id, points: m.starters_points[i] ?? 0 })),
+    bench,
+    benchPoints: round2(bench.reduce((s, x) => s + x.points, 0)),
+  };
+}
+
+/**
+ * The champion's season: the lineup that won the final, and every week they played with both lineups.
+ * Null while the season is in progress. A null matchup_id in a playoff week is a bye.
+ */
+export function championRun(season: SeasonData) {
+  const final = season.bracket?.find(m => m.p === 1);
+  if (!final?.w) return null;
+  const champ = final.w;
+  const rounds = Math.max(...season.bracket!.map(m => m.r));
+  const roundName = (r: number) => (r === rounds ? 'Final' : r === rounds - 1 ? 'Semifinals' : r === rounds - 2 ? 'Quarterfinals' : `Playoff round ${r}`);
+  const all = [...season.weeks.map(w => ({ w, playoff: 0 })), ...season.playoffWeeks.map((w, i) => ({ w, playoff: i + 1 }))];
+
+  const schedule = all.flatMap(({ w, playoff }, i) => {
+    const mine = w.find(m => m.roster_id === champ);
+    if (!mine) return [];
+    const opp = mine.matchup_id === null ? undefined : w.find(m => m.matchup_id === mine.matchup_id && m.roster_id !== champ);
+    return [{
+      week: i + 1,
+      label: playoff ? roundName(playoff) : `Week ${i + 1}`,
+      playoff: playoff > 0,
+      mine: lineup(mine, season.league.roster_positions),
+      theirs: opp ? lineup(opp, season.league.roster_positions) : null,
+      result: opp ? result({ points: mine.points, opponentPoints: opp.points }) : null,
+    }];
+  });
+  return { rosterId: champ, roster: schedule.at(-1)!.mine, schedule };
+}
+
+/** Display name for a lineup player: the site's player list, then the draft's metadata, then the bare id. */
+export function playerName(id: string, players: Players, picks: DraftPick[] = []): string {
+  if (id === '0') return 'Empty';
+  const pick = picks.find(p => p.player_id === id);
+  return players[id]?.name ?? (pick ? pickName(pick) : `Player ${id}`);
 }

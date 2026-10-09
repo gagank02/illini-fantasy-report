@@ -461,17 +461,17 @@ The in progress 2026 season shows its draft but leaves out the bracket.
 **Description:** `loadHistory` also loads weeks `playoff_week_start..last_scored_leg` for completed leagues into `SeasonData.playoffWeeks`. A pure `championRun(season, name)` in `history.ts` returns the champion, the championship week's starters (with slots from `roster_positions`) and bench, and one schedule row per week with the opponent, both scores, the result, a round label, and both lineups. A null `matchup_id` in the playoffs is a bye.
 
 **Acceptance criteria:**
-- [ ] `buildHistory` results are unchanged. Playoff weeks never reach standings, records, or head to head
-- [ ] Championship starters' points sum to the champion's score in the final
-- [ ] The final's opponent is the bracket's `p === 1` loser
-- [ ] Regular season rows match the champion's W/L/T in `buildHistory`
-- [ ] An empty slot (`"0"`) comes back as "Empty". A bye week has `theirs: null`
-- [ ] In progress seasons get no run
+- [x] `buildHistory` results are unchanged. Playoff weeks never reach standings, records, or head to head
+- [x] Championship starters' points sum to the champion's score in the final
+- [x] The final's opponent is the bracket's `p === 1` loser
+- [x] Regular season rows match the champion's W/L/T in `buildHistory`
+- [x] An empty slot (`"0"`) comes back as "Empty". A bye week has `theirs: null`
+- [x] In progress seasons get no run
 
 **Verification:**
-- [ ] Re-save the 2024 and 2025 champion and opponent fixture entries with lineups using a one-off script in the scratchpad (not committed), plus `matchups-15..17`
-- [ ] `tests/history.test.ts` covers each criterion above for 2024 (10 teams) and 2025 (12 teams). The existing tests still pass
-- [ ] `npm test && npm run check`
+- [x] Re-save the 2024 and 2025 champion and opponent fixture entries with lineups using a one-off script in the scratchpad (not committed), plus `matchups-15..17`
+- [x] `tests/history.test.ts` covers each criterion above for 2024 (10 teams) and 2025 (12 teams). The existing tests still pass
+- [x] `npm test && npm run check`
 
 **Dependencies:** T18
 
