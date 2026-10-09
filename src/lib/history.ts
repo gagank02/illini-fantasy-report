@@ -1,5 +1,5 @@
 // League history across seasons. Managers are tracked by Sleeper user_id because roster ids reset each season.
-import { currentLeagueId, leagueById, loadSeason, winnersBracket, type League, type Season } from './sleeper.ts';
+import { calls, currentLeagueId, leagueById, loadSeason, winnersBracket, type League, type Season } from './sleeper.ts';
 import { games, result, standings, teamNames, type Record3 } from './stats.ts';
 
 export interface BracketMatch {
@@ -30,12 +30,18 @@ export async function walkChain(startId: string, fetchLeague: (id: string) => Pr
   return out;
 }
 
+let logged = false;
+
 export async function loadHistory(startId = currentLeagueId()): Promise<SeasonData[]> {
   const leagues = await walkChain(startId, leagueById);
-  return Promise.all(leagues.map(async l => ({
+  const seasons = await Promise.all(leagues.map(async l => ({
     ...(await loadSeason(l.league_id)),
     bracket: l.status === 'complete' ? await winnersBracket(l.league_id) : null,
   })));
+  // Once per build: shows whether completed seasons came from the disk cache.
+  if (!logged) console.log(`sleeper: ${calls.live} live, ${calls.cached} cached`);
+  logged = true;
+  return seasons;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;

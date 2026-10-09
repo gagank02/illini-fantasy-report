@@ -91,6 +91,23 @@ The site is small, so all four modules live in this one spec and don't get separ
   - **Draft hits and busts:** Each pick's season points compared with its draft slot, to show the best and worst picks.
 - Stats don't change for completed seasons, so their data is fetched at build time like everything else. That's about 20 Sleeper calls per past season.
 
+**6a. Champion run** (`/history/{season}/champion`, completed seasons only)
+- **Entry points:** The champion's name on the `/history` banner and on the `/history/{season}` champion card links here. In progress seasons have no champion, so they get no page.
+- **Header:** The champion's manager and team name, regular season record and rank, PF, and the result of the final ("beat Team X 170.06 to 132.06").
+- **Winning roster:** The lineup from the championship game (the `p === 1` bracket match's week), not the `/rosters` list, which shows the roster as of today. Starters are listed in `roster_positions` order with slot (QB, RB, FLEX...), player name, position, and points. The bench follows with points. An empty slot (`"0"`) shows "Empty".
+- **Schedule:** Every week the champion played, regular season and playoffs, in order. Each row shows the week (playoff weeks are labeled by round: Quarterfinals, Semifinals, Final), the opponent's team name, both scores, and W/L/T. A playoff bye shows "Bye" and the champion's score that week.
+- **Matchup detail:** Each schedule row is a native `<details>` element. Opening it shows both teams' starters side by side with slot, name, and points, then each team's bench points total. No client JS. One week open at a time is not enforced.
+- **Data:**
+  - Regular season weeks come from the existing `season.weeks`. No new calls.
+  - Playoff weeks are `playoff_week_start` through `last_scored_leg`, about 3 more `/matchups/{week}` calls per completed season. They are loaded into a new `SeasonData.playoffWeeks` field so standings, records, and head to head keep counting regular season only.
+  - The opponent is the other roster with the same non null `matchup_id` that week. Checked live on 2024 week 17: the final pairs rosters 3 and 8 on `matchup_id` 1, and every matchup carries `starters`, `players`, and `players_points`.
+  - Player names come from `src/data/players.json`, then the season's draft pick metadata, then `Player {id}`. Team defenses use their id (`CHI`) as the name.
+  - **Completed seasons are cached on disk, never committed.** A completed league's data doesn't change, so `get()` in `sleeper.ts` writes each response for a league with `status === 'complete'` to `node_modules/.astro/sleeper/` and reads from there on later builds. That covers its league, users, rosters, matchups (regular and playoff weeks), winners bracket, and draft picks. Only completed leagues are ever written, so a file on disk is safe to trust with no expiry. The in progress season always fetches live. The folder sits under `node_modules/`, which git ignores. A warm build then makes about 10 Sleeper calls, all for the current season, down from about 60 today.
+  - `ci.yml` restores and saves the folder with `actions/cache` after `npm ci`, since CI builds on every PR push. Cloudflare Pages' build cache is **optional**: it keeps `node_modules/.astro` for Astro projects when turned on (Settings → Build → Build cache, purged after 7 days unread). Without it, Cloudflare builds fetch past seasons live, about 60 calls a build, which is still far under Sleeper's limit. A cold cache always falls back to a normal build.
+  - The build logs one line, `sleeper: N live, M cached`, so we can confirm a second build reads past seasons from disk.
+  - `scripts/update-players.ts` also commits the players who appear in every past champion's and opponent's lineup, so names resolve without calling `/players/nfl` from a build. That adds roughly 300 names the site now shows.
+- **Logic:** One pure function in `src/lib/history.ts`, `championRun(season)`, returns `{ champion, roster: { starters, bench }, schedule: [{ week, label, opponent, points, oppPoints, result, mine: Lineup, theirs: Lineup | null }] }`. Pages only format.
+
 **7. Security**
 - Fully static output. No server, no database, no user input.
 - The Claude Code OAuth token exists only as a GitHub Actions secret and never reaches the client bundle.
@@ -235,6 +252,12 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 - [x] CI secret guard fails a build that contains a fake `sk-ant-` string. *verified in T1*
 - [x] securityheaders.com grades the deployed site A or better. *Mozilla Observatory A+ (12/12), rescanned 2026-10-07 (securityheaders.com blocks automated scans)*
 - [x] No horizontal page scroll at 360px width. *all 10 pages at 360px and 320px*
+- [ ] Champion run: `/history/2024/champion` and `/history/2025/champion` build, and each is linked from `/history` and its season page. No page builds for 2026.
+- [ ] Champion run: the championship week starters' points sum to the champion's score in the final (tested on 2024 and 2025 fixtures).
+- [ ] Champion run: the schedule has one row per week from 1 through the final, regular season rows match `buildHistory`'s W/L for the champion, and the final row's opponent is the bracket's `p === 1` loser (tested).
+- [ ] Champion run: every player shown has a real name, not `Player {id}`, on the live build.
+- [ ] Champion run: no added JS, no horizontal scroll at 360px, Lighthouse a11y stays 100.
+- [ ] Sleeper disk cache: a completed league's responses are written once and then served from disk, and an in progress league's are never written (tested with a stubbed `fetch`). A second CI run logs 0 live calls for 2024 and 2025.
 
 ## Decisions
 
@@ -246,6 +269,8 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 - Tone: friendly trash talk by name, aimed at decisions and results, never personal.
 - Power rankings: 50/30/20 weights.
 - The punishment loser is the last place team in the regular season standings, not the loser of a bracket.
+- Champion run pages are for champions only, not runners up or other playoff teams (2026-10-08).
+- Champion run tests re-save the champions' history fixtures with `starters`, `players`, and `players_points`, plus the playoff weeks. That adds about 40 KB of fixtures (2026-10-08).
 - History starts at 2024. There are no seasons before Sleeper.
 - Trade finder (`/trades`): suggests trades that improve both teams' starting lineups, using FantasyCalc redraft values (2026-10-07). FantasyCalc's terms: only documented endpoints (we call `GET /values/current` only), cache and ideally fetch once a day, a visible FantasyCalc.com credit and link next to the data, non-commercial use, and no republishing their full value list. They ask for an email from a human before a public launch: sent by the commissioner, and FantasyCalc approved use under their Terms of Use (2026-10-08). Their Terms also forbid implying endorsement, so the footer says the site is not affiliated with or endorsed by FantasyCalc.
 - Only `scripts/update-trades.ts` calls FantasyCalc, from the daily refresh job, at most once per UTC day, even after a failed call (a "called today" marker is cached pass or fail), and only when the `FANTASYCALC_ENABLED` repo variable is `true`. FantasyCalc's docs only ask for hourly at most, so this is stricter on purpose. A person can override it from Daily refresh → Run workflow → "force" when fresh values are needed the same day (still one call per run, and FantasyCalc allows hourly); the schedule never forces.
