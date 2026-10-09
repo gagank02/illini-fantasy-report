@@ -225,7 +225,8 @@ section + section { margin-top: 2rem; }
 .b-pts { flex: none; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.9rem; }
 .b-team.win { font-weight: 700; }
 .b-team.win .b-pts { color: inherit; }
-.b-team.win .b-name::before { content: '▸ '; color: var(--accent-text); }
+/* After the name, so the seed numbers stay in one column. */
+.b-team.win .b-name::after { content: ' ◂'; color: var(--accent-text); }
 .b-placements { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin-top: 1rem; }
 /* Phones: the bracket still fits the width. Smaller type, and each score drops under its team name. */
 @media (max-width: 40rem) {
@@ -234,8 +235,9 @@ section + section { margin-top: 2rem; }
   .b-match { padding: 0.3rem 0.4rem; font-size: 0.78rem; }
   .b-team { flex-direction: column; align-items: stretch; gap: 0; line-height: 1.3; }
   .b-pts { font-size: 0.75rem; }
-  .b-team.win .b-name::before { content: none; }
-  .b-team.win { box-shadow: inset 3px 0 var(--orange); padding-left: 0.3rem; }
+  .b-team.win .b-name::after { content: none; }
+  .b-team { padding-left: 0.3rem; }
+  .b-team.win { box-shadow: inset 3px 0 var(--orange); }
   .b-seed { min-width: 0; margin-right: 0.25rem; }
 }
 /* 320px: long usernames still wrap, but the round names fit. */
