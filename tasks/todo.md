@@ -434,6 +434,97 @@ The in progress 2026 season shows its draft but leaves out the bracket.
 
 **Dependencies:** T16, PR #3 (trade finder)
 
+## Task 18: Disk cache for completed leagues
+
+**Description:** `get()` in `sleeper.ts` reads `node_modules/.astro/sleeper/` before fetching. It writes a response there only if the path's league id or draft id belongs to a completed league. CI keeps the folder between runs. Each build logs one line with live and cached call counts.
+
+**Acceptance criteria:**
+- [x] A completed league's `/league`, `/users`, `/rosters`, `/matchups/{w}`, `/winners_bracket`, and `/draft/{id}/picks` are fetched once, then read from disk
+- [x] An in progress league's responses are never written
+- [x] Writes go to a temp file and then get renamed. A file that won't parse is deleted and fetched again
+- [x] `loadHistory` logs `sleeper: N live, M cached`
+- [x] `ci.yml` restores and saves `node_modules/.astro/sleeper` with `actions/cache` after `npm ci`
+
+**Verification:**
+- [x] `tests/sleeper.test.ts`: stub `fetch` and point `SLEEPER_CACHE_DIR` at a temp dir. Completed: 1 fetch, then 0 in a fresh module. In progress: 2 fetches, no files
+- [x] `npm run build` twice locally. The second logged `sleeper: 7 live, 36 cached`: all 7 live calls were the current season, and the cache held 38 files, all from 2024 and 2025
+- [x] `npm test && npm run check`
+
+**Dependencies:** None
+
+**Files:** `src/lib/sleeper.ts`, `src/lib/history.ts` (log line), `tests/sleeper.test.ts`, `.github/workflows/ci.yml`
+
+**Estimated scope:** S
+
+## Task 19: Playoff weeks and `championRun()`
+
+**Description:** `loadHistory` also loads weeks `playoff_week_start..last_scored_leg` for completed leagues into `SeasonData.playoffWeeks`. A pure `championRun(season, name)` in `history.ts` returns the champion, the championship week's starters (with slots from `roster_positions`) and bench, and one schedule row per week with the opponent, both scores, the result, a round label, and both lineups. A null `matchup_id` in the playoffs is a bye.
+
+**Acceptance criteria:**
+- [x] `buildHistory` results are unchanged. Playoff weeks never reach standings, records, or head to head
+- [x] Championship starters' points sum to the champion's score in the final
+- [x] The final's opponent is the bracket's `p === 1` loser
+- [x] Regular season rows match the champion's W/L/T in `buildHistory`
+- [x] An empty slot (`"0"`) comes back as "Empty". A bye week has `theirs: null`
+- [x] In progress seasons get no run
+
+**Verification:**
+- [x] Re-save the 2024 and 2025 champion and opponent fixture entries with lineups using a one-off script in the scratchpad (not committed), plus `matchups-15..17`
+- [x] `tests/history.test.ts` covers each criterion above for 2024 (10 teams) and 2025 (12 teams). The existing tests still pass
+- [x] `npm test && npm run check`
+
+**Dependencies:** T18
+
+**Files:** `src/lib/history.ts`, `tests/history.test.ts`, `tests/fixtures/history/{2024,2025}/matchups-*.json`
+
+**Estimated scope:** M
+
+## Task 20: Champion players in `players.json`
+
+**Description:** `update-players.ts` adds every player in each past champion's and opponents' lineups (from `championRun`) to the committed subset, so names resolve without `/players/nfl` at build.
+
+**Acceptance criteria:**
+- [x] The `siteIds` input includes the champion run player ids
+- [x] The run log says how many champion run players were added
+
+**Verification:**
+- [x] `npm run players` locally added 101 players. The other 11 changed lines were today's injury and team updates. Every player in both champions' lineups has a name (198 in 2024, 227 in 2025)
+- [x] `npm test && npm run check`
+
+**Also:** `refresh.yml` and `weekly-report.yml` restore the Sleeper history cache, since `npm run players` now loads every season.
+
+**Dependencies:** T19
+
+**Files:** `scripts/update-players.ts`, `src/data/players.json`
+
+**Estimated scope:** XS
+
+## Task 21: `/history/{season}/champion` page and links
+
+**Description:** A static page per completed season with a header (record, rank, PF, the final's result), the winning roster table, and the schedule. Each week is a `<details>` that opens both lineups side by side, plus bench totals. Names come from `players.json`, then draft pick metadata, then `Player {id}`. The champion's name on `/history` and on `/history/{season}` links here.
+
+**Acceptance criteria:**
+- [x] Pages build for 2024 and 2025, and none builds for 2026
+- [x] Both entry links work
+- [x] No new JS. No horizontal scroll at 320/360px. Lineups stack on phones
+- [x] Sleeper credit is shown (`tests/attribution.test.ts` passes)
+- [x] No `Player {id}` text in the built pages
+
+**Verification:**
+- [x] `npm run build`, then grep `dist/history/*/champion.html` for `Player ` ids: none. 17 weeks and 35 lineup tables on each page
+- [x] Browser check at 320/360/1024 in light and dark. No sideways scroll at 320/360 even with every week open. Lighthouse is 100/100/100 on `/history/2025/champion`
+- [x] `npm test && npm run check`
+
+**Dependencies:** T19, T20
+
+**Files:** `src/pages/history/[season]/champion.astro`, `src/pages/history/index.astro`, `src/pages/history/[season].astro`, `src/styles/global.css`, `src/components/Lineup.astro`
+
+**Estimated scope:** M
+
+## Checkpoint E: Champion run
+- [x] Every Champion run and Sleeper disk cache criterion in `SPEC.md` is checked (the CI cache was confirmed on PR #5: 49 live calls, then 7 live and 42 cached)
+- [ ] Review with the human before merging
+
 ## Checkpoint D: Done
 - [x] Every success criterion in `SPEC.md` is checked (all but two Safari and iPhone export checks, which are left for the human)
 - [x] Lighthouse mobile scores are 95 or higher for performance and accessibility on every page (100 on all 8 audited)

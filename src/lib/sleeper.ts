@@ -1,4 +1,7 @@
 // Sleeper public API. Read only, no key. Called at build time only.
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 const BASE = 'https://api.sleeper.app/v1';
 
 export interface League {
@@ -84,12 +87,58 @@ const limit = createLimiter(600, 60_000);
 // One fetch per URL per build, shared by every page.
 const cache = new Map<string, Promise<unknown>>();
 
+// A completed league never changes, so its responses are kept on disk between builds (git ignores node_modules).
+// Only completed leagues' responses are ever written, so any file found here is safe to use as is.
+const DISK = process.env.SLEEPER_CACHE_DIR ?? 'node_modules/.astro/sleeper';
+/** League and draft ids of completed leagues, learned from /league/{id} responses. */
+const complete = new Set<string>();
+export const calls = { live: 0, cached: 0 };
+
+const diskFile = (path: string) => join(DISK, `${path.slice(1).replace(/[^\w-]/g, '_')}.json`);
+const ownerId = (path: string) => path.match(/^\/(?:league|draft)\/(\d+)/)?.[1];
+
+function noteLeague(path: string, data: unknown) {
+  const l = data as Partial<League>;
+  if (/^\/league\/\d+$/.test(path) && l.status === 'complete') {
+    complete.add(l.league_id!);
+    if (l.draft_id) complete.add(l.draft_id);
+  }
+}
+
+function readDisk(path: string): unknown {
+  const file = diskFile(path);
+  if (!existsSync(file)) return undefined;
+  try {
+    return JSON.parse(readFileSync(file, 'utf8'));
+  } catch {
+    rmSync(file, { force: true }); // half written by a killed build: fetch it again
+    return undefined;
+  }
+}
+
+function writeDisk(path: string, data: unknown) {
+  const file = diskFile(path);
+  mkdirSync(DISK, { recursive: true });
+  writeFileSync(`${file}.tmp`, JSON.stringify(data));
+  renameSync(`${file}.tmp`, file);
+}
+
 function get<T>(path: string): Promise<T> {
   let p = cache.get(path);
   if (!p) {
-    p = limit().then(() => fetch(BASE + path)).then(res => {
+    const saved = readDisk(path);
+    if (saved !== undefined) {
+      calls.cached++;
+      noteLeague(path, saved);
+      cache.set(path, Promise.resolve(saved));
+      return Promise.resolve(saved as T);
+    }
+    p = limit().then(() => { calls.live++; return fetch(BASE + path); }).then(async res => {
       if (!res.ok) throw new Error(`Sleeper ${path} returned ${res.status}`);
-      return res.json();
+      const data: unknown = await res.json();
+      noteLeague(path, data);
+      if (complete.has(ownerId(path) ?? '')) writeDisk(path, data);
+      return data;
     });
     p.catch(() => cache.delete(path));
     cache.set(path, p);

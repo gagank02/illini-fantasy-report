@@ -1,0 +1,76 @@
+---
+import Lineup from '../../../components/Lineup.astro';
+import players from '../../../data/players.json';
+import Base from '../../../layouts/Base.astro';
+import { buildHistory, championRun, loadHistory, playerName, type SeasonData } from '../../../lib/history';
+import { draftPicks } from '../../../lib/sleeper';
+import { teamNames, type Players } from '../../../lib/stats';
+
+// Completed seasons only: an in progress season has no champion yet.
+export async function getStaticPaths() {
+  const seasons = await loadHistory();
+  return seasons.filter(s => championRun(s)).map(s => ({ params: { season: s.league.season }, props: { seasons, season: s } }));
+}
+
+const { seasons, season } = Astro.props as { seasons: SeasonData[]; season: SeasonData };
+const run = championRun(season)!;
+const summary = buildHistory(seasons).seasons.find(x => x.season === Number(season.league.season))!;
+const owner = (rosterId: number) => season.rosters.find(r => r.roster_id === rosterId)?.owner_id ?? '';
+const team = (rosterId: number) => teamNames(season.users, owner(rosterId)).team;
+const champ = summary.standings.find(r => r.userId === owner(run.rosterId))!;
+const picks = await draftPicks(season.league.draft_id);
+const name = (id: string) => playerName(id, players as Players, picks);
+const pos = (id: string) => (players as Players)[id]?.pos ?? picks.find(p => p.player_id === id)?.metadata.position ?? '';
+const final = run.schedule.at(-1)!;
+const rec = (r: { w: number; l: number; t: number }) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+const ord = (n: number) => `${n}${[, 'st', 'nd', 'rd'][n % 100 > 10 && n % 100 < 14 ? 0 : n % 10] ?? 'th'}`;
+---
+
+<Base title={`${summary.season} Champion`}>
+  <p class="muted"><a href="/history">League history</a> · <a href={`/history/${summary.season}`}>{summary.season} season</a></p>
+  <h1>{summary.season} Champion</h1>
+  <ul class="champs">
+    <li>
+      <span class="fact-title">Champion</span>
+      <strong class="champ-name">{champ.name}</strong>
+      <span class="sub">{team(run.rosterId)}</span>
+      <dl>
+        <div><dt>Regular season</dt><dd>{rec(champ)}, {ord(champ.rank)}</dd></div>
+        <div><dt>Points for</dt><dd>{champ.pf.toFixed(2)}</dd></div>
+        <div><dt>Final</dt><dd>Beat {team(final.theirs!.rosterId)}, {final.mine.points.toFixed(2)} to {final.theirs!.points.toFixed(2)}</dd></div>
+      </dl>
+    </li>
+  </ul>
+
+  <section aria-labelledby="roster-h">
+    <h2 id="roster-h">Winning roster</h2>
+    <p class="muted">The lineup {team(run.rosterId)} started in the {summary.season} final, with every player's points that week.</p>
+    <div class="table-scroll">
+      <Lineup lineup={run.roster} caption={`${team(run.rosterId)}, ${final.label}`} name={name} pos={pos} fullBench />
+    </div>
+  </section>
+
+  <section aria-labelledby="sched-h">
+    <h2 id="sched-h">Schedule</h2>
+    <p class="muted">Every week {team(run.rosterId)} played, playoffs included. Open a week to see both lineups.</p>
+    <div class="whatif-list schedule">
+      {run.schedule.map(r => (
+        <details>
+          <summary>
+            <span class={`f f-${r.result ?? 'T'}`} aria-hidden="true">{r.result ?? '·'}</span>
+            <span class="sched-week">{r.label}</span>
+            <span class="sched-opp">{r.theirs ? `vs ${team(r.theirs.rosterId)}` : 'Bye'}</span>
+            <span class="sched-score">
+              {r.result && <span class="visually-hidden">{r.result === 'W' ? 'Won' : r.result === 'L' ? 'Lost' : 'Tied'} </span>}
+              {r.mine.points.toFixed(2)}{r.theirs && <> to {r.theirs.points.toFixed(2)}</>}
+            </span>
+          </summary>
+          <div class="matchup">
+            <div class="table-scroll"><Lineup lineup={r.mine} caption={team(r.mine.rosterId)} name={name} pos={pos} /></div>
+            {r.theirs && <div class="table-scroll"><Lineup lineup={r.theirs} caption={team(r.theirs.rosterId)} name={name} pos={pos} /></div>}
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+</Base>

@@ -2,10 +2,11 @@
 // 1. The full trimmed list goes to .cache/players-full.json (git ignored, kept in the workflows' Actions
 //    cache). It's fetched only if the file isn't from today, so reruns never add calls.
 // 2. src/data/players.json (committed) gets only the players our pages use: rosters, this season's games,
-//    and this season's draft. Builds read that and never call /players/nfl.
+//    this season's draft, and past champions' lineups. Builds read that and never call /players/nfl.
 // The daily refresh and weekly report workflows run this and share one cache key per UTC day.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { championRun, loadHistory } from '../src/lib/history.ts';
 import { FULL_PATH, readFull, SITE_PATH, type FullPlayers } from '../src/lib/players.ts';
 import { draftPicks, loadSeason } from '../src/lib/sleeper.ts';
 import { siteIds, siteSubset, trimPlayers, type Players } from '../src/lib/stats.ts';
@@ -30,7 +31,14 @@ if (full?.fetched === today) {
 
 const season = await loadSeason();
 const picks = await draftPicks(season.league.draft_id).catch(() => []);
-const site: Players = siteSubset(full.players, siteIds(season.rosters, season.weeks, picks));
+const ids = siteIds(season.rosters, season.weeks, picks);
+// Champion run pages show every lineup each past champion and their opponents played.
+const champIds = (await loadHistory()).flatMap(s => championRun(s)?.schedule ?? [])
+  .flatMap(r => [r.mine, r.theirs]).flatMap(l => (l ? [...l.starters, ...l.bench].map(x => x.playerId) : []))
+  .filter(id => id !== '0' && !ids.has(id));
+for (const id of champIds) ids.add(id);
+console.log(`Added ${new Set(champIds).size} players from past champions' lineups.`);
+const site: Players = siteSubset(full.players, ids);
 // One player per line keeps daily diffs readable.
 const lines = Object.entries(site).map(([id, p]) => `${JSON.stringify(id)}:${JSON.stringify(p)}`);
 writeFileSync(SITE_PATH, `{\n${lines.join(',\n')}\n}\n`);

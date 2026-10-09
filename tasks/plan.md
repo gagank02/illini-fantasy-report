@@ -61,6 +61,21 @@ Details for each task are in `tasks/todo.md`.
 ### Checkpoint D: Done
 - [x] Every success criterion in `SPEC.md` passes (Safari and iPhone export checks pending with the human)
 
+### Phase 5: Champion run (SPEC 6a)
+- [x] T18: Disk cache for completed leagues
+- [x] T19: Playoff weeks and `championRun()`
+- [x] T20: Champion players in `players.json`
+- [x] T21: `/history/{season}/champion` page and links
+
+### Checkpoint E: Champion run
+- [ ] Every Champion run and Sleeper disk cache criterion in `SPEC.md` passes
+
+#### Phase 5 decisions
+- **One rule in `get()`, nothing per endpoint.** `get()` checks `node_modules/.astro/sleeper/` before fetching, and every path is eligible. After a fetch, it writes the response only if the path's league id or draft id belongs to a completed league. Ids get marked complete whenever a `/league/{id}` response with `status === 'complete'` is seen, whether it came live or from disk. That way a league whose other files never got saved finishes saving them on the next build. Only completed leagues are ever written, so a file on disk is always safe to read, and there's no expiry logic. `SLEEPER_CACHE_DIR` overrides the folder for tests.
+- **Playoff weeks stay out of `weeks`.** They go in `SeasonData.playoffWeeks`, filled only for completed leagues, so standings, what if, records, and head to head stay regular season only.
+- **The opponent comes from `matchup_id`.** A null `matchup_id` in a playoff week is a bye, because the champion is never in a consolation game.
+- **Order:** the cache comes first, so the new playoff calls land already cached. Names come before the page, so the page is verified with real names.
+
 ## Parallelization
 
 T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and the layout. After Checkpoint B, Phase 3 and Phase 4 touch different files, so two sessions can work on them at once. The only shared file is the nav in `Base.astro`, so add both nav links in T2.
@@ -79,6 +94,9 @@ T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and
 | Builds call `/players/nfl` too often | Med | Builds read the committed `src/data/players.json`. Only the weekly Action calls the endpoint |
 | Actions can't open PRs by default | Low | Enable "Allow GitHub Actions to create pull requests" in repo settings during T13 |
 | `ci.yml` doesn't run on PRs opened by an Action's built in token | Med | The weekly job runs test, check, build, secret guard, and lint itself before opening the PR (T13) |
+| `astro build` or Cloudflare's install step wipes `node_modules/.astro/sleeper` | Low | A cold cache is just a normal build. The `sleeper: N live, M cached` log line shows it. Move the folder if it happens |
+| A cached file is half written (the build was killed) | Low | Write to a `.tmp` file, then rename. A file that won't parse is deleted and fetched again |
+| Re-saved fixtures change numbers the existing history tests expect | Med | Only add `starters`, `players`, and `players_points` to existing entries. Leave `points` alone and rerun the whole suite |
 | GitHub turns off cron workflows after 60 days with no activity | Low | Weekly merges keep the repo active during the season. Re enable at the start of the season if needed |
 
 ## Things You Need To Do (Claude can't)
@@ -87,6 +105,8 @@ T1 through T8 must run in order because they share `sleeper.ts`, `stats.ts`, and
 - **T4:** Turn on GitHub secret scanning push protection.
 - **T13:** Run `claude setup-token` locally and add the result as the GitHub secret `CLAUDE_CODE_OAUTH_TOKEN`. Reports use your Claude subscription, not a paid API key.
 - **T13:** Under GitHub → Settings → Actions → General, turn on "Allow GitHub Actions to create and approve pull requests". If you add branch protection to `main`, don't make `ci.yml` a required check, because it won't run on the report PRs.
+
+- **Phase 5 (optional):** Turn on Cloudflare Pages → Settings → Build → Build cache if you want Cloudflare builds to skip past season calls too.
 
 ## Open Questions
 

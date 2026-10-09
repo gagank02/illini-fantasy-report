@@ -203,12 +203,45 @@ section + section { margin-top: 2rem; }
 .wi-none { color: var(--muted); }
 
 /* Season pages: bracket, draft value, draft board. Position tints mix into the surface so text stays AA. */
-.bracket { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); align-items: start; }
-.bracket-round h3 { margin: 0 0 0.5rem; font-size: 1rem; }
-.bracket-match { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 0.5rem 0.7rem; margin-bottom: 0.6rem; }
-.bm-team { padding: 0.15rem 0; }
-.bm-team.win { font-weight: 700; }
-.bm-team.win::before { content: '▸ '; color: var(--accent-text); }
+/* Bracket: one column per round. Each column splits its height evenly between its games, so a game sits level
+   with the game that fed it, and a pair of games is joined by a line into the next round's game. */
+.bracket { --gap: 1.6rem; --b-line: color-mix(in srgb, var(--muted) 55%, transparent); display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: var(--gap); }
+.b-round { display: flex; flex-direction: column; min-width: 0; }
+.b-round h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.b-col, .b-group { display: flex; flex-direction: column; flex: 1; }
+.b-group { position: relative; }
+.b-slot { position: relative; display: flex; align-items: center; flex: 1; padding-block: 0.3rem; }
+.b-round:not(:last-child) .b-slot::after, .b-round:not(:first-child) .b-slot::before {
+  content: ''; position: absolute; top: 50%; width: calc(var(--gap) / 2); border-top: 2px solid var(--b-line);
+}
+.b-slot::after { left: 100%; }
+.b-slot::before { right: 100%; }
+.b-pair::after { content: ''; position: absolute; right: calc(var(--gap) / -2); top: 25%; bottom: 25%; border-right: 2px solid var(--b-line); }
+.b-match { width: 100%; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 0.35rem 0.6rem; }
+.b-team { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; padding: 0.15rem 0; }
+.b-team + .b-team { border-top: 1px solid var(--rule); }
+.b-name { min-width: 0; }
+.b-seed { display: inline-block; min-width: 1.1em; margin-right: 0.3rem; font-size: 0.75em; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+.b-pts { flex: none; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.9rem; }
+.b-team.win { font-weight: 700; }
+.b-team.win .b-pts { color: inherit; }
+/* After the name, so the seed numbers stay in one column. */
+.b-team.win .b-name::after { content: ' ◂'; color: var(--accent-text); }
+.b-placements { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); margin-top: 1rem; }
+/* Phones: the bracket still fits the width. Smaller type, and each score drops under its team name. */
+@media (max-width: 40rem) {
+  .bracket { --gap: 0.9rem; }
+  .b-round h3 { font-size: 0.85rem; }
+  .b-match { padding: 0.3rem 0.4rem; font-size: 0.78rem; }
+  .b-team { flex-direction: column; align-items: stretch; gap: 0; line-height: 1.3; }
+  .b-pts { font-size: 0.75rem; }
+  .b-team.win .b-name::after { content: none; }
+  .b-team { padding-left: 0.3rem; }
+  .b-team.win { box-shadow: inset 3px 0 var(--orange); }
+  .b-seed { min-width: 0; margin-right: 0.25rem; }
+}
+/* 320px: long usernames still wrap, but the round names fit. */
+@media (max-width: 21rem) { .bracket { --gap: 0.7rem; } .b-round h3 { font-size: 0.74rem; } .b-match { padding-inline: 0.3rem; } }
 .dv-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
 .dv-grid h3 { margin: 0 0 0.4rem; font-size: 1rem; }
 .dv-list { margin: 0; padding-left: 1.3rem; }
@@ -230,6 +263,27 @@ table.draft td { position: relative; padding-bottom: 1.15rem; }
 .pos-WR { background: color-mix(in srgb, #0091ff 18%, var(--surface)); }
 .pos-TE { background: color-mix(in srgb, #f76b15 18%, var(--surface)); }
 .pos-K, .pos-DEF { background: color-mix(in srgb, #8e8c99 18%, var(--surface)); }
+
+/* Champion run: lineup tables, and a schedule of native <details> rows that open both lineups. */
+.champ-name a { color: inherit; text-decoration-color: var(--orange); text-underline-offset: 0.2em; }
+table.lineup caption { padding: 0.55rem 0.7rem; text-align: left; font-weight: 700; }
+/* The player column takes the spare width, not the slot column. */
+table.lineup th.left { width: auto; }
+table.lineup thead th:nth-child(2) { width: 100%; }
+table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
+.lineup-total > * { font-weight: 700; }
+.lineup-bench > * { color: var(--muted); }
+.schedule summary { display: flex; align-items: baseline; gap: 0.6rem; font-weight: 400; }
+.schedule summary .f { align-self: center; flex: none; }
+.sched-week { flex: none; width: 6.5rem; font-weight: 600; }
+.sched-opp { flex: 1; min-width: 0; }
+.sched-score { flex: none; font-variant-numeric: tabular-nums; }
+.matchup { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0 0.8rem 0.8rem; align-items: start; }
+@media (max-width: 40rem) {
+  .matchup { grid-template-columns: 1fr; }
+  .schedule summary { flex-wrap: wrap; row-gap: 0.1rem; }
+  .sched-opp { flex-basis: 100%; order: 3; padding-left: 1.8rem; }
+}
 
 /* Trade finder. FantasyCalc's terms want their credit clearly visible next to the values. */
 .trade-credit { font-weight: 600; }

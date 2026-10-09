@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { buildHistory, draftBoard, draftValue, playoffRounds, walkChain, type BracketMatch, type DraftPick, type SeasonData } from '../src/lib/history';
+import { buildHistory, championRun, draftBoard, draftValue, playerName, playoffRounds, walkChain, type BracketMatch, type DraftPick, type SeasonData } from '../src/lib/history';
 import type { League, Matchup, Roster, User } from '../src/lib/sleeper';
 import { games, standings } from '../src/lib/stats';
 
@@ -11,6 +11,7 @@ const past = (year: string, weeks: number): SeasonData => ({
   rosters: load<Roster[]>(`history/${year}/rosters`),
   weeks: Array.from({ length: weeks }, (_, i) => load<Matchup[]>(`history/${year}/matchups-${i + 1}`)),
   bracket: load<BracketMatch[]>(`history/${year}/winners_bracket`),
+  playoffWeeks: [15, 16, 17].map(w => load<Matchup[]>(`history/${year}/matchups-${w}`)),
 });
 const current: SeasonData = {
   league: load<League>('league'),
@@ -18,6 +19,7 @@ const current: SeasonData = {
   rosters: load<Roster[]>('rosters'),
   weeks: [1, 2, 3, 4].map(w => load<Matchup[]>(`matchups-${w}`)),
   bracket: null,
+  playoffWeeks: [],
 };
 const seasons = [current, past('2025', 14), past('2024', 14)];
 const h = buildHistory(seasons);
@@ -178,10 +180,111 @@ describe('season pages', () => {
     expect(new Set(v.hits.map(x => x.pos)).size).toBeGreaterThan(1);
   });
 
-  test('playoff rounds in order, final marked with the champion', () => {
-    const rounds = playoffRounds(seasons[1]!.bracket!, team(seasons[1]!));
-    expect(rounds.map(r => r.round)).toEqual([1, 2, 3]);
-    const final = rounds.at(-1)!.matches.find(m => m.place === 1)!;
-    expect(final.winner).toBe(team(seasons[1]!)(6));
+  test('bracket lines: each game is level with the game that fed it, so the drawing never misleads', () => {
+    for (const s of [seasons[1]!, seasons[2]!]) {
+      const { rounds } = playoffRounds(s.bracket!, team(s), s.playoffWeeks);
+      const winner = (m: (typeof rounds)[0]['matches'][0]) => m.teams.find(t => t.won)!.name;
+      const names = (m: (typeof rounds)[0]['matches'][0]) => m.teams.map(t => t.name);
+      for (let i = 0; i + 1 < rounds.length; i++) {
+        const [here, next] = [rounds[i]!.matches, rounds[i + 1]!.matches];
+        // Same count: drawn straight across. Half as many: drawn as pairs joining into one game.
+        const feeds = (k: number) => (next.length === here.length ? next[k]! : next[Math.floor(k / 2)]!);
+        expect([here.length, here.length / 2]).toContain(next.length);
+        here.forEach((m, k) => expect(names(feeds(k))).toContain(winner(m)));
+      }
+    }
+  });
+
+  test('seeds are regular season ranks, and they match the bracket: 3v6 and 4v5, then 1 and 2 after byes', () => {
+    for (const s of [seasons[1]!, seasons[2]!]) {
+      const rank = new Map(standings(s.rosters, s.users, games(s.weeks)).map(r => [r.rosterId, r.rank]));
+      const { rounds, placements } = playoffRounds(s.bracket!, team(s), s.playoffWeeks, id => rank.get(id));
+      const seeds = (i: number) => rounds[i]!.matches.map(m => m.teams.map(t => t.seed));
+      expect(seeds(0).map(m => [...m].sort())).toEqual([[4, 5], [3, 6]]);
+      expect(seeds(1).map(m => m[0])).toEqual([1, 2]);
+      expect(placements.flatMap(m => m.teams.map(t => t.seed)).every(n => n! >= 1 && n! <= 6)).toBe(true);
+    }
+  });
+
+  test('bracket: the path to the title by round, placement games apart, scores from the playoff weeks', () => {
+    const s = seasons[1]!;
+    const { rounds, placements } = playoffRounds(s.bracket!, team(s), s.playoffWeeks);
+    expect(rounds.map(r => [r.label, r.matches.length])).toEqual([['Quarterfinals', 2], ['Semifinals', 2], ['Final', 1]]);
+    const final = rounds[2]!.matches[0]!;
+    expect(final.place).toBe(1);
+    expect(final.teams.filter(t => t.won).map(t => t.name)).toEqual([team(s)(6)]);
+    expect(final.teams.map(t => t.points)).toEqual([152.92, 96.34]);
+    expect(placements.map(m => m.place)).toEqual([3, 5]);
+    expect(rounds.flatMap(r => r.matches).every(m => m.teams.filter(t => t.won).length === 1)).toBe(true);
+    // Without playoff weeks the bracket still draws, just without scores.
+    expect(playoffRounds(s.bracket!, team(s)).rounds[2]!.matches[0]!.teams.map(t => t.points)).toEqual([null, null]);
+  });
+});
+
+describe('championRun', () => {
+  for (const s of [seasons[1]!, seasons[2]!]) {
+    const year = s.league.season;
+    const run = championRun(s)!;
+    const final = s.bracket!.find(m => m.p === 1)!;
+
+    test(`${year}: one row per week, 1 through the final, playoffs labeled by round`, () => {
+      expect(run.rosterId).toBe(final.w);
+      expect(run.schedule.map(r => r.week)).toEqual(Array.from({ length: 17 }, (_, i) => i + 1));
+      expect(run.schedule.slice(14).map(r => r.label)).toEqual(['Quarterfinals', 'Semifinals', 'Final']);
+    });
+
+    test(`${year}: the winning roster is the final's lineup and its starters add up to the score`, () => {
+      const last = run.schedule.at(-1)!;
+      expect(last.theirs!.rosterId).toBe(final.l);
+      expect(last.result).toBe('W');
+      expect(run.roster).toBe(last.mine);
+      expect(run.roster.starters.map(x => x.slot)).toEqual(['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX', 'K', 'DEF']);
+      expect(run.roster.starters.reduce((sum, x) => sum + x.points, 0)).toBeCloseTo(run.roster.points, 2);
+      expect(run.roster.bench.every(b => !run.roster.starters.some(x => x.playerId === b.playerId))).toBe(true);
+    });
+
+    test(`${year}: every playoff opponent is the other team in that round's bracket game`, () => {
+      for (const r of run.schedule.filter(x => x.playoff)) {
+        const round = r.week - s.weeks.length;
+        const game = s.bracket!.find(m => m.r === round && (m.t1 === run.rosterId || m.t2 === run.rosterId));
+        if (!game) { expect(r.theirs).toBeNull(); continue; } // a bye
+        expect(r.theirs!.rosterId).toBe(game.t1 === run.rosterId ? game.t2 : game.t1);
+        expect(r.result).toBe(game.w === run.rosterId ? 'W' : 'L');
+      }
+    });
+
+    test(`${year}: regular season rows match the champion's record in buildHistory`, () => {
+      const regular = run.schedule.filter(r => !r.playoff);
+      const row = h.seasons.find(x => x.season === Number(year))!.standings.find(x => x.userId === ownerOf(s, final.w!))!;
+      const count = (c: string) => regular.filter(r => r.result === c).length;
+      expect([count('W'), count('L'), count('T')]).toEqual([row.w, row.l, row.t]);
+      for (const r of regular) expect(r.theirs!.rosterId).not.toBe(run.rosterId);
+    });
+  }
+
+  test('playoff weeks stay out of every regular season record', () => {
+    const without = buildHistory(seasons.map(s => ({ ...s, playoffWeeks: [] })));
+    expect(without).toEqual(h);
+  });
+
+  test('a playoff bye has no opponent or result', () => {
+    const s = seasons[1]!;
+    const champ = s.bracket!.find(m => m.p === 1)!.w!;
+    const byeWeek = s.playoffWeeks[0]!.map(m => (m.roster_id === champ ? { ...m, matchup_id: null } : m));
+    const row = championRun({ ...s, playoffWeeks: [byeWeek, ...s.playoffWeeks.slice(1)] })!.schedule[14]!;
+    expect(row).toMatchObject({ label: 'Quarterfinals', theirs: null, result: null });
+    expect(row.mine.rosterId).toBe(champ);
+  });
+
+  test('no run while the season is in progress', () => {
+    expect(championRun(current)).toBeNull();
+  });
+
+  test('player names fall back from the player list to the draft to the id, and "0" is an empty slot', () => {
+    const pick = { round: 1, pick_no: 1, draft_slot: 1, roster_id: 1, player_id: '77', metadata: { first_name: 'Drafted', last_name: 'Guy' } };
+    expect(playerName('0', {})).toBe('Empty');
+    expect(playerName('77', { 77: { name: 'Listed Guy', pos: 'RB', team: null, injury: null } }, [pick])).toBe('Listed Guy');
+    expect(playerName('77', {}, [pick])).toBe('Drafted Guy');
+    expect(playerName('78', {}, [pick])).toBe('Player 78');
   });
 });
