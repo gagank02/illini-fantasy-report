@@ -135,6 +135,7 @@ Required env:
 - `SLEEPER_LEAGUE_ID` (build + report)
 - `CLAUDE_CODE_OAUTH_TOKEN` (report only, CI secret, made with `claude setup-token`; uses your Claude subscription)
 - `CF_DEPLOY_HOOK_URL` (daily refresh, CI secret)
+- `GITHUB_TOKEN` (refresh cron Worker secret: fine grained, this repo only, Actions read and write; see `workers/refresh-cron/README.md`)
 
 ### Secrets handling
 - `.gitignore` already ignores `.env` and `.env.*`. Only `.env.example`, holding placeholder values, gets committed.
@@ -168,6 +169,7 @@ tests/
   ci.yml                  → test + check + build + audit on PRs
   weekly-report.yml       → Tue 15:23 UTC: draft report, lint, open PR
   refresh.yml             → daily: hit Cloudflare deploy hook
+workers/refresh-cron/     → Cloudflare cron that starts either workflow if GitHub dropped its scheduled run; a late GitHub run then skips itself (guard job)
 public/_headers           → security headers
 writing-style.md          → report system prompt (source of truth for voice)
 ```

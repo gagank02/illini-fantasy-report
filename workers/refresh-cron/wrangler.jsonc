@@ -1,0 +1,12 @@
+// Backup trigger for GitHub's scheduled workflows. Deploy from this folder: npx wrangler deploy
+// Then add the token once: npx wrangler secret put GITHUB_TOKEN (see README.md).
+{
+  "name": "illini-refresh-cron",
+  "main": "index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  // Keep in sync with JOBS in index.ts. Each runs 30 minutes after the GitHub cron it backs up.
+  // Day names, not numbers: Cloudflare counts 1 = Sunday, GitHub 0 = Sunday, so "2" means Monday here.
+  "triggers": { "crons": ["47 10 * * *", "53 15 * * tue"] },
+  "vars": { "GITHUB_REPO": "gagank02/illini-fantasy-report" }
+}
