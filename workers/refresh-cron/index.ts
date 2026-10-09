@@ -19,7 +19,7 @@ export interface Job {
 
 export const JOBS: Job[] = [
   { cron: '47 10 * * *', workflow: 'refresh.yml', sinceHourUtc: 10 },
-  { cron: '53 15 * * 2', workflow: 'weekly-report.yml', sinceHourUtc: 15 },
+  { cron: '53 15 * * tue', workflow: 'weekly-report.yml', sinceHourUtc: 15 },
 ];
 
 const API = 'https://api.github.com';

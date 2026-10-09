@@ -6,6 +6,7 @@
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
   // Keep in sync with JOBS in index.ts. Each runs 30 minutes after the GitHub cron it backs up.
-  "triggers": { "crons": ["47 10 * * *", "53 15 * * 2"] },
+  // Day names, not numbers: Cloudflare counts 1 = Sunday, GitHub 0 = Sunday, so "2" means Monday here.
+  "triggers": { "crons": ["47 10 * * *", "53 15 * * tue"] },
   "vars": { "GITHUB_REPO": "gagank02/illini-fantasy-report" }
 }

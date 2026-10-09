@@ -5,7 +5,7 @@ name: Weekly report
 # Writes the report with Claude on the commissioner's subscription and opens a PR to review.
 on:
   schedule:
-    - cron: '23 15 * * 2'
+    - cron: '23 15 * * tue'
   workflow_dispatch:
     inputs:
       week:

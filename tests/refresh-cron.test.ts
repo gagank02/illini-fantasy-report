@@ -48,6 +48,8 @@ test('wrangler.jsonc crons match JOBS, and each check runs after the GitHub cron
     expect(Number(github[2]), job.workflow).toBe(job.sinceHourUtc);
     expect(Number(hour) * 60 + Number(min), job.workflow).toBeGreaterThan(Number(github[2]) * 60 + Number(github[1]));
     expect(rest, job.workflow).toBe(github[3]);
+    // Cloudflare numbers days 1 = Sunday, GitHub 0 = Sunday, so only day names mean the same day on both.
+    expect(rest.split(' ')[2], job.workflow).toMatch(/^(\*|[a-z]{3})$/);
   }
 });
 
