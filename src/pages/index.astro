@@ -117,7 +117,7 @@ const rec = (id: number) => { const r = team(id); return `${r.w}-${r.l}${r.t ? `
         {mover
           ? <>Market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>{momentum?.sample ? ' (made up for local testing)' : ''}. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
           : <>Scores and trends from <Ext href="https://sleeper.com">Sleeper</Ext>.</>}
-        {nfl && <span> Other weeks from <Ext href="https://github.com/nflverse">nflverse</Ext>.</span>}
+        {nfl && <span> Other weeks from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>).</span>}
       </p>
 
       <Facts facts={facts(rows, all)} teamNames={rows.map(r => r.team)} />

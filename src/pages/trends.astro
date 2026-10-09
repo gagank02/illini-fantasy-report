@@ -42,7 +42,7 @@ const columns = loaded ? 5 : 4;
       : loaded
         ? <>Market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>, updated {loaded.fetched}. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
         : <>Points from <Ext href="https://sleeper.com">Sleeper</Ext>. Market moves appear after the next daily update.</>}
-    {nfl && <span> Other weeks and expected points from <Ext href="https://github.com/nflverse">nflverse</Ext> and <Ext href="https://github.com/ffverse/ffopportunity">ffopportunity</Ext>, updated {nfl.fetched}.</span>}
+    {nfl && <span> Other weeks and expected points from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>) and <Ext href="https://github.com/ffverse/ffopportunity">ffopportunity</Ext> (<Ext href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</Ext>), updated {nfl.fetched}.</span>}
   </p>
 
   <div class="trends">
@@ -120,7 +120,7 @@ const columns = loaded ? 5 : 4;
       </table>
     </div>
   </div>
-  <p class="muted legend">Last 2 and Last 3 need at least four weeks this season. Hover a line for every week's points. {nfl ? 'Gaps are byes and games a player missed.' : "Gaps are weeks a player wasn't on a roster here."} Kickers and defenses aren't included.</p>
+  <p class="muted legend">Last 2 and Last 3 need at least four weeks this season. Hover a line for every week's points. {nfl ? 'Byes and missed games count as 0 in weeks a player was on a roster here, and show as gaps in the other weeks.' : "Gaps are weeks a player wasn't on a roster here."} Kickers and defenses aren't included.</p>
 </Base>
 
 <script>
