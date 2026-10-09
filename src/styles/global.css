@@ -142,6 +142,10 @@ th.left { width: 100%; }
 .inj-out { background: var(--loss); }
 /* inline-block: in a narrow cell the body part drops to its own line instead of being clipped. */
 .inj-body { display: inline-block; margin-left: 0.25rem; font: 600 0.68rem var(--sans); color: var(--muted); }
+/* Buy low / sell high (nflverse expected points): outlined, so it stays quieter than injury tags. */
+.luck { display: inline-block; margin-left: 0.35rem; padding: 0 0.3rem; border: 1px solid currentColor; border-radius: var(--r-sm); font: 700 0.62rem/1.35 var(--sans); letter-spacing: 0.02em; vertical-align: 0.1em; white-space: nowrap; }
+.luck-buy { color: var(--up-text); }
+.luck-sell { color: var(--down-text); }
 
 /* Keep last: must override .sub's display. */
 /* Columns marked .wide fold into .narrow sub lines on phones so tables fit without scrolling. */

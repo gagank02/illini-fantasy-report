@@ -1,4 +1,4 @@
-// Every place that shows Sleeper or FantasyCalc data must credit it. These checks read the source, so a new
+// Every place that shows Sleeper, FantasyCalc or nflverse data must credit it. These checks read the source, so a new
 // page that forgets a credit fails here instead of shipping.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -32,6 +32,15 @@ test('every page showing FantasyCalc data credits it next to the data, with a li
     const branches = credit.match(/'[^']*'|<>[\s\S]*?<\/>/g) ?? [];
     expect(branches.length, f).toBeGreaterThanOrEqual(2);
     for (const b of branches) expect(b, `${f}: ${b.trim()}`).toContain(SLEEPER_LINK);
+  }
+});
+
+test('every page showing nflverse data credits and links it next to the data', () => {
+  const nflPages = pages('src/pages').filter(f => read(f).includes('loadNflverse'));
+  expect(nflPages.length).toBeGreaterThanOrEqual(3);
+  for (const f of nflPages) {
+    const credit = read(f).match(/<p class="trade-credit">[\s\S]*?<\/p>/)?.[0] ?? '';
+    expect(credit, f).toContain('href="https://github.com/nflverse"');
   }
 });
 

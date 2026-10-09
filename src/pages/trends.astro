@@ -1,10 +1,12 @@
 ---
 import Injury from '../components/Injury.astro';
+import Luck from '../components/Luck.astro';
 import Ext from '../components/Ext.astro';
 import Sparkline from '../components/Sparkline.astro';
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
 import { loadMomentum } from '../lib/fantasycalc';
+import { loadNflverse } from '../lib/nflverse';
 import { loadSeason } from '../lib/sleeper';
 import { standings, games, type Players } from '../lib/stats';
 import { trendRows } from '../lib/trends';
@@ -15,7 +17,8 @@ const last = league.previous_league_id ? await loadSeason(league.previous_league
 const lastSeason = last ? Number(last.league.season) : Number(league.season) - 1;
 const ids = rosters.flatMap(r => r.players ?? []);
 const loaded = loadMomentum(process.env, ids);
-const rows = trendRows(rosters, P, weeks, last?.weeks ?? [], loaded?.momentum ?? {});
+const nfl = loadNflverse(Number(league.season));
+const rows = trendRows(rosters, P, weeks, last?.weeks ?? [], loaded?.momentum ?? {}, nfl?.players);
 
 const teamName = new Map(standings(rosters, users, games(weeks)).map(r => [r.rosterId, r.team]));
 const owner = new Map(rosters.flatMap(r => (r.players ?? []).map(id => [id, r.roster_id] as const)));
@@ -29,6 +32,7 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
   <h1>Trends</h1>
   <p class="muted">
     How every rostered player is doing this season. <strong>Last 2</strong> (<strong>Last 3</strong> from week 6) compares a player's most recent weeks with his weeks before them, so ▲ means heating up. <strong>Market</strong> is how much his trade value moved over the last 30 days. The {lastSeason} column is last season in this league, for comparison.
+    {nfl && <><strong>Buy low</strong> and <strong>Sell high</strong> mark players scoring well below or above what their targets and carries usually produce.</>}
   </p>
   <p class="trade-credit">
     {loaded?.sample
@@ -36,6 +40,7 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
       : loaded
         ? <>Market moves from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>, updated {loaded.fetched}. Points from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
         : <>Points from <Ext href="https://sleeper.com">Sleeper</Ext>. Market moves appear after the next daily update.</>}
+    {nfl && <span> Other weeks and expected points from <Ext href="https://github.com/nflverse">nflverse</Ext> and <Ext href="https://github.com/ffverse/ffopportunity">ffopportunity</Ext>, updated {nfl.fetched}.</span>}
   </p>
 
   <div class="trends">
@@ -64,7 +69,7 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
           {rows.map(r => (
             <tr data-pos={r.pos}>
               <th scope="row" class="left">
-                {P[r.id]!.name}<Injury status={P[r.id]!.injury} body={P[r.id]!.body} />
+                {P[r.id]!.name}<Injury status={P[r.id]!.injury} body={P[r.id]!.body} /><Luck luck={r.luck} />
                 <span class="sub">{r.pos} {P[r.id]!.team ?? 'FA'} · {fantasyTeam(r.id)}</span>
                 {(r.form !== null || (loaded && r.momentum !== null)) && (
                   <span class="sub narrow">
@@ -102,5 +107,5 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
       </table>
     </div>
   </div>
-  <p class="muted legend">Last 2 and Last 3 need at least four weeks this season. Hover a line for every week's points. Gaps are weeks a player wasn't on a roster here. Kickers and defenses aren't included.</p>
+  <p class="muted legend">Last 2 and Last 3 need at least four weeks this season. Hover a line for every week's points. {nfl ? 'Gaps are byes and games a player missed.' : "Gaps are weeks a player wasn't on a roster here."} Kickers and defenses aren't included.</p>
 </Base>

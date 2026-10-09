@@ -13,6 +13,7 @@
     "check": "astro check",
     "test": "vitest run --passWithNoTests",
     "players": "node scripts/update-players.ts",
+    "nflverse": "node --env-file-if-exists=.env scripts/update-nflverse.ts",
     "lint:report": "node --env-file-if-exists=.env scripts/lint-report.ts",
     "report": "node --env-file-if-exists=.env scripts/write-report.ts",
     "trades": "node --env-file-if-exists=.env scripts/update-trades.ts"

@@ -1,12 +1,13 @@
 name: Daily refresh
 
-# Rebuilds the site on Cloudflare so Sleeper data stays current, and refreshes two saved data files, each at most
+# Rebuilds the site on Cloudflare so Sleeper data stays current, and refreshes three saved data files, each at most
 # once per UTC day:
 # - Sleeper's player list (/players/nfl: names, positions, injury tags). The full list stays in the Actions cache
 #   (.cache/players-full.json, never committed), sharing its key with weekly-report.yml so the two together never
 #   call it twice in a day. Only the players our pages use are committed, to src/data/players.json.
 # - src/data/trades.json (trade suggestions from FantasyCalc /values/current), once the FANTASYCALC_ENABLED repo
 #   variable is 'true'. Only the suggestions are committed; FantasyCalc's raw values are never saved to the repo.
+# - src/data/nflverse.json (weekly PPR points and expected points for rostered players, from nflverse).
 # Odd minute on purpose: GitHub delays or drops scheduled runs at the top of the hour under load.
 on:
   schedule:
@@ -87,6 +88,13 @@ jobs:
         with:
           path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
+
+      # nflverse (CC-BY 4.0): this season's weekly PPR points and expected points, a few MB of CSV from GitHub releases.
+      # Commits only a small summary for rostered players to src/data/nflverse.json. If a download fails, or the files
+      # look broken, yesterday's file stays.
+      - name: Update nflverse data
+        continue-on-error: true
+        run: npm run nflverse
 
       # FantasyCalc: at most ONE call per UTC day, even if it fails. Their docs only ask for hourly at most,
       # we are stricter on purpose. Three guards: the "called today" marker below (saved pass or fail), today's

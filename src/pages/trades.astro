@@ -1,9 +1,11 @@
 ---
 import Injury from '../components/Injury.astro';
+import Luck from '../components/Luck.astro';
 import Ext from '../components/Ext.astro';
 import Base from '../layouts/Base.astro';
 import players from '../data/players.json';
 import { loadTrades } from '../lib/fantasycalc';
+import { luck, loadNflverse } from '../lib/nflverse';
 import { loadSeason } from '../lib/sleeper';
 import { games, standings, type Players } from '../lib/stats';
 import { stillValid, type SavedTrade } from '../lib/trades';
@@ -14,6 +16,7 @@ const rows = standings(rosters, users, games(weeks));
 const teams = [...rows].sort((a, b) => a.team.localeCompare(b.team));
 const team = (id: number) => rows.find(r => r.rosterId === id)!;
 const board = loaded?.saved.board ?? null;
+const nfl = loadNflverse(Number(league.season));
 // Saved once a day; hide any suggestion whose players have since changed teams.
 const current = (ts: SavedTrade[] = []) => ts.filter(t => stillValid(t, rosters));
 
@@ -47,6 +50,7 @@ const first = teams[0]?.rosterId;
         {loaded!.sample
           ? <>Sample values for local testing. These are made up. Rosters from <Ext href="https://sleeper.com">Sleeper</Ext>.</>
           : <>Player values from <Ext href="https://fantasycalc.com">FantasyCalc.com</Ext>, updated {loaded!.saved.fetched}. Rosters from <Ext href="https://sleeper.com">Sleeper</Ext>.</>}
+        {nfl && <span> Buy low and Sell high from <Ext href="https://github.com/nflverse">nflverse</Ext> and <Ext href="https://github.com/ffverse/ffopportunity">ffopportunity</Ext> expected points.</span>}
       </p>
 
       <form class="trade-pick" id="trade-pick">
@@ -77,7 +81,7 @@ const first = teams[0]?.rosterId;
                       <h3>{team(id).team} gets</h3>
                       <ul>
                         {gets.map(pid => (
-                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} body={info(pid)?.body} /></li>
+                          <li>{info(pid)?.name ?? pid}<span class="sub">{info(pid)?.pos} {info(pid)?.team ?? 'FA'}</span><Injury status={info(pid)?.injury} body={info(pid)?.body} /><Luck luck={luck(nfl?.players[pid])} /></li>
                         ))}
                       </ul>
                       <span class="trade-gain move-up">Lineup {pct(gain)}</span>
