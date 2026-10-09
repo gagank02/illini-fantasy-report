@@ -21,7 +21,7 @@ const teamName = new Map(standings(rosters, users, games(weeks)).map(r => [r.ros
 const owner = new Map(rosters.flatMap(r => (r.players ?? []).map(id => [id, r.roster_id] as const)));
 const fantasyTeam = (id: string) => teamName.get(owner.get(id)!) ?? '';
 const pct = (v: number) => `${v > 0 ? '+' : ''}${Math.round(v * 100)}%`;
-const fmt = (xs: (number | null)[]) => xs.map(v => (v === null ? '–' : v.toFixed(1))).join(', ');
+const fmt = (xs: (number | null)[]) => xs.map(v => (v === null ? '-' : v.toFixed(1))).join(', ');
 const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
 ---
 
@@ -82,11 +82,11 @@ const positions = ['All', 'QB', 'RB', 'WR', 'TE'];
                 />
               </td>
               <td>
-                {r.avg26?.toFixed(1) ?? '–'}
+                {r.avg26?.toFixed(1) ?? '-'}
                 {r.form !== null && <span class={`sub wide move ${r.form >= 0 ? 'move-up' : 'move-down'}`}>Last {r.recentWeeks} {r.form >= 0 ? '▲' : '▼'}{Math.abs(r.form).toFixed(1)}</span>}
               </td>
               {loaded && (
-                <td class="wide">{r.momentum === null ? '–' : <span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>{r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span>}</td>
+                <td class="wide">{r.momentum === null ? '-' : <span class={`move ${r.momentum >= 0 ? 'move-up' : 'move-down'}`}>{r.momentum >= 0 ? '▲' : '▼'} {pct(r.momentum)}</span>}</td>
               )}
               <td class="wide last-season">
                 {r.avg25 === null ? <span class="muted">Not in league</span> : (

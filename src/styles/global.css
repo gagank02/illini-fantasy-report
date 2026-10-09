@@ -1,10 +1,26 @@
+/* Self-hosted (the CSP allows font-src 'self' only). Licenses in public/fonts. */
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+/* The unmodified upstream file: its license reserves the name, so no subsetting or conversion (OFL FAQ 2.2, 2.6). */
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/PlayfairDisplay%5Bwght%5D.ttf') format('truetype');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
 /* Tokens use light-dark(): data-theme on <html> overrides the OS setting. */
 :root {
   color-scheme: light dark;
   --orange: #ff5f05;
   --blue: #13294b;
+  --on-dark: #fbfaf7;
   --bg: light-dark(#faf8f4, #0b1628);
-  --surface: light-dark(#ffffff, #13294b);
+  --surface: light-dark(#fefdfb, #13294b);
   --fg: light-dark(#13294b, #eef1f6);
   --muted: light-dark(#55606f, #a7b2c4);
   --accent-text: light-dark(#b53d00, #ff5f05);
@@ -21,7 +37,13 @@
   --up-text: light-dark(#1a7f37, #4ade80);
   --down-text: light-dark(#c62828, #ff8a80);
   --serif: Georgia, 'Times New Roman', serif;
-  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --display: 'Playfair Display', var(--serif);
+  --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Shape rule: containers and inputs --r, badges --r-sm, buttons and tabs are pills. */
+  --r: 8px;
+  --r-sm: 4px;
+  --lift: 0 1px 2px rgb(19 41 75 / 0.06), 0 10px 24px -14px rgb(19 41 75 / 0.35);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 :root[data-theme='light'] { color-scheme: light; }
 :root[data-theme='dark'] { color-scheme: dark; }
@@ -32,11 +54,18 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font: 1rem/1.55 var(--sans);
+  font: 1rem/1.6 var(--sans);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
   overflow-wrap: break-word;
 }
 
-h1, h2, h3 { font-family: var(--serif); line-height: 1.2; }
+h1, h2, h3 { font-family: var(--sans); font-weight: 650; line-height: 1.15; letter-spacing: -0.02em; }
+h1 { font-size: clamp(1.85rem, 4.5vw, 2.6rem); font-weight: 700; letter-spacing: -0.035em; margin: 0.25rem 0 0.4rem; }
+h1 + .muted { margin-top: 0; }
+h2 { font-size: 1.4rem; }
+/* Lining figures: Playfair's old-style zero reads as an "o" in names like fr0sty. */
+.wordmark, .lead-story h2, .rl-headline, .paper { font-variant-numeric: lining-nums tabular-nums; }
 
 a { color: var(--accent-text); }
 
@@ -45,47 +74,49 @@ a { color: var(--accent-text); }
 .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1rem; }
 
 /* Header: Illini Blue in both themes with an orange underline. */
-.site-header { background: var(--blue); color: #fff; border-bottom: 4px solid var(--orange); }
-.site-header .wrap { display: flex; align-items: center; gap: 0.75rem; min-height: 3.5rem; }
-.wordmark { font: 700 1.25rem var(--serif); color: #fff; text-decoration: none; margin-right: auto; }
+.site-header { background: var(--blue); color: var(--on-dark); border-bottom: 4px solid var(--orange); }
+.site-header .wrap { display: flex; align-items: center; gap: 0.75rem; min-height: 3.75rem; }
+.wordmark { font: 700 clamp(1.05rem, 4.2vw, 1.3rem)/1.15 var(--display); letter-spacing: -0.01em; color: var(--on-dark); text-decoration: none; margin-right: auto; }
 
 .site-header button {
-  font: inherit; color: #fff; background: transparent;
-  border: 1px solid rgb(255 255 255 / 0.5); border-radius: 4px;
-  padding: 0.35rem 0.6rem; cursor: pointer;
+  font: inherit; color: var(--on-dark); background: transparent;
+  border: 1px solid rgb(255 255 255 / 0.5); border-radius: 999px;
+  padding: 0.35rem 0.7rem; cursor: pointer;
 }
+.site-header button:hover { border-color: var(--orange); }
 
 /* Mobile: nav is a native popover opened by the Menu button. */
 #site-nav {
   margin: 3.75rem 1rem auto auto; padding: 0.5rem;
   background: var(--surface); color: var(--fg);
-  border: 1px solid var(--rule); border-radius: 6px;
+  border: 1px solid var(--rule); border-radius: var(--r); box-shadow: var(--lift);
 }
 #site-nav ul { list-style: none; margin: 0; padding: 0; }
-#site-nav a { display: block; padding: 0.6rem 0.9rem; color: inherit; text-decoration: none; white-space: nowrap; }
+#site-nav a { display: block; padding: 0.6rem 0.9rem; color: inherit; text-decoration: none; white-space: nowrap; font-weight: 500; }
 #site-nav a[aria-current='page'] { color: var(--accent-text); font-weight: 600; }
 
 /* Desktop: the popover becomes an always visible inline nav. The links need about 850px. */
 @media (min-width: 60rem) {
   .menu-button { display: none; }
-  #site-nav { display: block; position: static; inset: auto; margin: 0; padding: 0; background: none; border: 0; color: #fff; }
-  #site-nav ul { display: flex; gap: 0.25rem; }
-  #site-nav a { padding: 0.4rem 0.6rem; }
-  #site-nav a[aria-current='page'] { color: #fff; box-shadow: inset 0 -3px var(--orange); }
+  #site-nav { display: block; position: static; inset: auto; margin: 0; padding: 0; background: none; border: 0; color: var(--on-dark); }
+  #site-nav ul { display: flex; gap: 0.15rem; }
+  #site-nav a { padding: 0.4rem 0.5rem; font-size: 0.95rem; color: rgb(251 250 247 / 0.82); }
+  #site-nav a:hover { color: var(--on-dark); box-shadow: inset 0 -3px rgb(255 95 5 / 0.45); }
+  #site-nav a[aria-current='page'] { color: var(--on-dark); font-weight: 600; box-shadow: inset 0 -3px var(--orange); }
 }
 
 /* main.wrap, not main: .wrap's padding shorthand would otherwise reset the block padding. */
-main.wrap { padding-block: 1.5rem 3rem; }
+main.wrap { padding-block: 2rem 4rem; }
 
-.site-footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.875rem; padding-block: 1rem; }
+.site-footer { border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.85rem; line-height: 1.6; padding-block: 1.5rem; }
 
 .muted { color: var(--muted); }
 
 /* Tables scroll inside their own box so the page never scrolls sideways. */
-.table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+.table-scroll { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
 table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 th, td { padding: 0.55rem 0.7rem; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--rule); }
-thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 2px solid var(--orange); }
+thead th { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); border-bottom: 2px solid var(--orange); }
 tbody tr:last-child > * { border-bottom: 0; }
 .left { text-align: left; }
 tbody th { font-weight: 600; white-space: normal; min-width: 8rem; }
@@ -98,7 +129,7 @@ th.left { width: 100%; }
 .sub { display: block; font-weight: 400; font-size: 0.8rem; color: var(--muted); }
 
 .form { display: inline-flex; gap: 3px; vertical-align: middle; }
-.f { display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: 3px; font-size: 0.65rem; font-weight: 700; color: #fff; }
+.f { display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem; border-radius: var(--r-sm); font-size: 0.65rem; font-weight: 700; color: var(--on-dark); }
 .f-W { background: var(--win); }
 .f-L { background: var(--loss); }
 .f-T { background: var(--tie); }
@@ -106,7 +137,7 @@ th.left { width: 100%; }
 .f-latest { outline: 1px solid var(--muted); outline-offset: 1px; margin-left: 1px; }
 .sub .form { margin-top: 0.3rem; }
 /* Injury tags: same quiet badge shape as the form guide. Amber = questionable, red = out for now. */
-.inj { display: inline-block; margin-left: 0.35rem; padding: 0 0.3rem; border-radius: 3px; font: 700 0.62rem/1.35 var(--sans); letter-spacing: 0.02em; color: #fff; vertical-align: 0.1em; white-space: nowrap; }
+.inj { display: inline-block; margin-left: 0.35rem; padding: 0 0.3rem; border-radius: var(--r-sm); font: 700 0.62rem/1.35 var(--sans); letter-spacing: 0.02em; color: var(--on-dark); vertical-align: 0.1em; white-space: nowrap; }
 .inj-warn { background: var(--warn); }
 .inj-out { background: var(--loss); }
 /* inline-block: in a narrow cell the body part drops to its own line instead of being clipped. */
@@ -133,13 +164,13 @@ th.left { width: 100%; }
 .wi-up { background: color-mix(in srgb, var(--win) 22%, var(--surface)); }
 .wi-down { background: color-mix(in srgb, var(--loss) 22%, var(--surface)); }
 .wi-self { font-weight: 700; box-shadow: inset 0 0 0 2px var(--orange); }
-.legend .wi-up, .legend .wi-down { padding: 0.1rem 0.35rem; border-radius: 3px; }
+.legend .wi-up, .legend .wi-down { padding: 0.1rem 0.35rem; border-radius: var(--r-sm); }
 
-.whatif-list { border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+.whatif-list { border: 1px solid var(--rule); border-radius: var(--r); background: var(--surface); }
 .whatif-list details + details { border-top: 1px solid var(--rule); }
 .whatif-list summary { padding: 0.7rem 0.8rem; cursor: pointer; font-weight: 600; }
 .whatif-list ul { list-style: none; margin: 0; padding: 0 0.8rem 0.7rem; }
-.whatif-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0.5rem; border-radius: 4px; }
+.whatif-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.35rem 0.5rem; border-radius: var(--r-sm); }
 .whatif-list li + li { margin-top: 2px; }
 
 .move { font-weight: 700; }
@@ -148,7 +179,7 @@ th.left { width: 100%; }
 
 /* Tabs: radio inputs + labels, no JS. Panel n shows when radio n is checked. */
 .tab-list { border: 0; margin: 0 0 0.75rem; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.tab-list label { padding: 0.35rem 0.75rem; border: 1px solid var(--rule); border-radius: 999px; cursor: pointer; font-size: 0.9rem; background: var(--surface); }
+.tab-list label { padding: 0.4rem 0.9rem; font-weight: 500; border: 1px solid var(--rule); border-radius: 999px; cursor: pointer; font-size: 0.9rem; background: var(--surface); }
 .tab-list input:checked + label { background: var(--orange); border-color: var(--orange); color: var(--blue); font-weight: 600; }
 .tab-list input:focus-visible + label { outline: 3px solid var(--orange); outline-offset: 2px; }
 .tabs .tab-panel { display: none; }
@@ -162,14 +193,14 @@ th.left { width: 100%; }
 
 .facts { margin-top: 2rem; }
 .facts ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
-.facts li { background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--orange); border-radius: 6px; padding: 0.8rem 0.9rem; }
-.fact-title { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-text); margin-bottom: 0.25rem; }
+.facts li { background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--orange); border-radius: var(--r); padding: 1rem 1.1rem; }
+.fact-title { display: block; font-size: 0.82rem; font-weight: 650; color: var(--accent-text); margin-bottom: 0.3rem; }
 
 /* Home page preview cards. The whole card is the link. */
 .previews { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
-.preview { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; color: var(--fg); text-decoration: none; }
+.preview { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.15rem 1.2rem; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); color: var(--fg); text-decoration: none; }
 .preview:hover { border-color: var(--orange); }
-.preview h2 { margin: 0; font-size: 1.2rem; }
+.preview h2 { margin: 0; font-size: 1.2rem; letter-spacing: -0.025em; }
 .preview ol { margin: 0; padding: 0; list-style: none; }
 .preview li { display: flex; gap: 0.6rem; padding: 0.15rem 0; }
 .preview li > span:nth-child(2) { flex: 1; }
@@ -180,21 +211,21 @@ th.left { width: 100%; }
 .pv-more { margin-top: auto; color: var(--accent-text); font-weight: 600; font-size: 0.9rem; }
 
 /* Home lead story and the reports list: newsprint cards. */
-.lead-story, .report-list a { display: block; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-top: 4px double var(--ink); border-radius: 4px; padding: 1rem 1.1rem; text-decoration: none; }
-.lead-story { margin-bottom: 1rem; }
+.lead-story, .report-list a { display: block; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-top: 4px double var(--ink); border-radius: var(--r); padding: 1.15rem 1.3rem; text-decoration: none; }
+.lead-story { margin: 1.5rem 0 1rem; }
 .lead-story:hover, .report-list a:hover { border-color: var(--orange); }
-.lead-story h2 { font-size: clamp(1.4rem, 4vw, 2rem); margin: 0.2rem 0 0.4rem; }
+.lead-story h2 { font: 700 clamp(1.5rem, 4vw, 2.2rem)/1.15 var(--display); letter-spacing: -0.01em; margin: 0.2rem 0 0.5rem; }
 .lead-story p { font-family: var(--serif); font-size: 1.05rem; margin: 0 0 0.6rem; }
 .report-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
-.rl-headline { display: block; font-family: var(--serif); font-size: 1.3rem; margin: 0.15rem 0 0.3rem; }
+.rl-headline { display: block; font: 700 1.35rem/1.2 var(--display); margin: 0.15rem 0 0.3rem; }
 .rl-lede { display: block; font-family: var(--serif); color: var(--ink-muted); }
 
 /* History */
-section + section { margin-top: 2rem; }
+section + section { margin-top: 2.5rem; }
 .champs { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-.champs li { position: relative; background: var(--surface); border: 1px solid var(--rule); border-top: 4px solid var(--orange); border-radius: 8px; padding: 1rem; }
-.champ-year { position: absolute; top: 0.6rem; right: 0.9rem; font: 700 1.6rem var(--serif); color: var(--muted); }
-.champ-name { display: block; font: 700 1.35rem var(--serif); }
+.champs li { position: relative; background: var(--surface); border: 1px solid var(--rule); border-top: 4px solid var(--orange); border-radius: var(--r); padding: 1rem; }
+.champ-year { position: absolute; top: 0.7rem; right: 1rem; font: 700 1.6rem var(--sans); letter-spacing: -0.03em; color: var(--muted); }
+.champ-name { display: block; font: 700 1.35rem/1.2 var(--sans); letter-spacing: -0.025em; }
 .champs dl { margin: 0.75rem 0 0; display: grid; gap: 0.2rem; font-size: 0.9rem; }
 .champs dl div { display: flex; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--rule); padding-top: 0.2rem; }
 .champs dt { color: var(--muted); }
@@ -217,7 +248,7 @@ section + section { margin-top: 2rem; }
 .b-slot::after { left: 100%; }
 .b-slot::before { right: 100%; }
 .b-pair::after { content: ''; position: absolute; right: calc(var(--gap) / -2); top: 25%; bottom: 25%; border-right: 2px solid var(--b-line); }
-.b-match { width: 100%; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 0.35rem 0.6rem; }
+.b-match { width: 100%; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 0.35rem 0.6rem; }
 .b-team { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; padding: 0.15rem 0; }
 .b-team + .b-team { border-top: 1px solid var(--rule); }
 .b-name { min-width: 0; }
@@ -288,11 +319,12 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 /* Trade finder. FantasyCalc's terms want their credit clearly visible next to the values. */
 .trade-credit { font-weight: 600; }
 .trade-pick { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin: 1rem 0 1.25rem; }
-.trade-pick label { display: grid; gap: 0.25rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-.trade-pick select { font: inherit; font-size: 1rem; text-transform: none; letter-spacing: 0; color: var(--fg); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 0.4rem 0.6rem; min-width: 14rem; max-width: 100%; }
+.trade-pick label { display: grid; gap: 0.35rem; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+.trade-pick select { font: inherit; font-size: 1rem; font-weight: 400; color: var(--fg); background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 0.4rem 0.6rem; min-width: 14rem; max-width: 100%; }
+.trade-pick select:hover { border-color: var(--orange); }
 .trade-panel h2 { font-size: 1.25rem; margin: 0 0 0.75rem; }
 .trades { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
-.trade { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--orange); border-radius: 6px; padding: 0.8rem 0.9rem; }
+.trade { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--rule); border-top: 3px solid var(--orange); border-radius: var(--r); padding: 0.8rem 0.9rem; }
 .trade-side h3 { margin: 0 0 0.35rem; font: 600 0.95rem var(--sans); }
 .trade-side ul { list-style: none; margin: 0 0 0.35rem; padding: 0; }
 .trade-side li { padding: 0.15rem 0; font-weight: 600; }
@@ -318,6 +350,16 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 .spark-dot { fill: var(--accent-text); stroke: var(--surface); stroke-width: 2; }
 .spark-divider { stroke: var(--rule); stroke-width: 1; }
 @media (max-width: 30rem) { .spark { width: 84px; height: 30px; } }
+
+/* Motion: feedback on hover and press only. Off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .preview, .lead-story, .report-list a, .tab-list label, .site-header button, #site-nav a, .trade-pick select {
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease), color 0.2s var(--ease), background-color 0.2s var(--ease);
+  }
+  .preview:hover, .lead-story:hover, .report-list a:hover { transform: translateY(-2px); box-shadow: var(--lift); }
+  .preview:active, .lead-story:active, .report-list a:active { transform: translateY(0); }
+  .tab-list label:active, .site-header button:active { transform: scale(0.97); }
+}
 
 /* Keep these last so they win over any display rule above. */
 @media (max-width: 47.99rem) { .grid-only { display: none; } }
