@@ -484,12 +484,14 @@ The in progress 2026 season shows its draft but leaves out the bracket.
 **Description:** `update-players.ts` adds every player in each past champion's and opponents' lineups (from `championRun`) to the committed subset, so names resolve without `/players/nfl` at build.
 
 **Acceptance criteria:**
-- [ ] The `siteIds` input includes the champion run player ids
-- [ ] The run log says how many champion run players were added
+- [x] The `siteIds` input includes the champion run player ids
+- [x] The run log says how many champion run players were added
 
 **Verification:**
-- [ ] `npm run players` locally. The diff only adds entries
-- [ ] `npm test && npm run check`
+- [x] `npm run players` locally added 101 players. The other 11 changed lines were today's injury and team updates. Every player in both champions' lineups has a name (198 in 2024, 227 in 2025)
+- [x] `npm test && npm run check`
+
+**Also:** `refresh.yml` and `weekly-report.yml` restore the Sleeper history cache, since `npm run players` now loads every season.
 
 **Dependencies:** T19
 

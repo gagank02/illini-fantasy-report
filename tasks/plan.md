@@ -64,7 +64,7 @@ Details for each task are in `tasks/todo.md`.
 ### Phase 5: Champion run (SPEC 6a)
 - [x] T18: Disk cache for completed leagues
 - [x] T19: Playoff weeks and `championRun()`
-- [ ] T20: Champion players in `players.json`
+- [x] T20: Champion players in `players.json`
 - [ ] T21: `/history/{season}/champion` page and links
 
 ### Checkpoint E: Champion run

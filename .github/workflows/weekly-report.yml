@@ -52,6 +52,13 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Completed seasons' Sleeper responses, saved by ci.yml (never committed). Saves about 45 calls per run.
+      - name: Restore cached Sleeper history
+        uses: actions/cache/restore@v6
+        with:
+          path: node_modules/.astro/sleeper
+          key: sleeper-history-
+          restore-keys: sleeper-history-
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code@2.1.292
 
