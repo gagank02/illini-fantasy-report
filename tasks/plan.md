@@ -65,7 +65,7 @@ Details for each task are in `tasks/todo.md`.
 - [x] T18: Disk cache for completed leagues
 - [x] T19: Playoff weeks and `championRun()`
 - [x] T20: Champion players in `players.json`
-- [ ] T21: `/history/{season}/champion` page and links
+- [x] T21: `/history/{season}/champion` page and links
 
 ### Checkpoint E: Champion run
 - [ ] Every Champion run and Sleeper disk cache criterion in `SPEC.md` passes

@@ -1,0 +1,33 @@
+---
+// One team's lineup for a week: starters in slot order, then the bench in full or as a total.
+import type { Lineup } from '../lib/history';
+
+interface Props {
+  lineup: Lineup;
+  caption: string;
+  name: (id: string) => string;
+  pos: (id: string) => string;
+  fullBench?: boolean;
+}
+const { lineup, caption, name, pos, fullBench = false } = Astro.props;
+---
+
+<table class="lineup">
+  <caption>{caption}</caption>
+  <thead><tr><th scope="col" class="left">Slot</th><th scope="col" class="left">Player</th><th scope="col">Pts</th></tr></thead>
+  <tbody>
+    {lineup.starters.map(s => (
+      <tr><td class="left">{s.slot}</td><th scope="row" class="left">{name(s.playerId)}<span class="sub">{pos(s.playerId)}</span></th><td>{s.points.toFixed(2)}</td></tr>
+    ))}
+    <tr class="lineup-total"><td class="left"></td><th scope="row" class="left">Starters</th><td>{lineup.points.toFixed(2)}</td></tr>
+  </tbody>
+  {fullBench ? (
+    <tbody>
+      {lineup.bench.map(b => (
+        <tr class="lineup-bench"><td class="left">BN</td><th scope="row" class="left">{name(b.playerId)}<span class="sub">{pos(b.playerId)}</span></th><td>{b.points.toFixed(2)}</td></tr>
+      ))}
+    </tbody>
+  ) : (
+    <tbody><tr class="lineup-bench"><td class="left">BN</td><th scope="row" class="left">Bench total</th><td>{lineup.benchPoints.toFixed(2)}</td></tr></tbody>
+  )}
+</table>

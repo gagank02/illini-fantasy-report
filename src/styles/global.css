@@ -231,6 +231,27 @@ table.draft td { position: relative; padding-bottom: 1.15rem; }
 .pos-TE { background: color-mix(in srgb, #f76b15 18%, var(--surface)); }
 .pos-K, .pos-DEF { background: color-mix(in srgb, #8e8c99 18%, var(--surface)); }
 
+/* Champion run: lineup tables, and a schedule of native <details> rows that open both lineups. */
+.champ-name a { color: inherit; text-decoration-color: var(--orange); text-underline-offset: 0.2em; }
+table.lineup caption { padding: 0.55rem 0.7rem; text-align: left; font-weight: 700; }
+/* The player column takes the spare width, not the slot column. */
+table.lineup th.left { width: auto; }
+table.lineup thead th:nth-child(2) { width: 100%; }
+table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
+.lineup-total > * { font-weight: 700; }
+.lineup-bench > * { color: var(--muted); }
+.schedule summary { display: flex; align-items: baseline; gap: 0.6rem; font-weight: 400; }
+.schedule summary .f { align-self: center; flex: none; }
+.sched-week { flex: none; width: 6.5rem; font-weight: 600; }
+.sched-opp { flex: 1; min-width: 0; }
+.sched-score { flex: none; font-variant-numeric: tabular-nums; }
+.matchup { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0 0.8rem 0.8rem; align-items: start; }
+@media (max-width: 40rem) {
+  .matchup { grid-template-columns: 1fr; }
+  .schedule summary { flex-wrap: wrap; row-gap: 0.1rem; }
+  .sched-opp { flex-basis: 100%; order: 3; padding-left: 1.8rem; }
+}
+
 /* Trade finder. FantasyCalc's terms want their credit clearly visible next to the values. */
 .trade-credit { font-weight: 600; }
 .trade-pick { display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; margin: 1rem 0 1.25rem; }

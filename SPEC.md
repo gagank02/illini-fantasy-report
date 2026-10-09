@@ -252,12 +252,12 @@ export function recordWithSchedule(weeks: WeekScores, a: number, b: number): Rec
 - [x] CI secret guard fails a build that contains a fake `sk-ant-` string. *verified in T1*
 - [x] securityheaders.com grades the deployed site A or better. *Mozilla Observatory A+ (12/12), rescanned 2026-10-07 (securityheaders.com blocks automated scans)*
 - [x] No horizontal page scroll at 360px width. *all 10 pages at 360px and 320px*
-- [ ] Champion run: `/history/2024/champion` and `/history/2025/champion` build, and each is linked from `/history` and its season page. No page builds for 2026.
-- [ ] Champion run: the championship week starters' points sum to the champion's score in the final (tested on 2024 and 2025 fixtures).
-- [ ] Champion run: the schedule has one row per week from 1 through the final, regular season rows match `buildHistory`'s W/L for the champion, and the final row's opponent is the bracket's `p === 1` loser (tested).
-- [ ] Champion run: every player shown has a real name, not `Player {id}`, on the live build.
-- [ ] Champion run: no added JS, no horizontal scroll at 360px, Lighthouse a11y stays 100.
-- [ ] Sleeper disk cache: a completed league's responses are written once and then served from disk, and an in progress league's are never written (tested with a stubbed `fetch`). A second CI run logs 0 live calls for 2024 and 2025.
+- [x] Champion run: `/history/2024/champion` and `/history/2025/champion` build, and each is linked from `/history` and its season page. No page builds for 2026.
+- [x] Champion run: the championship week starters' points sum to the champion's score in the final (tested on 2024 and 2025 fixtures).
+- [x] Champion run: the schedule has one row per week from 1 through the final, regular season rows match `buildHistory`'s W/L for the champion, and the final row's opponent is the bracket's `p === 1` loser (tested).
+- [x] Champion run: every player shown has a real name, not `Player {id}`, on the live build.
+- [x] Champion run: no added JS, no horizontal scroll at 360px, Lighthouse a11y stays 100. *2026-10-08: 100/100/100 on /history/2025/champion, no overflow at 320 and 360 with every week open*
+- [ ] Sleeper disk cache: a completed league's responses are written once and then served from disk, and an in progress league's are never written (tested with a stubbed `fetch`). A second CI run logs 0 live calls for 2024 and 2025. *Tested, and two local builds went from 43 live calls to 7. The CI half is confirmed on the first PR*
 
 ## Decisions
 

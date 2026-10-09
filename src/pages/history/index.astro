@@ -38,7 +38,7 @@ const tone = (x: Record3) => (x.w + x.l + x.t === 0 ? 'none' : x.w > x.l ? 'up' 
         <li>
           <a class="champ-year" href={`/history/${s.season}`}>{s.season}</a>
           <span class="fact-title">Champion</span>
-          <strong class="champ-name">{s.champion?.name}</strong>
+          <strong class="champ-name"><a href={`/history/${s.season}/champion`}>{s.champion?.name}</a></strong>
           <span class="sub">{s.champion?.team}</span>
           <dl>
             <div><dt>Runner up</dt><dd>{s.runnerUp?.name}</dd></div>

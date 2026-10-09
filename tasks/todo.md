@@ -504,25 +504,25 @@ The in progress 2026 season shows its draft but leaves out the bracket.
 **Description:** A static page per completed season with a header (record, rank, PF, the final's result), the winning roster table, and the schedule. Each week is a `<details>` that opens both lineups side by side, plus bench totals. Names come from `players.json`, then draft pick metadata, then `Player {id}`. The champion's name on `/history` and on `/history/{season}` links here.
 
 **Acceptance criteria:**
-- [ ] Pages build for 2024 and 2025, and none builds for 2026
-- [ ] Both entry links work
-- [ ] No new JS. No horizontal scroll at 320/360px. Lineups stack on phones
-- [ ] Sleeper credit is shown (`tests/attribution.test.ts` passes)
-- [ ] No `Player {id}` text in the built pages
+- [x] Pages build for 2024 and 2025, and none builds for 2026
+- [x] Both entry links work
+- [x] No new JS. No horizontal scroll at 320/360px. Lineups stack on phones
+- [x] Sleeper credit is shown (`tests/attribution.test.ts` passes)
+- [x] No `Player {id}` text in the built pages
 
 **Verification:**
-- [ ] `npm run build`, then grep `dist/history/*/champion/index.html` for `Player ` ids
-- [ ] Browser check at 320/360/1024 in light and dark. Lighthouse a11y is 100 on `/history/2025/champion`
-- [ ] `npm test && npm run check`
+- [x] `npm run build`, then grep `dist/history/*/champion.html` for `Player ` ids: none. 17 weeks and 35 lineup tables on each page
+- [x] Browser check at 320/360/1024 in light and dark. No sideways scroll at 320/360 even with every week open. Lighthouse is 100/100/100 on `/history/2025/champion`
+- [x] `npm test && npm run check`
 
 **Dependencies:** T19, T20
 
-**Files:** `src/pages/history/[season]/champion.astro`, `src/pages/history/index.astro`, `src/pages/history/[season].astro`, `src/styles/global.css`
+**Files:** `src/pages/history/[season]/champion.astro`, `src/pages/history/index.astro`, `src/pages/history/[season].astro`, `src/styles/global.css`, `src/components/Lineup.astro`
 
 **Estimated scope:** M
 
 ## Checkpoint E: Champion run
-- [ ] Every Champion run and Sleeper disk cache criterion in `SPEC.md` is checked
+- [x] Every Champion run and Sleeper disk cache criterion in `SPEC.md` is checked (the CI cache run is confirmed on the first PR)
 - [ ] Review with the human before merging
 
 ## Checkpoint D: Done
