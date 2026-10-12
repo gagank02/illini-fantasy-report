@@ -189,7 +189,7 @@ tests/
   refresh.yml             → daily: hit Cloudflare deploy hook
 workers/refresh-cron/     → Cloudflare cron that starts either workflow if GitHub dropped its scheduled run; a late GitHub run then skips itself (guard job)
 public/_headers           → security headers
-writing-style.md          → report system prompt (source of truth for voice)
+writing-style.md          → report system prompt (source of truth for voice; gitignored, local only, WRITING_STYLE secret in CI)
 ```
 
 ## Code Style

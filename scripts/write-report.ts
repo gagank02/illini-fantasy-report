@@ -2,7 +2,7 @@
 // Builds the facts bundle (Sleeper data only), asks Claude (through Claude Code on your subscription) to write
 // the report, lints it, retries once with the problems, and writes src/content/reports/{season}/week-{N}.md.
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { lintReport } from '../src/lib/lint-report.ts';
@@ -25,6 +25,9 @@ if (!Number.isInteger(week) || week < 1) fail('Pass a week number, like: npm run
 if (spawnSync('claude', ['--version'], { encoding: 'utf8' }).status !== 0) {
   fail('The `claude` command (Claude Code) was not found. Install it and log in with your Claude subscription, or set CLAUDE_CODE_OAUTH_TOKEN in CI.');
 }
+
+// writing-style.md is never committed: keep it locally, and CI writes it from the WRITING_STYLE secret.
+if (!existsSync('writing-style.md')) fail('writing-style.md is missing. It is not in git: put your local copy in the repo root (CI writes it from the WRITING_STYLE secret).');
 
 // 2. Facts, from Sleeper only. No outside news feeds: ESPN and Yahoo terms forbid feeding their content to AI tools.
 // Full list: trending pickups and transactions can name anyone, not just our rosters.

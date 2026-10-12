@@ -8,3 +8,5 @@ dist/
 .wrangler/
 # Sleeper's full player list: kept in the Actions cache, never committed.
 .cache/
+# Report voice guide: lives only on the commissioner's machine (and in the WRITING_STYLE secret for CI).
+writing-style.md

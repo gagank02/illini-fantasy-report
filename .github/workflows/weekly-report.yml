@@ -85,6 +85,14 @@ jobs:
           path: .cache/players-full.json
           key: sleeper-players-${{ steps.day.outputs.date }}
 
+      # The style guide is never committed. It lives in the WRITING_STYLE repo secret (paste the whole file).
+      - name: Restore writing-style.md
+        env:
+          WRITING_STYLE: ${{ secrets.WRITING_STYLE }}
+        run: |
+          if [ -z "$WRITING_STYLE" ]; then echo "WRITING_STYLE secret is not set (paste writing-style.md into it)"; exit 1; fi
+          printf '%s\n' "$WRITING_STYLE" > writing-style.md
+
       - name: Write the report
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
