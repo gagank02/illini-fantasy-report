@@ -1,0 +1,40 @@
+name: README screenshot (temporary)
+
+on:
+  push:
+    branches: [claude/project-thread-at9q4x]
+    paths: [.github/workflows/readme-screenshot.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  shoot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: |
+          mkdir /tmp/shot && cd /tmp/shot
+          npm init -y >/dev/null
+          npm i playwright@1.56.1 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          cat > shot.mjs <<'JS'
+          import { chromium } from 'playwright';
+          const browser = await chromium.launch();
+          const page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, deviceScaleFactor: 2, colorScheme: 'light' });
+          await page.goto('https://illini-fantasy-report.pages.dev/', { waitUntil: 'networkidle' });
+          await page.evaluate(() => document.fonts.ready);
+          await page.screenshot({ path: process.argv[2] });
+          await browser.close();
+          JS
+          mkdir -p "$GITHUB_WORKSPACE/docs"
+          node shot.mjs "$GITHUB_WORKSPACE/docs/homepage.png"
+      - run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/homepage.png
+          git commit -m "Add homepage screenshot for the README"
+          git push
