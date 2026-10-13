@@ -69,3 +69,10 @@ test('the scheduled handler picks the job by cron', async () => {
   await worker.scheduled({ cron: '47 10 * * *', scheduledTime: Date.parse('2026-10-08T10:47:00Z') }, env);
   expect(log).toHaveBeenCalledWith('refresh.yml: already ran');
 });
+
+test('the scheduled handler finds the weekly job even when Cloudflare rewrites the cron text', async () => {
+  mockGitHub(0);
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  await worker.scheduled({ cron: '53 15 * * TUE', scheduledTime: Date.parse('2026-10-13T15:53:00Z') }, env);
+  expect(log).toHaveBeenCalledWith('weekly-report.yml: dispatched');
+});

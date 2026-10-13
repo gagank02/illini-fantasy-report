@@ -49,8 +49,14 @@ export async function backup(job: Job, now: Date, env: Env): Promise<'already ra
 
 export default {
   async scheduled(event: { cron: string; scheduledTime: number }, env: Env): Promise<void> {
-    const job = JOBS.find(j => j.cron === event.cron);
-    if (!job) throw new Error(`No job for cron ${event.cron}`);
+    // Match on the fire time, not the cron text: Cloudflare may hand back the expression in another form
+    // (e.g. "TUE" or a day number), and an exact string match then silently skips the job.
+    const at = new Date(event.scheduledTime);
+    const job = JOBS.find(j => {
+      const [min, hour] = j.cron.split(' ').map(Number);
+      return hour === at.getUTCHours() && min === at.getUTCMinutes();
+    });
+    if (!job) throw new Error(`No job for cron ${event.cron} at ${at.toISOString()}`);
     console.log(`${job.workflow}: ${await backup(job, new Date(event.scheduledTime), env)}`);
   },
 };
