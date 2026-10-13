@@ -41,6 +41,7 @@ then the markdown body, using the required ## sections in the given order.
 Game by game. One short paragraph per game. Start each with the bold score, like **Team A 120.50, Team B 99.10.**
 Player of the week and Bust of the week. One player each, with the number.
 Bench blunders. Use benchBlunders, coachOfTheWeek, and worstCoach. Lead with anyone whose bench would have won a loss.
+The optimal lineup respects the league's lineup slots. shouldHaveStarted lists the bench players it starts, and shouldHaveSat the starters it benches. Only blame a bench player who is in shouldHaveStarted. Never say any other bench player should have started, however many points they scored, because they would not have fit in the lineup.
 Stock up and stock down. Use powerMovers. Explain the move with numbers from the facts.
 Transactions. Highlight the interesting moves, not every one. Call out droppedAndScored if present. Transactions are listed oldest first, with when. Describe any sequence of moves in that order, and never reorder them.
 Injury report. List injured starters and whose team they hurt. Name the injury from bodyPart when it is given, and never guess one when it is null.
