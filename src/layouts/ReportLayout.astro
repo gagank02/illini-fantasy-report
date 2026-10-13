@@ -30,7 +30,7 @@ const [first = '', ...rest] = [...lede];
 const longDate = date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
 
-<Base title={`Week ${week}: ${headline}`}>
+<Base title={`Week ${week}: ${headline}`} description={lede} image={`/og/${season}/week-${week}.png`} ogType="article">
   <div class="report-actions">
     <button type="button" id="save-pdf">Save PDF</button>
     <button type="button" id="save-img" data-filename={`illini-report-${season}-week-${week}.png`}>Save image</button>
