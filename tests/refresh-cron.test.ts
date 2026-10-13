@@ -47,9 +47,11 @@ test('wrangler.jsonc crons match JOBS, and each check runs after the GitHub cron
     const rest = days.join(' ');
     expect(Number(github[2]), job.workflow).toBe(job.sinceHourUtc);
     expect(Number(hour) * 60 + Number(min), job.workflow).toBeGreaterThan(Number(github[2]) * 60 + Number(github[1]));
-    expect(rest, job.workflow).toBe(github[3]);
-    // Cloudflare numbers days 1 = Sunday, GitHub 0 = Sunday, so only day names mean the same day on both.
-    expect(rest.split(' ')[2], job.workflow).toMatch(/^(\*|[a-z]{3})$/);
+    // Worker crons stay daily; a weekly job's day lives in dayUtc and must match the GitHub cron's day.
+    expect(rest, job.workflow).toBe('* * *');
+    const githubDay = github[3]!.split(' ')[2]!;
+    const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    expect(githubDay === '*' ? undefined : dayNames.indexOf(githubDay), job.workflow).toBe(job.dayUtc);
   }
 });
 
@@ -70,9 +72,12 @@ test('the scheduled handler picks the job by cron', async () => {
   expect(log).toHaveBeenCalledWith('refresh.yml: already ran');
 });
 
-test('the scheduled handler finds the weekly job even when Cloudflare rewrites the cron text', async () => {
-  mockGitHub(0);
+test('the weekly job dispatches on Tuesday and does nothing on other days', async () => {
+  const calls = mockGitHub(0);
   const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-  await worker.scheduled({ cron: '53 15 * * TUE', scheduledTime: Date.parse('2026-10-13T15:53:00Z') }, env);
+  await worker.scheduled({ cron: '53 15 * * *', scheduledTime: Date.parse('2026-10-12T15:53:00Z') }, env);
+  expect(log).toHaveBeenCalledWith('weekly-report.yml: not its day');
+  expect(calls).toHaveLength(0);
+  await worker.scheduled({ cron: '53 15 * * *', scheduledTime: Date.parse('2026-10-13T15:53:00Z') }, env);
   expect(log).toHaveBeenCalledWith('weekly-report.yml: dispatched');
 });

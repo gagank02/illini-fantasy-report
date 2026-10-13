@@ -8,7 +8,7 @@ and starts it if it didn't.
 | Workflow            | GitHub cron (UTC) | Worker check (UTC) |
 | ------------------- | ----------------- | ------------------ |
 | `refresh.yml`       | daily 10:17       | daily 10:47        |
-| `weekly-report.yml` | Tuesday 15:23     | Tuesday 15:53      |
+| `weekly-report.yml` | Tuesday 15:23     | daily 15:53, acts on Tuesday only |
 
 Each day gets exactly one real run. If GitHub's run started, the Worker does nothing. If the Worker
 started one and GitHub's scheduled run shows up late anyway, that run's first job (`guard`) sees the
