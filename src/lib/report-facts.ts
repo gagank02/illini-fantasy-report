@@ -22,7 +22,7 @@ const ELIGIBLE: Record<string, string[]> = {
  * ponytail: greedy is exact for this league's slots (FLEX = RB/WR/TE); unusual mixes of overlapping flex
  * slots could need a proper assignment solver.
  */
-export function optimalLineup(slots: string[], points: Record<string, number>, players: Players) {
+export function optimalLineup(slots: string[], points: Record<string, number>, players: Players, starters: string[] = []) {
   const used = new Set<string>();
   const filled: { i: number; slot: string; id: string | null; points: number }[] = [];
   const order = slots.map((slot, i) => ({ slot, i })).filter(s => ELIGIBLE[s.slot])
@@ -31,7 +31,8 @@ export function optimalLineup(slots: string[], points: Record<string, number>, p
     let best: string | null = null;
     for (const [id, pts] of Object.entries(points)) {
       if (used.has(id) || !ELIGIBLE[slot]!.includes(players[id]?.pos ?? '')) continue;
-      if (best === null || pts > points[best]!) best = id;
+      // On a tie, keep the player who actually started, so a tie never reads as a bench mistake.
+      if (best === null || pts > points[best]! || (pts === points[best]! && starters.includes(id))) best = id;
     }
     if (best) used.add(best);
     filled.push({ i, slot, id: best, points: best ? points[best]! : 0 });
@@ -86,9 +87,13 @@ export function assembleFacts(input: FactsInput) {
     .filter(m => m.matchup_id != null)
     .map(m => {
       const opp = thisWeek.find(o => o.matchup_id === m.matchup_id && o.roster_id !== m.roster_id);
-      const best = optimalLineup(league.roster_positions, m.players_points ?? {}, players);
-      const bench = (m.players ?? []).filter(id => !m.starters.includes(id))
-        .map(id => player(id, m.players_points?.[id] ?? 0)).sort((a, b) => b.points - a.points);
+      const best = optimalLineup(league.roster_positions, m.players_points ?? {}, players, m.starters);
+      // Name only the swaps the optimal lineup makes. The top scoring bench player is often a backup QB
+      // who could never have started over the QB who did.
+      const inBest = new Set(best.lineup.map(s => s.id));
+      const byPoints = (ids: string[]) => ids.map(id => player(id, m.players_points?.[id] ?? 0)).sort((a, b) => b.points - a.points);
+      const shouldHaveStarted = byPoints((m.players ?? []).filter(id => !m.starters.includes(id) && inBest.has(id)));
+      const shouldHaveSat = byPoints(m.starters.filter(id => id !== '0' && !inBest.has(id)));
       const lost = !!opp && m.points < opp.points;
       return {
         ...who(m.roster_id),
@@ -98,7 +103,8 @@ export function assembleFacts(input: FactsInput) {
         opponentPoints: opp?.points ?? 0,
         lost,
         couldHaveWon: lost && best.total > (opp?.points ?? 0),
-        bestBenchPlayer: bench[0] ?? null,
+        shouldHaveStarted,
+        shouldHaveSat,
       };
     })
     .sort((a, b) => b.leftOnBench - a.leftOnBench);

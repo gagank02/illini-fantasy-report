@@ -75,6 +75,21 @@ describe('assembleFacts (week 4 fixtures)', () => {
     expect(facts.coachOfTheWeek.team).toBe(sorted.at(-1)!.team);
   });
 
+  test('bench blunders only name swaps the optimal lineup makes, never a backup QB', () => {
+    for (const w of [1, 2, 3, 4]) {
+      const f = assembleFacts(input(w, []));
+      for (const b of f.benchBlunders) {
+        const swapped = b.shouldHaveStarted.reduce((s, p) => s + p.points, 0) - b.shouldHaveSat.reduce((s, p) => s + p.points, 0);
+        expect(swapped).toBeCloseTo(b.leftOnBench, 2);
+        expect(b.shouldHaveStarted).toHaveLength(b.shouldHaveSat.length);
+        if (b.leftOnBench === 0) expect(b.shouldHaveStarted).toEqual([]);
+      }
+    }
+    // Week 2: Malik Willis scored 12.48 on roster 3's bench, but the starting QB scored more.
+    const wk2 = assembleFacts(input(2, []));
+    expect(wk2.benchBlunders.flatMap(b => b.shouldHaveStarted).some(p => p.name === 'Malik Willis')).toBe(false);
+  });
+
   test('standings change compares with the week before', () => {
     expect(facts.standings).toHaveLength(12);
     expect(facts.standings.map(s => s.rank)).toEqual([...Array(12).keys()].map(i => i + 1));
