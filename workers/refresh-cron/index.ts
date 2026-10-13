@@ -15,11 +15,15 @@ export interface Job {
   workflow: string;
   /** UTC hour of the GitHub cron this backs up. Runs created since then today count as "already ran". */
   sinceHourUtc: number;
+  /** UTC weekday the job runs on (0 = Sunday, as in JavaScript). Omit for daily jobs. */
+  dayUtc?: number;
 }
 
 export const JOBS: Job[] = [
   { cron: '47 10 * * *', workflow: 'refresh.yml', sinceHourUtc: 10 },
-  { cron: '53 15 * * tue', workflow: 'weekly-report.yml', sinceHourUtc: 15 },
+  // Cloudflare never fired '53 15 * * tue' (nor '* * 2' before it), so weekly jobs run on a daily cron
+  // and the handler skips the other days itself.
+  { cron: '53 15 * * *', workflow: 'weekly-report.yml', sinceHourUtc: 15, dayUtc: 2 },
 ];
 
 const API = 'https://api.github.com';
@@ -49,8 +53,18 @@ export async function backup(job: Job, now: Date, env: Env): Promise<'already ra
 
 export default {
   async scheduled(event: { cron: string; scheduledTime: number }, env: Env): Promise<void> {
-    const job = JOBS.find(j => j.cron === event.cron);
-    if (!job) throw new Error(`No job for cron ${event.cron}`);
+    // Match on the fire time, not the cron text: Cloudflare may hand back the expression in another form
+    // (e.g. "TUE" or a day number), and an exact string match then silently skips the job.
+    const at = new Date(event.scheduledTime);
+    const job = JOBS.find(j => {
+      const [min, hour] = j.cron.split(' ').map(Number);
+      return hour === at.getUTCHours() && min === at.getUTCMinutes();
+    });
+    if (!job) throw new Error(`No job for cron ${event.cron} at ${at.toISOString()}`);
+    if (job.dayUtc !== undefined && at.getUTCDay() !== job.dayUtc) {
+      console.log(`${job.workflow}: not its day`);
+      return;
+    }
     console.log(`${job.workflow}: ${await backup(job, new Date(event.scheduledTime), env)}`);
   },
 };
