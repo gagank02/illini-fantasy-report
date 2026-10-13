@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import { safeMarkdown } from './src/lib/markdown.ts';
 
 export default defineConfig({
+  // Absolute URLs for link previews (og:url, og:image).
+  site: 'https://illini-fantasy-report.pages.dev',
   output: 'static',
   // External CSS/JS files keep the CSP strict: only the theme snippet needs a hash.
   // standings.html, not standings/index.html, so Cloudflare serves /standings without a redirect.

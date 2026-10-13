@@ -5,10 +5,25 @@ import { tradesAvailable } from '../lib/fantasycalc';
 
 interface Props {
   title?: string;
+  /** Shown under the title in link previews. */
+  description?: string;
+  /** Link preview image path, from src/pages/og. */
+  image?: string;
+  /** 'article' for weekly reports. */
+  ogType?: 'website' | 'article';
 }
 
-const { title } = Astro.props;
+const {
+  title,
+  description = 'Weekly reports, standings, power rankings, and trends for the Illini fantasy football league.',
+  image = '/og/site.png',
+  ogType = 'website',
+} = Astro.props;
 const fullTitle = title ? `${title} | The Illini Fantasy Report` : 'The Illini Fantasy Report';
+// Previews need absolute URLs; `site` is set in astro.config.mjs.
+// At build time the pathname ends in .html (build.format: 'file'), but the site serves clean URLs.
+const pageUrl = new URL(Astro.url.pathname.replace(/(index)?\.html$/, ''), Astro.site).href;
+const imageUrl = new URL(image, Astro.site).href;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const links = [
@@ -31,6 +46,17 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={pageUrl} />
+    <meta property="og:site_name" content="The Illini Fantasy Report" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title ?? fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <!-- Runs before paint so a saved theme never flashes. Its hash is allowed in public/_headers. -->
