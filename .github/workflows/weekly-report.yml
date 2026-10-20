@@ -104,8 +104,10 @@ jobs:
             echo "Secret pattern found in dist/ (files listed above)"
             exit 1
           fi
-      - name: Lint every report against writing-style.md
-        run: find src/content/reports -name '*.md' -print0 | xargs -0 -r npm run lint:report --
+      # Only this run's report: merged reports were linted at review time, and Sleeper team names change mid
+      # season (a renamed team's old emoji name is no longer allowed), so relinting them fails for no reason.
+      - name: Lint the new report against writing-style.md
+        run: git status --porcelain --untracked-files=all -z src/content/reports | cut -z -c4- | xargs -0 -r npm run lint:report --
 
       - name: Open or update the PR
         env:

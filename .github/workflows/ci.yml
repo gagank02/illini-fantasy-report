@@ -15,6 +15,8 @@ jobs:
       SLEEPER_LEAGUE_ID: '1386106937921253376'
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the report lint diffs against the PR base or the previous main commit
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -37,8 +39,12 @@ jobs:
           path: node_modules/.astro/sleeper
           key: sleeper-history-${{ hashFiles('node_modules/.astro/sleeper/*') }}
       - run: npm audit --omit=dev
-      - name: Lint every report against writing-style.md
-        run: find src/content/reports -name '*.md' -print0 | xargs -0 -r npm run lint:report --
+      # Only reports this PR or push adds or edits. Merged reports were linted when they went in, and a team
+      # renamed in Sleeper since then would fail on its old name (emoji, dashes) for no reason.
+      - name: Lint new or edited reports against writing-style.md
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: git diff -z --name-only --diff-filter=AM "$BASE" HEAD -- 'src/content/reports/*.md' | xargs -0 -r npm run lint:report --
       - name: Fail if secrets leaked into the build
         run: |
           if grep -rIl -e 'sk-ant-' -e 'pages/webhooks/deploy_hooks' dist/; then
