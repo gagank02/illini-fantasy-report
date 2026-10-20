@@ -123,6 +123,18 @@ export function assembleFacts(input: FactsInput) {
         .map(x => ({ player: players[id]?.name ?? id, points: x.pts, droppedBy: who(droppedBy).team, startedFor: who(x.m.roster_id).team })),
     );
 
+  // The pickup side of droppedAndScored: without it the writer sees an add's name but never its points.
+  const addedAndScored = completed
+    .filter(t => t.leg === week || t.leg === week - 1)
+    .flatMap(t => Object.entries(t.adds ?? {}))
+    .flatMap(([id, addedBy]) =>
+      thisWeek
+        .filter(m => m.roster_id === addedBy && m.starters.includes(id))
+        .map(m => ({ pts: m.starters_points[m.starters.indexOf(id)] ?? 0 }))
+        .filter(x => x.pts >= 15)
+        .map(x => ({ player: players[id]?.name ?? id, points: x.pts, addedBy: who(addedBy).team })),
+    );
+
   const injuries = thisWeek.flatMap(m =>
     m.starters.filter(id => players[id]?.injury).map(id => ({
       player: players[id]!.name, pos: players[id]!.pos, status: players[id]!.injury!, bodyPart: players[id]!.body ?? null, ...who(m.roster_id),
@@ -172,6 +184,7 @@ export function assembleFacts(input: FactsInput) {
       added: names(t.adds), dropped: names(t.drops),
     })),
     droppedAndScored,
+    addedAndScored,
     injuries,
     nextWeek: pairs(input.nextWeek).filter(p => p.length === 2).map(([a, b]) => ({ home: nextSide(a!), away: nextSide(b!) })),
     trending: { adds: trend(input.trending.add), drops: trend(input.trending.drop) },

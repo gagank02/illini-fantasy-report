@@ -126,6 +126,16 @@ describe('assembleFacts (week 4 fixtures)', () => {
     expect(flagged).toEqual([expect.objectContaining({ player: P[starter.starters[i]!]!.name, points: starter.starters_points[i] })]);
   });
 
+  test('a pickup who started for the team that added them and scored 15+ is flagged', () => {
+    const starter = weeks[3]!.find(m => m.starters_points.some(p => p >= 15))!;
+    const i = starter.starters_points.findIndex(p => p >= 15);
+    const tx: Transaction[] = [{ type: 'waiver', status: 'complete', adds: { [starter.starters[i]!]: starter.roster_id }, drops: null, roster_ids: [starter.roster_id], leg: 4 }];
+    const flagged = assembleFacts(input(4, tx)).addedAndScored;
+    expect(flagged).toEqual([expect.objectContaining({ player: P[starter.starters[i]!]!.name, points: starter.starters_points[i] })]);
+    const other = rosters.find(r => r.roster_id !== starter.roster_id)!.roster_id;
+    expect(assembleFacts(input(4, [{ ...tx[0]!, adds: { [starter.starters[i]!]: other } }])).addedAndScored).toEqual([]);
+  });
+
   test('injury report lists only this week\'s starters with a status', () => {
     const started = new Set(weeks[3]!.flatMap(m => m.starters));
     const byName = new Map(Object.entries(P).map(([id, p]) => [p.name, id]));
