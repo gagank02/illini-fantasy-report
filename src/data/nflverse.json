@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-23",
+ "fetched": "2026-10-24",
  "season": 2026,
  "fill": {
   "96": [12.5,4,22.7,22,null,null],
@@ -98,7 +98,7 @@
   "7525": {"use":[6,13,8,null,null,14],"exp":[10.4,23.1,11.6,null,null,20.7],"tot":{"tgt":41,"rec":26,"recYd":310,"recTd":2},"bio":{"age":27,"exp":5,"college":"Alabama","pick":10,"year":2021}},
   "7526": {"use":[3,10,7,6,5,7],"exp":[4,18.1,11.8,9.4,8.4,9.9],"tot":{"tgt":38,"rec":22,"recYd":228,"recTd":1},"bio":{"age":27,"exp":5,"college":"Alabama","pick":6,"year":2021}},
   "7543": {"use":[16,10,15,null,null,null],"exp":[18.4,7.4,13.2,null,null,null],"tot":{"car":30,"rushYd":128,"rushTd":0,"tgt":13,"rec":11,"recYd":51,"recTd":0},"bio":{"age":27,"exp":5,"college":"Clemson","pick":25,"year":2021}},
-  "7547": {"use":[14,13,8,11,11,null],"exp":[26.1,24.9,15.9,19.7,29.1,null],"tot":{"tgt":57,"rec":37,"recYd":372,"recTd":5},"bio":{"age":26,"exp":5,"college":"USC","pick":112,"year":2021}},
+  "7547": {"use":[14,13,8,11,11,null],"exp":[26.1,24.9,15.9,19.7,29.1,null],"tot":{"tgt":57,"rec":37,"recYd":372,"recTd":5},"bio":{"age":27,"exp":5,"college":"USC","pick":112,"year":2021}},
   "7553": {"use":[1,3,2,3,6,7],"exp":[1.6,4.6,3,4.8,12.7,12.8],"tot":{"tgt":22,"rec":15,"recYd":169,"recTd":3},"bio":{"age":26,"exp":5,"college":"Florida","pick":4,"year":2021}},
   "7564": {"use":[4,9,12,3,10,null],"exp":[7.8,16.5,20.7,4.8,20.8,null],"tot":{"tgt":38,"rec":27,"recYd":289,"recTd":4},"bio":{"age":26,"exp":5,"college":"LSU","pick":5,"year":2021}},
   "7567": {"use":[6,5,5,5,7,3],"exp":[3.7,7.7,8.8,4.5,8.1,2.4],"tot":{"car":19,"rushYd":61,"rushTd":0,"tgt":17,"rec":12,"recYd":61,"recTd":1},"bio":{"age":27,"exp":5,"college":"Memphis","pick":150,"year":2021}},
@@ -198,7 +198,7 @@
   "12534": {"use":[12,12,10,31,null,null],"exp":[9,8.5,5.3,30,null,null],"tot":{"car":60,"rushYd":324,"rushTd":3,"tgt":5,"rec":5,"recYd":39,"recTd":0},"bio":{"age":24,"exp":1,"college":"Rutgers","pick":233,"year":2025}},
   "12536": {"use":[2,5,2,3,5,4],"exp":[3.4,8.3,3.6,7,9.4,7.9],"tot":{"tgt":21,"rec":17,"recYd":334,"recTd":2},"bio":{"age":24,"exp":1,"college":"Iowa State","pick":79,"year":2025}},
   "12545": {"use":[56,34,42,48,25,30],"exp":[28.3,22.9,23.8,18.8,6.2,22],"tot":{"cmp":153,"att":235,"passYd":1443,"passTd":12,"int":5,"car":21,"rushYd":104,"rushTd":2},"bio":{"age":27,"exp":1,"college":"Louisville; Texas Tech; Oregon","pick":40,"year":2025}},
-  "12718": {"use":[1,2,8,3,null,3],"exp":[1.5,3.5,13.1,4.5,null,3.9],"tot":{"tgt":17,"rec":8,"recYd":127,"recTd":1},"bio":{"age":23,"exp":1,"college":"Pittsburgh; Akron","pick":242,"year":2025}},
+  "12718": {"use":[1,2,8,3,null,3],"exp":[1.5,3.5,13.1,4.5,null,3.9],"tot":{"tgt":17,"rec":8,"recYd":127,"recTd":1},"bio":{"age":24,"exp":1,"college":"Pittsburgh; Akron","pick":242,"year":2025}},
   "13274": {"use":[null,8,1,2,9,12],"exp":[null,11.8,1.6,2.7,14.9,15.6],"tot":{"tgt":32,"rec":24,"recYd":227,"recTd":1},"bio":{"age":22,"exp":0,"college":"Alabama; Washington; Michigan State","pick":47,"year":2026}},
   "13276": {"use":[1,null,null,null,null,7],"exp":[1.3,null,null,null,null,11.4],"tot":{"tgt":8,"rec":7,"recYd":133,"recTd":1},"bio":{"age":22,"exp":0,"college":"Indiana","pick":30,"year":2026}},
   "13279": {"use":[6,5,9,12,5,7],"exp":[9,7.8,13.3,17.4,6.9,13.5],"tot":{"tgt":44,"rec":29,"recYd":344,"recTd":1},"bio":{"age":21,"exp":0,"college":"Ohio State","pick":4,"year":2026}},
