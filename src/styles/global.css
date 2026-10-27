@@ -354,12 +354,11 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 .allowed:has(#allowed-TE:checked) [data-pos]:not([data-pos="TE"]) { display: none; }
 /* Heat map: each column shaded on its own scale, green for more points allowed, blue for fewer. Classes, not inline
    styles, because the CSP blocks inline styles. */
-.table-scroll:has(.heat-table) { width: fit-content; max-width: 100%; }
 .heat-table { font-variant-numeric: tabular-nums; }
-.heat-table th.left { width: auto; }
+.heat-table th.left { width: 14%; }
+.heat-table td, .heat-table thead th:not(.left) { width: 17.2%; text-align: center; }
 .heat-table th, .heat-table td { padding-inline: 0.85rem; }
-.heat-table td { min-width: 3.4rem; }
-@media (max-width: 30rem) { .heat-table th, .heat-table td { padding-inline: 0.4rem; min-width: 0; } .heat-table tbody th { min-width: 0; } }
+@media (max-width: 30rem) { .heat-table th, .heat-table td { padding-inline: 0.4rem; } .heat-table tbody th { min-width: 0; } }
 .heat-table abbr { text-decoration: none; }
 .heat { --heat-hi: light-dark(#2f9e44, #2f9e44); --heat-lo: light-dark(#3b6fd8, #3b6fd8); }
 .heat-p1 { background: color-mix(in srgb, var(--heat-hi) 16%, var(--surface)); }
