@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
-import { allowedHeat, allowedRows, allowedThrough, buildNflData, fillWeeks, loadNflverse, luck, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, serializeSiteNfl, siteNfl, type NflPlayer } from '../src/lib/nflverse';
+import { allowedHeat, allowedRows, lastWednesday, weeklyAllowed, allowedThrough, buildNflData, fillWeeks, loadNflverse, luck, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, serializeSiteNfl, siteNfl, type NflPlayer } from '../src/lib/nflverse';
 import { trendRows } from '../src/lib/trends';
 import type { Matchup } from '../src/lib/sleeper';
 import type { Players } from '../src/lib/stats';
@@ -188,4 +188,23 @@ test('heat map: per game by position and total, abbreviation order, each column 
     QB: { v: 20, level: 2 }, RB: { v: 20, level: 0 }, WR: { v: 40, level: 2 }, TE: { v: 10, level: 0 }, Total: { v: 90, level: 2 },
   });
   expect(rows[2]!.cells.QB).toEqual({ v: 10, level: -2 });
+});
+
+test('points allowed update once a week: first run on or after Wednesday, otherwise the saved numbers stay', () => {
+  expect(lastWednesday('2026-10-28')).toBe('2026-10-28'); // Wednesday
+  expect(lastWednesday('2026-10-27')).toBe('2026-10-21'); // Tuesday
+  expect(lastWednesday('2026-11-01')).toBe('2026-10-28'); // Sunday
+  const old = { QB: [10], RB: [10], WR: [10], TE: [10] };
+  const fresh = { QB: [20], RB: [20], WR: [20], TE: [20] };
+  const site = (allowed: typeof old, allowedAsOf?: string) => ({ fetched: 'x', season: 2026, fill: {}, tags: {}, allowed: { ARI: allowed }, allowedAsOf });
+  const today = site(fresh);
+  // Saved last Wednesday: Thursday through Tuesday keep it.
+  expect(weeklyAllowed(today, site(old, '2026-10-21'), '2026-10-27')).toMatchObject({ allowed: { ARI: old }, allowedAsOf: '2026-10-21' });
+  // Wednesday takes the new week.
+  expect(weeklyAllowed(today, site(old, '2026-10-21'), '2026-10-28')).toMatchObject({ allowed: { ARI: fresh }, allowedAsOf: '2026-10-28' });
+  // Wednesday's run was missed: Thursday catches up.
+  expect(weeklyAllowed(today, site(old, '2026-10-21'), '2026-10-29')).toMatchObject({ allowed: { ARI: fresh }, allowedAsOf: '2026-10-29' });
+  // Nothing saved yet: take them now.
+  expect(weeklyAllowed(today, null, '2026-10-27')).toMatchObject({ allowed: { ARI: fresh }, allowedAsOf: '2026-10-27' });
+  expect(JSON.parse(serializeSiteNfl(weeklyAllowed(today, null, '2026-10-27'))).allowedAsOf).toBe('2026-10-27');
 });

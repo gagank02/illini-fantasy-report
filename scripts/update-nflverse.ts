@@ -5,7 +5,7 @@
 // allowed by position (all 32 teams) for the Points Allowed page. Only the daily refresh job runs this. Builds never fetch.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { buildNflData, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, readFull, serializeSiteNfl, siteNfl } from '../src/lib/nflverse.ts';
+import { allowedThrough, buildNflData, loadNflverse, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, readFull, serializeSiteNfl, siteNfl, weeklyAllowed } from '../src/lib/nflverse.ts';
 import { scriptPlayers } from '../src/lib/players.ts';
 import { loadSeason } from '../src/lib/sleeper.ts';
 import { weeklyPoints } from '../src/lib/trends.ts';
@@ -49,6 +49,9 @@ note(`nflverse: ${skill.length - missing.length} of ${skill.length} rostered QB/
 if (missing.length) note(`No nflverse games yet: ${missing.map(id => players[id]?.name ?? id).join(', ')}`);
 if (missing.length > skill.length / 2) throw new Error('Too few rostered players matched nflverse, so the files look broken. Keeping yesterday\'s file.');
 
-const site = siteNfl(full, skill, id => weeklyPoints(weeks, id), id => ({ pos: players[id]!.pos, team: players[id]!.team ?? null }));
+// Points allowed only change on Wednesdays (after Monday night's stats are in); other days keep the saved ones.
+const daily = siteNfl(full, skill, id => weeklyPoints(weeks, id), id => ({ pos: players[id]!.pos, team: players[id]!.team ?? null }));
+const site = weeklyAllowed(daily, loadNflverse(season), today);
+if (site.allowedAsOf === today) note(`Points allowed updated through week ${allowedThrough(site.allowed!)}.`);
 writeFileSync(NFLVERSE_PATH, serializeSiteNfl(site));
 console.log(`Wrote ${Object.keys(site.fill).length} filled lines, ${Object.keys(site.tags).length} tags, ${Object.keys(site.cards ?? {}).length} player panels and points allowed for ${Object.keys(site.allowed ?? {}).length} teams to ${NFLVERSE_PATH}.`);

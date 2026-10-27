@@ -19,7 +19,7 @@ const signed = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).
   </p>
   <p class="trade-credit">
     {allowed
-      ? <>Points from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>), updated {nfl!.fetched}. New weeks appear the day after nflverse posts Monday night's stats, usually Wednesday.</>
+      ? <>Points from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>), updated {nfl!.allowedAsOf ?? nfl!.fetched}. Updated once a week, on Wednesday mornings, after Monday night's stats are in.</>
       : <>Points from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>) appear after the next daily update.</>}
   </p>
 

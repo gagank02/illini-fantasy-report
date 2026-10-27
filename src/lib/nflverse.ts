@@ -202,6 +202,8 @@ export interface SiteNfl {
   teams?: Record<string, TeamSchedule>;
   /** Points allowed by position for every NFL team, for the Points Allowed page. All 32 teams, not only rostered. */
   allowed?: Allowed;
+  /** UTC date `allowed` was last updated. It changes once a week, on Wednesdays (see `weeklyAllowed`). */
+  allowedAsOf?: string;
 }
 
 export interface Card {
@@ -306,7 +308,7 @@ export function siteNfl(
 export function serializeSiteNfl(d: SiteNfl): string {
   const group = (g: Record<string, unknown>) => Object.entries(g).map(([id, v]) => `  ${JSON.stringify(id)}: ${JSON.stringify(v)}`).join(',\n');
   const extra = d.cards ? `,\n "cards": {\n${group(d.cards)}\n },\n "teams": {\n${group(d.teams ?? {})}\n }` : '';
-  const allowed = d.allowed ? `,\n "allowed": {\n${group(d.allowed)}\n }` : '';
+  const allowed = d.allowed ? `${d.allowedAsOf ? `,\n "allowedAsOf": ${JSON.stringify(d.allowedAsOf)}` : ''},\n "allowed": {\n${group(d.allowed)}\n }` : '';
   return `{\n "fetched": ${JSON.stringify(d.fetched)},\n "season": ${d.season},\n "fill": {\n${group(d.fill)}\n },\n "tags": {\n${group(d.tags)}\n }${extra}${allowed}\n}\n`;
 }
 
@@ -407,6 +409,26 @@ export function allowedHeat(allowed: Allowed): HeatRow[] {
     team,
     cells: Object.fromEntries(HEAT_COLS.map(c => [c, { v: round1(values[team]![c]!), level: level(c, values[team]![c]!) }])) as HeatRow['cells'],
   }));
+}
+
+/** The most recent Wednesday on or before a UTC date (YYYY-MM-DD). */
+export function lastWednesday(day: string): string {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() - 3 + 7) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Points allowed change once a week: nflverse posts Monday night's stats on Tuesday afternoon, after Tuesday's
+ * refresh, so the first run on or after Wednesday takes the new week. On other days the saved numbers stay, so the
+ * page never shows a half played week (Thursday and Sunday games land mid-week). A missed Wednesday catches up on
+ * the next run, and a file without points allowed yet gets them right away.
+ */
+export function weeklyAllowed(site: SiteNfl, prev: SiteNfl | null, today: string): SiteNfl {
+  if (prev?.allowed && prev.allowedAsOf && prev.allowedAsOf >= lastWednesday(today)) {
+    return { ...site, allowed: prev.allowed, allowedAsOf: prev.allowedAsOf };
+  }
+  return site.allowed ? { ...site, allowedAsOf: today } : site;
 }
 
 /** Whether the saved file has points allowed yet, for the nav link. Never fetches. */
