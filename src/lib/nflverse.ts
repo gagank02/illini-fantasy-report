@@ -88,7 +88,18 @@ export interface NflData {
   season: number;
   players: Record<string, NflPlayer>;
   games?: Game[];
+  /** PPR points each NFL defense allowed, by the scoring player's position, by week. See `Allowed`. */
+  allowed?: Allowed;
 }
+
+/** Positions on the Points Allowed page. Fullbacks aren't counted, matching the usual nflfastR charts. */
+export const ALLOWED_POS = ['QB', 'RB', 'WR', 'TE'] as const;
+export type AllowedPos = (typeof ALLOWED_POS)[number];
+/**
+ * Per NFL team (Sleeper abbreviation), the PPR points its opponents' QBs, RBs, WRs and TEs scored against it, by
+ * week (index 0 = week 1), null for weeks it didn't play (byes, weeks not played yet).
+ */
+export type Allowed = Record<string, Record<AllowedPos, (number | null)[]>>;
 
 /** nflverse calls the Rams LA; Sleeper calls them LAR. Everything else matches. */
 export const sleeperTeam = (t: string) => (t === 'LA' ? 'LAR' : t);
@@ -115,6 +126,19 @@ export function buildNflData(
     gsisToSleeper.set(r.gsis_id, r.sleeper_id);
     bios.set(r.sleeper_id, { birth: r.birth_date || null, exp: num(r.years_exp), college: r.college || null, pick: num(r.draft_number), year: num(r.entry_year) });
   }
+
+  // Points allowed: every player's line counts against the team he played, whether or not he has a Sleeper id.
+  const allowed: Allowed = {};
+  for (const r of files.stats) {
+    const w = Number(r.week);
+    if (r.season_type !== 'REG' || !(w >= 1 && w <= REG_WEEKS) || !r.opponent_team) continue;
+    const t = (allowed[sleeperTeam(r.opponent_team)] ??= { QB: [], RB: [], WR: [], TE: [] });
+    // Any line against a team means it played that week, so its other positions start at 0, not null.
+    for (const pos of ALLOWED_POS) t[pos][w - 1] ??= 0;
+    const pos = r.position as AllowedPos;
+    if (ALLOWED_POS.includes(pos)) t[pos][w - 1]! += Number(r.fantasy_points_ppr) || 0;
+  }
+  for (const t of Object.values(allowed)) for (const pos of ALLOWED_POS) t[pos] = Array.from(t[pos], x => (x == null ? null : round1(x)));
 
   const players: Record<string, NflPlayer> = {};
   const get = (gsis: string | undefined) => {
@@ -153,7 +177,8 @@ export function buildNflData(
   const games = (files.games ?? [])
     .filter(r => Number(r.season) === season && r.game_type === 'REG')
     .map((r): Game => [Number(r.week), sleeperTeam(r.away_team!), sleeperTeam(r.home_team!)]);
-  return { fetched, season, players, ...(files.games ? { games } : {}) };
+  const sortedAllowed = Object.fromEntries(Object.entries(allowed).sort(([a], [b]) => a.localeCompare(b)));
+  return { fetched, season, players, ...(files.games ? { games } : {}), allowed: sortedAllowed };
 }
 
 /** The full summary for the Actions cache (never committed), or null if missing or not from this season. */
@@ -175,6 +200,10 @@ export interface SiteNfl {
   cards?: Record<string, Card>;
   /** Bye week and next games for the NFL teams of rostered players (Sleeper abbreviations). */
   teams?: Record<string, TeamSchedule>;
+  /** Points allowed by position for every NFL team, for the Points Allowed page. All 32 teams, not only rostered. */
+  allowed?: Allowed;
+  /** UTC date `allowed` was last updated. It changes once a week, on Wednesdays (see `weeklyAllowed`). */
+  allowedAsOf?: string;
 }
 
 export interface Card {
@@ -265,14 +294,22 @@ export function siteNfl(
     if (team && full.games && !teams[team]) teams[team] = teamSchedule(full.games, team, league.length);
   }
   const sortedTeams = Object.fromEntries(Object.entries(teams).sort(([a], [b]) => a.localeCompare(b)));
-  return { fetched: full.fetched, season: full.season, fill, tags, ...(info ? { cards, teams: sortedTeams } : {}) };
+  return {
+    fetched: full.fetched,
+    season: full.season,
+    fill,
+    tags,
+    ...(info ? { cards, teams: sortedTeams } : {}),
+    ...(full.allowed ? { allowed: full.allowed } : {}),
+  };
 }
 
 /** The committed file. One player (or team) per line keeps daily diffs readable. */
 export function serializeSiteNfl(d: SiteNfl): string {
   const group = (g: Record<string, unknown>) => Object.entries(g).map(([id, v]) => `  ${JSON.stringify(id)}: ${JSON.stringify(v)}`).join(',\n');
   const extra = d.cards ? `,\n "cards": {\n${group(d.cards)}\n },\n "teams": {\n${group(d.teams ?? {})}\n }` : '';
-  return `{\n "fetched": ${JSON.stringify(d.fetched)},\n "season": ${d.season},\n "fill": {\n${group(d.fill)}\n },\n "tags": {\n${group(d.tags)}\n }${extra}\n}\n`;
+  const allowed = d.allowed ? `${d.allowedAsOf ? `,\n "allowedAsOf": ${JSON.stringify(d.allowedAsOf)}` : ''},\n "allowed": {\n${group(d.allowed)}\n }` : '';
+  return `{\n "fetched": ${JSON.stringify(d.fetched)},\n "season": ${d.season},\n "fill": {\n${group(d.fill)}\n },\n "tags": {\n${group(d.tags)}\n }${extra}${allowed}\n}\n`;
 }
 
 /** This build's nflverse data, read from disk. Never fetches. null until the daily job saves it, or if it's last season's. */
@@ -309,3 +346,109 @@ export function luck(p: NflPlayer | undefined): Luck | null {
   if (act - exp >= LUCK_GAP && act >= LUCK_FLOOR) return { kind: 'sell', act, exp, games };
   return null;
 }
+
+export interface AllowedRow {
+  team: string;
+  /** 1 = allows the most points per game to this position (the easiest matchup). */
+  rank: number;
+  games: number;
+  /** PPR points allowed per game: season, and over the team's last three games. */
+  perGame: number;
+  last3: number;
+  /** Season per game minus the league-wide per game average for this position. */
+  vsAvg: number;
+}
+
+/** One position's Points Allowed table: every team that has played, most points allowed per game first. */
+export function allowedRows(allowed: Allowed, pos: AllowedPos): AllowedRow[] {
+  const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+  const base = Object.entries(allowed)
+    .map(([team, t]) => ({ team, played: t[pos].filter((x): x is number => x !== null) }))
+    .filter(r => r.played.length)
+    .map(r => ({ team: r.team, games: r.played.length, perGame: avg(r.played), last3: avg(r.played.slice(-3)) }));
+  const league = avg(base.map(r => r.perGame));
+  return base
+    .sort((a, b) => b.perGame - a.perGame || a.team.localeCompare(b.team))
+    .map((r, i) => ({ ...r, rank: i + 1, perGame: round1(r.perGame), last3: round1(r.last3), vsAvg: round1(r.perGame - league) }));
+}
+
+export type HeatCol = AllowedPos | 'Total';
+export const HEAT_COLS: HeatCol[] = [...ALLOWED_POS, 'Total'];
+
+export interface HeatRow {
+  team: string;
+  /** Per game points allowed by column, and a shade from -3 (far fewer than average) to 3 (far more). */
+  cells: Record<HeatCol, { v: number; level: number }>;
+}
+
+/**
+ * The compact heat map: every team in abbreviation order, per game points allowed to each position and in total.
+ * Shades come from how many standard deviations a team is from that column's average, so each column is shaded on
+ * its own scale (WRs score more than TEs everywhere).
+ */
+export function allowedHeat(allowed: Allowed): HeatRow[] {
+  const teams = Object.keys(allowed).sort((a, b) => a.localeCompare(b));
+  const perGame = (team: string, pos: AllowedPos) => {
+    const played = allowed[team]![pos].filter((x): x is number => x !== null);
+    return played.length ? played.reduce((a, b) => a + b, 0) / played.length : null;
+  };
+  const values = Object.fromEntries(teams.map(t => {
+    const by = Object.fromEntries(ALLOWED_POS.map(p => [p, perGame(t, p)])) as Record<AllowedPos, number | null>;
+    const total = ALLOWED_POS.every(p => by[p] !== null) ? ALLOWED_POS.reduce((a, p) => a + by[p]!, 0) : null;
+    return [t, { ...by, Total: total }];
+  })) as Record<string, Record<HeatCol, number | null>>;
+  const live = teams.filter(t => values[t]!.Total !== null);
+  const scale = Object.fromEntries(HEAT_COLS.map(c => {
+    const xs = live.map(t => values[t]![c]!);
+    const mean = xs.reduce((a, b) => a + b, 0) / (xs.length || 1);
+    const sd = Math.sqrt(xs.reduce((a, b) => a + (b - mean) ** 2, 0) / (xs.length || 1));
+    return [c, { mean, sd }];
+  })) as Record<HeatCol, { mean: number; sd: number }>;
+  const level = (c: HeatCol, v: number) => (scale[c].sd ? Math.max(-3, Math.min(3, Math.round(((v - scale[c].mean) / scale[c].sd) * 1.5))) : 0);
+  return live.map(team => ({
+    team,
+    cells: Object.fromEntries(HEAT_COLS.map(c => [c, { v: round1(values[team]![c]!), level: level(c, values[team]![c]!) }])) as HeatRow['cells'],
+  }));
+}
+
+/** The most recent Wednesday on or before a UTC date (YYYY-MM-DD). */
+export function lastWednesday(day: string): string {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() - 3 + 7) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Points allowed change once a week: nflverse posts Monday night's stats on Tuesday afternoon, after Tuesday's
+ * refresh, so the first run on or after Wednesday takes the new week. On other days the saved numbers stay, so the
+ * page never shows a half played week (Thursday and Sunday games land mid-week). A missed Wednesday catches up on
+ * the next run, and a file without points allowed yet gets them right away.
+ */
+export function weeklyAllowed(site: SiteNfl, prev: SiteNfl | null, today: string): SiteNfl {
+  if (prev?.allowed && prev.allowedAsOf && prev.allowedAsOf >= lastWednesday(today)) {
+    return { ...site, allowed: prev.allowed, allowedAsOf: prev.allowedAsOf };
+  }
+  return site.allowed ? { ...site, allowedAsOf: today } : site;
+}
+
+/** Whether the saved file has points allowed yet, for the nav link. Never fetches. */
+export function allowedAvailable(path = NFLVERSE_PATH): boolean {
+  return existsSync(path) && 'allowed' in (JSON.parse(readFileSync(path, 'utf8')) as SiteNfl);
+}
+
+/** The last week any team has a game in, or 0. */
+export function allowedThrough(allowed: Allowed): number {
+  return Math.max(0, ...Object.values(allowed).map(t => t.QB.length));
+}
+
+/** NFL team names by Sleeper abbreviation, for the Points Allowed page. */
+export const NFL_TEAMS: Record<string, string> = {
+  ARI: 'Arizona Cardinals', ATL: 'Atlanta Falcons', BAL: 'Baltimore Ravens', BUF: 'Buffalo Bills',
+  CAR: 'Carolina Panthers', CHI: 'Chicago Bears', CIN: 'Cincinnati Bengals', CLE: 'Cleveland Browns',
+  DAL: 'Dallas Cowboys', DEN: 'Denver Broncos', DET: 'Detroit Lions', GB: 'Green Bay Packers',
+  HOU: 'Houston Texans', IND: 'Indianapolis Colts', JAX: 'Jacksonville Jaguars', KC: 'Kansas City Chiefs',
+  LAC: 'Los Angeles Chargers', LAR: 'Los Angeles Rams', LV: 'Las Vegas Raiders', MIA: 'Miami Dolphins',
+  MIN: 'Minnesota Vikings', NE: 'New England Patriots', NO: 'New Orleans Saints', NYG: 'New York Giants',
+  NYJ: 'New York Jets', PHI: 'Philadelphia Eagles', PIT: 'Pittsburgh Steelers', SEA: 'Seattle Seahawks',
+  SF: 'San Francisco 49ers', TB: 'Tampa Bay Buccaneers', TEN: 'Tennessee Titans', WAS: 'Washington Commanders',
+};

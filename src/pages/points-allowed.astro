@@ -1,0 +1,94 @@
+---
+import Ext from '../components/Ext.astro';
+import Base from '../layouts/Base.astro';
+import { ALLOWED_POS, allowedHeat, allowedRows, allowedThrough, HEAT_COLS, loadNflverse, NFL_TEAMS } from '../lib/nflverse';
+import { loadSeason } from '../lib/sleeper';
+
+const { league } = await loadSeason();
+const nfl = loadNflverse(Number(league.season));
+const allowed = nfl?.allowed ?? null;
+const through = allowed ? allowedThrough(allowed) : 0;
+const heatClass = (level: number) => (level ? `heat heat-${level > 0 ? 'p' : 'n'}${Math.abs(level)}` : 'heat');
+const signed = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(1)}`;
+---
+
+<Base title="Points Allowed" description="PPR fantasy points each NFL defense allows to QBs, RBs, WRs and TEs, updated weekly.">
+  <h1>Points Allowed</h1>
+  <p class="muted">
+    PPR fantasy points each NFL defense has allowed per game to each position this season{through > 0 && `, through week ${through}`}. 1st allows the most, so it's the easiest matchup. <strong>vs avg</strong> compares a team with the league average for that position, and <strong>Last 3</strong> is its last three games.
+  </p>
+  <p class="trade-credit">
+    {allowed
+      ? <>Points from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>), updated {nfl!.allowedAsOf ?? nfl!.fetched}. Updated once a week, on Wednesday mornings, after Monday night's stats are in.</>
+      : <>Points from <Ext href="https://github.com/nflverse">nflverse</Ext> (<Ext href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</Ext>) appear after the next daily update.</>}
+  </p>
+
+  {allowed && (
+    <div class="allowed">
+      <fieldset class="tab-list">
+        <legend class="visually-hidden">Position</legend>
+        {['Heat', ...ALLOWED_POS].map((p, i) => (
+          <>
+            <input type="radio" name="allowed-pos" id={`allowed-${p}`} class="visually-hidden" checked={i === 0} />
+            <label for={`allowed-${p}`}>{p === 'Heat' ? 'Heat map' : p}</label>
+          </>
+        ))}
+      </fieldset>
+
+      <div class="table-scroll" data-pos="Heat">
+        <table class="heat-table">
+          <caption class="visually-hidden">PPR points allowed per game by position, every team</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="left">Team</th>
+              {HEAT_COLS.map(c => <th scope="col">{c}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {allowedHeat(allowed).map(r => (
+              <tr>
+                <th scope="row" class="left"><abbr title={NFL_TEAMS[r.team] ?? r.team}>{r.team}</abbr></th>
+                {HEAT_COLS.map(c => <td class={heatClass(r.cells[c].level)}>{r.cells[c].v.toFixed(1)}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {ALLOWED_POS.map(pos => (
+        <div class="table-scroll" data-pos={pos}>
+          <table>
+            <caption class="visually-hidden">PPR points allowed to {pos}s per game</caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col" class="left">Defense</th>
+                <th scope="col">Per game</th>
+                <th scope="col">vs avg</th>
+                <th scope="col" class="wide">Last 3</th>
+                <th scope="col" class="wide">Games</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allowedRows(allowed, pos).map(r => (
+                <tr>
+                  <td>{r.rank}</td>
+                  <th scope="row" class="left">
+                    {NFL_TEAMS[r.team] ?? r.team}
+                    <span class="sub">{r.team}</span>
+                    <span class="sub narrow">Last 3: {r.last3.toFixed(1)} · {r.games} games</span>
+                  </th>
+                  <td>{r.perGame.toFixed(1)}</td>
+                  <td class={r.vsAvg > 0 ? 'move-up' : r.vsAvg < 0 ? 'move-down' : undefined}>{signed(r.vsAvg)}</td>
+                  <td class="wide">{r.last3.toFixed(1)}</td>
+                  <td class="wide">{r.games}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  )}
+  <p class="muted legend">{allowed && <>On the heat map, <span class="heat heat-p3">greener</span> means more points allowed than the league average for that column (an easier matchup), and <span class="heat heat-n3">bluer</span> means fewer. </>}Each player counts at his listed position, and fullbacks aren't counted. Byes don't count as games. Kickers and defenses aren't included.</p>
+</Base>

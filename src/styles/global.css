@@ -95,8 +95,8 @@ a { color: var(--accent-text); }
 #site-nav a { display: block; padding: 0.6rem 0.9rem; color: inherit; text-decoration: none; white-space: nowrap; font-weight: 500; }
 #site-nav a[aria-current='page'] { color: var(--accent-text); font-weight: 600; }
 
-/* Desktop: the popover becomes an always visible inline nav. The links need about 850px. */
-@media (min-width: 60rem) {
+/* Desktop: the popover becomes an always visible inline nav. The links need about 1040px with Points Allowed. */
+@media (min-width: 65rem) {
   .menu-button { display: none; }
   #site-nav { display: block; position: static; inset: auto; margin: 0; padding: 0; background: none; border: 0; color: var(--on-dark); }
   #site-nav ul { display: flex; gap: 0.15rem; }
@@ -346,6 +346,28 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 .trends:has(#pos-RB:checked) tr[data-pos]:not([data-pos="RB"]),
 .trends:has(#pos-WR:checked) tr[data-pos]:not([data-pos="WR"]),
 .trends:has(#pos-TE:checked) tr[data-pos]:not([data-pos="TE"]) { display: none; }
+/* Points Allowed: one table per position, CSS only like the Trends tabs. */
+.allowed:has(#allowed-Heat:checked) [data-pos]:not([data-pos="Heat"]),
+.allowed:has(#allowed-QB:checked) [data-pos]:not([data-pos="QB"]),
+.allowed:has(#allowed-RB:checked) [data-pos]:not([data-pos="RB"]),
+.allowed:has(#allowed-WR:checked) [data-pos]:not([data-pos="WR"]),
+.allowed:has(#allowed-TE:checked) [data-pos]:not([data-pos="TE"]) { display: none; }
+/* Heat map: each column shaded on its own scale, green for more points allowed, blue for fewer. Classes, not inline
+   styles, because the CSP blocks inline styles. */
+.heat-table { font-variant-numeric: tabular-nums; }
+.heat-table th.left { width: 14%; }
+.heat-table td, .heat-table thead th:not(.left) { width: 17.2%; text-align: center; }
+.heat-table th, .heat-table td { padding-inline: 0.85rem; }
+@media (max-width: 30rem) { .heat-table th, .heat-table td { padding-inline: 0.4rem; } .heat-table tbody th { min-width: 0; } }
+.heat-table abbr { text-decoration: none; }
+.heat { --heat-hi: light-dark(#2f9e44, #2f9e44); --heat-lo: light-dark(#3b6fd8, #3b6fd8); }
+.heat-p1 { background: color-mix(in srgb, var(--heat-hi) 16%, var(--surface)); }
+.heat-p2 { background: color-mix(in srgb, var(--heat-hi) 32%, var(--surface)); }
+.heat-p3 { background: color-mix(in srgb, var(--heat-hi) 48%, var(--surface)); }
+.heat-n1 { background: color-mix(in srgb, var(--heat-lo) 16%, var(--surface)); }
+.heat-n2 { background: color-mix(in srgb, var(--heat-lo) 32%, var(--surface)); }
+.heat-n3 { background: color-mix(in srgb, var(--heat-lo) 48%, var(--surface)); }
+.legend .heat { padding: 0.1rem 0.35rem; border-radius: var(--r-sm); color: var(--fg); }
 .trend-table thead th { white-space: normal; }
 .last-season .spark { display: inline-block; vertical-align: middle; }
 .last-season .sub { display: inline; margin-left: 0.4rem; }

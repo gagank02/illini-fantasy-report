@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Ext from '../components/Ext.astro';
 import { tradesAvailable } from '../lib/fantasycalc';
+import { allowedAvailable } from '../lib/nflverse';
 
 interface Props {
   title?: string;
@@ -34,6 +35,8 @@ const links = [
   { href: '/what-if', label: 'What If' },
   { href: '/history', label: 'History' },
   { href: '/trends', label: 'Trends' },
+  // Hidden until the daily job has saved points allowed.
+  ...(allowedAvailable() ? [{ href: '/points-allowed', label: 'Points Allowed' }] : []),
   // Hidden until the daily job has saved trade suggestions.
   ...(tradesAvailable() ? [{ href: '/trades', label: 'Trades' }] : []),
 ];
