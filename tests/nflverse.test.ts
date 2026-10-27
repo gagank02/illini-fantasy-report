@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
-import { buildNflData, fillWeeks, loadNflverse, luck, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, serializeSiteNfl, siteNfl, type NflPlayer } from '../src/lib/nflverse';
+import { allowedRows, allowedThrough, buildNflData, fillWeeks, loadNflverse, luck, NFL_FULL_PATH, NFLVERSE_PATH, nflverseUrls, parseCsv, serializeSiteNfl, siteNfl, type NflPlayer } from '../src/lib/nflverse';
 import { trendRows } from '../src/lib/trends';
 import type { Matchup } from '../src/lib/sleeper';
 import type { Players } from '../src/lib/stats';
@@ -139,7 +139,43 @@ test('player panels: usage by position, weeks he missed stay gaps, totals for hi
   });
   expect(full.games).toContainEqual([3, 'SEA', 'LAR']);
   const text = serializeSiteNfl(site);
-  expect(Object.keys(JSON.parse(text))).toEqual(['fetched', 'season', 'fill', 'tags', 'cards', 'teams']);
+  expect(Object.keys(JSON.parse(text))).toEqual(['fetched', 'season', 'fill', 'tags', 'cards', 'teams', 'allowed']);
   expect(JSON.parse(text)).toEqual(site);
   expect(text).not.toMatch(/"(pts|birth|gsis|pfr)"/); // no raw rows, ids or birth dates in the committed file
+});
+
+test('points allowed: every line counts against its opponent by position, byes stay null, FB counts as RB', () => {
+  const stats = csv([
+    ['player_id', 'position', 'season_type', 'week', 'opponent_team', 'fantasy_points_ppr'],
+    ['G1', 'QB', 'REG', '1', 'LA', '20.04'],
+    ['G2', 'WR', 'REG', '1', 'LA', '10'],
+    ['G3', 'WR', 'REG', '1', 'LA', '5.5'],
+    ['G4', 'FB', 'REG', '1', 'LA', '2'],
+    ['G5', 'LB', 'REG', '1', 'LA', '0'],
+    ['G6', 'QB', 'REG', '3', 'LA', '-1'],
+    ['G1', 'QB', 'POST', '19', 'LA', '30'],
+    ['G7', 'TE', 'REG', '1', 'CHI', '8'],
+  ]);
+  const d = buildNflData('2026-10-27', 2026, { ids: [], stats, expected: [] });
+  expect(d.allowed).toEqual({
+    CHI: { QB: [0], RB: [0], WR: [0], TE: [8] },
+    LAR: { QB: [20, null, -1], RB: [2, null, 0], WR: [15.5, null, 0], TE: [0, null, 0] },
+  });
+  expect(allowedThrough(d.allowed!)).toBe(3);
+});
+
+test('points allowed table: most per game first, last three games, vs league average, byes skipped', () => {
+  const t = (qb: (number | null)[]) => ({ QB: qb, RB: [], WR: [], TE: [] });
+  const rows = allowedRows({ AAA: t([10, 10, null, 10, 10]), BBB: t([30, null, 20, 10, 0]), CCC: t([]) }, 'QB');
+  expect(rows).toEqual([
+    { team: 'BBB', rank: 1, games: 4, perGame: 15, last3: 10, vsAvg: 2.5 },
+    { team: 'AAA', rank: 2, games: 4, perGame: 10, last3: 10, vsAvg: -2.5 },
+  ]);
+});
+
+test('the committed file carries points allowed for every team when the summary has it', () => {
+  const allowed = { ARI: { QB: [18], RB: [20], WR: [30], TE: [7] } };
+  const site = siteNfl({ fetched: '2026-10-27', season: 2026, players: {}, allowed }, [], () => []);
+  expect(site.allowed).toEqual(allowed);
+  expect(JSON.parse(serializeSiteNfl(site)).allowed).toEqual(allowed);
 });

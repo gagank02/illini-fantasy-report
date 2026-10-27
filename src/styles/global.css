@@ -346,6 +346,11 @@ table.lineup tbody + tbody { border-top: 2px solid var(--rule); }
 .trends:has(#pos-RB:checked) tr[data-pos]:not([data-pos="RB"]),
 .trends:has(#pos-WR:checked) tr[data-pos]:not([data-pos="WR"]),
 .trends:has(#pos-TE:checked) tr[data-pos]:not([data-pos="TE"]) { display: none; }
+/* Points Allowed: one table per position, CSS only like the Trends tabs. */
+.allowed:has(#allowed-QB:checked) [data-pos]:not([data-pos="QB"]),
+.allowed:has(#allowed-RB:checked) [data-pos]:not([data-pos="RB"]),
+.allowed:has(#allowed-WR:checked) [data-pos]:not([data-pos="WR"]),
+.allowed:has(#allowed-TE:checked) [data-pos]:not([data-pos="TE"]) { display: none; }
 .trend-table thead th { white-space: normal; }
 .last-season .spark { display: inline-block; vertical-align: middle; }
 .last-season .sub { display: inline; margin-left: 0.4rem; }
