@@ -92,7 +92,7 @@ export interface NflData {
   allowed?: Allowed;
 }
 
-/** Positions on the Points Allowed page. Fullbacks count as RBs. */
+/** Positions on the Points Allowed page. Fullbacks aren't counted, matching the usual nflfastR charts. */
 export const ALLOWED_POS = ['QB', 'RB', 'WR', 'TE'] as const;
 export type AllowedPos = (typeof ALLOWED_POS)[number];
 /**
@@ -129,15 +129,14 @@ export function buildNflData(
 
   // Points allowed: every player's line counts against the team he played, whether or not he has a Sleeper id.
   const allowed: Allowed = {};
-  const allowedPos = (pos: string): AllowedPos | null => (pos === 'FB' ? 'RB' : (ALLOWED_POS as readonly string[]).includes(pos) ? (pos as AllowedPos) : null);
   for (const r of files.stats) {
     const w = Number(r.week);
     if (r.season_type !== 'REG' || !(w >= 1 && w <= REG_WEEKS) || !r.opponent_team) continue;
     const t = (allowed[sleeperTeam(r.opponent_team)] ??= { QB: [], RB: [], WR: [], TE: [] });
     // Any line against a team means it played that week, so its other positions start at 0, not null.
     for (const pos of ALLOWED_POS) t[pos][w - 1] ??= 0;
-    const pos = allowedPos(r.position ?? '');
-    if (pos) t[pos][w - 1]! += Number(r.fantasy_points_ppr) || 0;
+    const pos = r.position as AllowedPos;
+    if (ALLOWED_POS.includes(pos)) t[pos][w - 1]! += Number(r.fantasy_points_ppr) || 0;
   }
   for (const t of Object.values(allowed)) for (const pos of ALLOWED_POS) t[pos] = Array.from(t[pos], x => (x == null ? null : round1(x)));
 
@@ -369,6 +368,45 @@ export function allowedRows(allowed: Allowed, pos: AllowedPos): AllowedRow[] {
   return base
     .sort((a, b) => b.perGame - a.perGame || a.team.localeCompare(b.team))
     .map((r, i) => ({ ...r, rank: i + 1, perGame: round1(r.perGame), last3: round1(r.last3), vsAvg: round1(r.perGame - league) }));
+}
+
+export type HeatCol = AllowedPos | 'Total';
+export const HEAT_COLS: HeatCol[] = [...ALLOWED_POS, 'Total'];
+
+export interface HeatRow {
+  team: string;
+  /** Per game points allowed by column, and a shade from -3 (far fewer than average) to 3 (far more). */
+  cells: Record<HeatCol, { v: number; level: number }>;
+}
+
+/**
+ * The compact heat map: every team in abbreviation order, per game points allowed to each position and in total.
+ * Shades come from how many standard deviations a team is from that column's average, so each column is shaded on
+ * its own scale (WRs score more than TEs everywhere).
+ */
+export function allowedHeat(allowed: Allowed): HeatRow[] {
+  const teams = Object.keys(allowed).sort((a, b) => a.localeCompare(b));
+  const perGame = (team: string, pos: AllowedPos) => {
+    const played = allowed[team]![pos].filter((x): x is number => x !== null);
+    return played.length ? played.reduce((a, b) => a + b, 0) / played.length : null;
+  };
+  const values = Object.fromEntries(teams.map(t => {
+    const by = Object.fromEntries(ALLOWED_POS.map(p => [p, perGame(t, p)])) as Record<AllowedPos, number | null>;
+    const total = ALLOWED_POS.every(p => by[p] !== null) ? ALLOWED_POS.reduce((a, p) => a + by[p]!, 0) : null;
+    return [t, { ...by, Total: total }];
+  })) as Record<string, Record<HeatCol, number | null>>;
+  const live = teams.filter(t => values[t]!.Total !== null);
+  const scale = Object.fromEntries(HEAT_COLS.map(c => {
+    const xs = live.map(t => values[t]![c]!);
+    const mean = xs.reduce((a, b) => a + b, 0) / (xs.length || 1);
+    const sd = Math.sqrt(xs.reduce((a, b) => a + (b - mean) ** 2, 0) / (xs.length || 1));
+    return [c, { mean, sd }];
+  })) as Record<HeatCol, { mean: number; sd: number }>;
+  const level = (c: HeatCol, v: number) => (scale[c].sd ? Math.max(-3, Math.min(3, Math.round(((v - scale[c].mean) / scale[c].sd) * 1.5))) : 0);
+  return live.map(team => ({
+    team,
+    cells: Object.fromEntries(HEAT_COLS.map(c => [c, { v: round1(values[team]![c]!), level: level(c, values[team]![c]!) }])) as HeatRow['cells'],
+  }));
 }
 
 /** Whether the saved file has points allowed yet, for the nav link. Never fetches. */
