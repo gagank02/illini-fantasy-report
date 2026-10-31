@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-30",
+ "fetched": "2026-10-31",
  "season": 2026,
  "fill": {
   "96": [12.5,4,22.7,22,null,null,null],
@@ -142,7 +142,7 @@
   "9224": {"use":[21,23,15,20,16,null,15],"exp":[20.3,16,8.4,20.3,15.6,null,12.6],"tot":{"car":82,"rushYd":285,"rushTd":1,"tgt":33,"rec":28,"recYd":143,"recTd":0},"bio":{"age":26,"exp":3,"college":"Illinois; Western Michigan","pick":163,"year":2023}},
   "9228": {"use":[37,36,48,41,null,39,27],"exp":[20.2,33,19.3,19.7,null,19.9,11.5],"tot":{"cmp":158,"att":269,"passYd":1921,"passTd":13,"int":5,"car":10,"rushYd":34,"rushTd":1},"bio":{"age":25,"exp":3,"college":"Alabama","pick":1,"year":2023}},
   "9480": {"use":[3,2,5,8,8,7,null],"exp":[7.5,3.5,8.6,14.1,12.9,11.1,null],"tot":{"tgt":33,"rec":26,"recYd":279,"recTd":1},"bio":{"age":25,"exp":3,"college":"Penn State","pick":61,"year":2023}},
-  "9484": {"use":[6,3,8,7,5,8,6],"exp":[10.7,4.9,10.9,15.7,8.1,16.9,12.1],"tot":{"tgt":49,"rec":35,"recYd":350,"recTd":3},"bio":{"age":25,"exp":3,"college":"South Dakota State","pick":78,"year":2023}},
+  "9484": {"use":[6,3,8,7,5,8,6],"exp":[10.7,4.9,10.9,15.7,8.1,16.5,12.1],"tot":{"tgt":49,"rec":35,"recYd":350,"recTd":3},"bio":{"age":25,"exp":3,"college":"South Dakota State","pick":78,"year":2023}},
   "9487": {"use":[6,12,5,3,9,11,null],"exp":[11.9,19.1,13.4,6.3,13.7,20.8,null],"tot":{"tgt":46,"rec":26,"recYd":416,"recTd":4},"bio":{"age":24,"exp":3,"college":"Penn State","pick":185,"year":2023}},
   "9488": {"use":[11,11,14,6,8,16,12],"exp":[18.6,21.4,26.6,10,12.9,23.7,23.1],"tot":{"tgt":78,"rec":58,"recYd":867,"recTd":8},"bio":{"age":24,"exp":3,"college":"Ohio State","pick":20,"year":2023}},
   "9493": {"use":[9,null,null,12,24,7,10],"exp":[17.8,null,null,21.1,45.8,11.7,19.8],"tot":{"tgt":62,"rec":45,"recYd":485,"recTd":2},"bio":{"age":25,"exp":3,"college":"BYU; Washington","pick":177,"year":2023}},
