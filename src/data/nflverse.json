@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "season": 2026,
  "fill": {
   "96": [12.5,4,22.7,22,null,null,null],
@@ -15,11 +15,11 @@
   "7553": [null,null,null,null,15.2,23,null],
   "7600": [15.6,7.4,5.1,10.7,21.5,null,null],
   "8122": [null,2.4,null,null,0.8,11.8,null],
-  "8154": [null,null,null,25.7,null,null,null],
   "8183": [21.1,null,null,null,null,null,null],
   "8210": [3.6,null,null,2.5,10,13.9,null],
   "9228": [31.4,null,null,null,null,null,null],
   "9480": [null,null,6.2,16.5,null,null,null],
+  "9501": [7,1.9,4.8,3.5,22.5,19.6,null],
   "9757": [9,null,3.9,1.9,9,null,null],
   "9758": [16.5,null,11.7,23.1,20.9,23,null],
   "10213": [null,22.9,null,8.4,7.5,null,null],
@@ -40,7 +40,8 @@
   "13296": [14.4,null,null,null,null,null,21],
   "13301": [16.4,null,null,5.1,6.1,8,null],
   "13337": [8.8,null,null,null,null,null,null],
-  "13346": [13.9,null,null,null,null,null,null]
+  "13346": [13.9,null,null,null,null,null,null],
+  "13424": [1,0,1.4,4.8,2.9,2.7,5.8]
  },
  "tags": {
   "3257": {"kind":"buy","act":15.4,"exp":22.5,"games":7},
@@ -130,13 +131,12 @@
   "8148": {"use":[9,4,4,8,4,null,9],"exp":[19.5,5.8,7.5,14.1,14.5,null,22.8],"tot":{"tgt":38,"rec":23,"recYd":367,"recTd":4},"bio":{"age":25,"exp":4,"college":"Alabama; Ohio State","pick":12,"year":2022}},
   "8150": {"use":[14,14,21,26,22,13,18],"exp":[12.5,12.4,17.8,30.6,27.5,15.4,13.3],"tot":{"car":96,"rushYd":492,"rushTd":5,"tgt":41,"rec":32,"recYd":239,"recTd":1},"bio":{"age":26,"exp":4,"college":"Notre Dame","pick":164,"year":2022}},
   "8151": {"use":[26,30,20,23,null,21,18],"exp":[26.2,36.3,17.4,19.2,null,24.6,13.9],"tot":{"car":120,"rushYd":701,"rushTd":6,"tgt":27,"rec":18,"recYd":116,"recTd":2},"bio":{"age":26,"exp":4,"college":"Michigan State; Wake Forest","pick":41,"year":2022}},
-  "8154": {"use":[9,13,10,15,7,4,null],"exp":[4,8.5,5.4,12,4.5,4.8,null],"tot":{"car":53,"rushYd":211,"rushTd":4,"tgt":6,"rec":5,"recYd":30,"recTd":0},"bio":{"age":27,"exp":4,"college":"Alabama","pick":98,"year":2022}},
   "8155": {"use":[24,21,16,null,null,null,null],"exp":[16.2,14.6,15.1,null,null,null,null],"tot":{"car":51,"rushYd":163,"rushTd":1,"tgt":10,"rec":10,"recYd":102,"recTd":0},"bio":{"age":25,"exp":4,"college":"Iowa State","pick":36,"year":2022}},
   "8161": {"use":[27,23,36,17,27,null,21],"exp":[13,7,22.9,6.4,26.6,null,14.1],"tot":{"cmp":87,"att":151,"passYd":1057,"passTd":4,"int":4,"car":35,"rushYd":223,"rushTd":3},"bio":{"age":27,"exp":4,"college":"Liberty; Auburn","pick":86,"year":2022}},
   "8167": {"use":[8,11,10,3,8,8,8],"exp":[16.6,18.7,20.3,4.2,17.1,17.5,14.4],"tot":{"tgt":66,"rec":42,"recYd":708,"recTd":6},"bio":{"age":27,"exp":4,"college":"North Dakota State","pick":34,"year":2022}},
   "8183": {"use":[34,22,27,30,29,29,40],"exp":[23.5,18.2,16.1,19.5,17.6,24.1,18.7],"tot":{"cmp":146,"att":211,"passYd":1748,"passTd":15,"int":4,"car":32,"rushYd":161,"rushTd":1},"bio":{"age":26,"exp":4,"college":"Iowa State","pick":262,"year":2022}},
   "8210": {"use":[3,null,null,4,6,7,null],"exp":[5.1,null,null,5.5,8.5,10.1,null],"tot":{"tgt":20,"rec":15,"recYd":150,"recTd":0},"bio":{"age":27,"exp":4,"college":"Maryland","pick":143,"year":2022}},
-  "8228": {"use":[15,13,20,20,21,16,21],"exp":[16.6,10.5,14.1,16.7,15,13,14.8],"tot":{"car":102,"rushYd":561,"rushTd":1,"tgt":34,"rec":24,"recYd":294,"recTd":1},"bio":{"age":27,"exp":4,"college":"Oklahoma State","pick":null,"year":2022}},
+  "8228": {"use":[15,13,20,20,21,16,21],"exp":[16.6,10.5,14.1,16.7,15,13,14.8],"tot":{"car":102,"rushYd":561,"rushTd":1,"tgt":34,"rec":24,"recYd":294,"recTd":1},"bio":{"age":28,"exp":4,"college":"Oklahoma State","pick":null,"year":2022}},
   "8408": {"use":[15,null,null,null,null,null,15],"exp":[10,null,null,null,null,null,10.2],"tot":{"car":30,"rushYd":127,"rushTd":1,"tgt":2,"rec":0,"recYd":0,"recTd":0},"bio":{"age":27,"exp":4,"college":"Georgia Tech","pick":null,"year":2022}},
   "9221": {"use":[34,22,27,19,30,null,34],"exp":[33,21.9,30.8,23,37.5,null,25.8],"tot":{"car":134,"rushYd":620,"rushTd":7,"tgt":40,"rec":32,"recYd":270,"recTd":2},"bio":{"age":24,"exp":3,"college":"Alabama; Georgia Tech","pick":12,"year":2023}},
   "9224": {"use":[21,23,15,20,16,null,15],"exp":[20.3,16,8.4,20.3,15.6,null,12.6],"tot":{"car":82,"rushYd":285,"rushTd":1,"tgt":33,"rec":28,"recYd":143,"recTd":0},"bio":{"age":26,"exp":3,"college":"Illinois; Western Michigan","pick":163,"year":2023}},
@@ -147,6 +147,7 @@
   "9488": {"use":[11,11,14,6,8,16,12],"exp":[18.6,21.4,26.6,10,12.9,23.7,23.1],"tot":{"tgt":78,"rec":58,"recYd":867,"recTd":8},"bio":{"age":24,"exp":3,"college":"Ohio State","pick":20,"year":2023}},
   "9493": {"use":[9,null,null,12,24,7,10],"exp":[17.8,null,null,21.1,45.8,11.7,19.8],"tot":{"tgt":62,"rec":45,"recYd":485,"recTd":2},"bio":{"age":25,"exp":3,"college":"BYU; Washington","pick":177,"year":2023}},
   "9500": {"use":[4,9,11,4,6,8,4],"exp":[6.1,13.2,21.8,5.2,9.1,14.5,5.3],"tot":{"tgt":46,"rec":26,"recYd":307,"recTd":0},"bio":{"age":25,"exp":3,"college":"North Carolina","pick":79,"year":2023}},
+  "9501": {"use":[7,2,5,3,5,8,4],"exp":[9.9,2.9,9.9,6,10.6,12.8,5.6],"tot":{"tgt":34,"rec":23,"recYd":256,"recTd":3},"bio":{"age":25,"exp":3,"college":"Liberty","pick":210,"year":2023}},
   "9502": {"use":[null,null,null,null,null,null,1],"exp":[null,null,null,null,null,null,2.8],"tot":{"tgt":1,"rec":1,"recYd":43,"recTd":0},"bio":{"age":27,"exp":3,"college":"Houston; Independence Comm. College; Alabama A&M","pick":69,"year":2023}},
   "9508": {"use":[5,9,3,3,11,2,null],"exp":[7.3,6.1,1.6,1.9,12.8,1.7,null],"tot":{"car":18,"rushYd":66,"rushTd":0,"tgt":17,"rec":15,"recYd":75,"recTd":0},"bio":{"age":25,"exp":3,"college":"Tulane","pick":81,"year":2023}},
   "9509": {"use":[29,19,31,20,21,11,25],"exp":[22.6,13.4,26.2,17.3,22.9,7.6,17.1],"tot":{"car":131,"rushYd":704,"rushTd":4,"tgt":32,"rec":25,"recYd":203,"recTd":1},"bio":{"age":24,"exp":3,"college":"Texas","pick":8,"year":2023}},
@@ -213,7 +214,8 @@
   "13337": {"use":[10,4,6,1,null,5,2],"exp":[6.4,4.1,3.4,1.6,null,5.8,4.1],"tot":{"car":19,"rushYd":62,"rushTd":0,"tgt":11,"rec":9,"recYd":109,"recTd":0},"bio":{"age":23,"exp":0,"college":"Nebraska","pick":161,"year":2026}},
   "13345": {"use":[0,13,null,null,null,null,11],"exp":[null,10.2,null,null,null,null,7],"tot":{"car":19,"rushYd":93,"rushTd":1,"tgt":5,"rec":5,"recYd":34,"recTd":0},"bio":{"age":23,"exp":0,"college":"Washington; Arizona","pick":108,"year":2026}},
   "13346": {"use":[4,7,4,7,7,5,8],"exp":[7.2,10.9,8.7,11.9,10.7,8.4,12.8],"tot":{"tgt":42,"rec":20,"recYd":372,"recTd":3},"bio":{"age":22,"exp":0,"college":"Washington","pick":39,"year":2026}},
-  "13414": {"use":[15,7,4,6,6,9,13],"exp":[7.6,4.3,4,3,2.4,6,19.1],"tot":{"car":57,"rushYd":233,"rushTd":1,"tgt":6,"rec":3,"recYd":4,"recTd":0},"bio":{"age":25,"exp":0,"college":"Indiana; James Madison","pick":90,"year":2026}}
+  "13414": {"use":[15,7,4,6,6,9,13],"exp":[7.6,4.3,4,3,2.4,6,19.1],"tot":{"car":57,"rushYd":233,"rushTd":1,"tgt":6,"rec":3,"recYd":4,"recTd":0},"bio":{"age":25,"exp":0,"college":"Indiana; James Madison","pick":90,"year":2026}},
+  "13424": {"use":[1,2,4,7,6,4,12],"exp":[1,0.9,2.7,6,3.6,2.1,6.5],"tot":{"car":32,"rushYd":134,"rushTd":0,"tgt":5,"rec":4,"recYd":12,"recTd":0},"bio":{"age":25,"exp":0,"college":"Kentucky; New Mexico State; Butler University; Oklahoma","pick":237,"year":2026}}
  },
  "teams": {
   "ARI": {"bye":14,"next":[{"w":8,"opp":"DAL","away":true},{"w":9,"opp":"SEA","away":true},{"w":10,"opp":"LAR","away":false}]},
