@@ -167,9 +167,19 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -m "Daily data for $(date -u +%F)"
-          git pull --rebase -q origin main
-          git push
-          echo "pushed=true" >> "$GITHUB_OUTPUT"
+          # GitHub sometimes answers a push with a 500 (it did on 2026-11-04). Everything above is already fetched and
+          # cached, so retry the push a few times instead of losing the day's data. No API is called again here.
+          for wait in 5 15 45 0; do
+            if git pull --rebase -q origin main && git push; then
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            [ "$wait" -gt 0 ] || break
+            echo "Push failed, retrying in ${wait}s"
+            sleep "$wait"
+          done
+          echo "Push failed after 4 tries"
+          exit 1
 
       - name: Trigger Cloudflare Pages build
         if: steps.commit.outputs.pushed != 'true'
